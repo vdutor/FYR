@@ -1,16 +1,60 @@
 \chapter{Introduction}  %Title of the First Chapter
 
+As the world we live in grows ever more interconnected and complex, making good decisions becomes increasingly difficult. Heterogenous transportation systems in large cities need to be optimised, global supply chains must be operated such thay they are as efficient and reliable as possible, and connected smart agents, such as self-driving cars, need to adhere to a policy that benefits the overall cause. Humans can typically make good decisions when the number of covariates is small, but suffer quickly when they have to consider thousands of influencing factors, or have to take into account the impact of their earlier decisions on future ones. Data-driven decision-making is a general framework that studies this problem. The aim of data-driven decision-making is to use past and current information to build a model of the environment that can be used to reason about future decisions and their impact.
 
-$x \in \mathcal{X}$
+A crucial building block for data-driven decision-making is a \emph{model}, which tries to explain the given data.
+uncertainty
+many explanations for the data
+aleatoric
+epistemic 
 
-hello worlds \citep{neal1992bayesian}
+\begin{enumerate}
+    \item Data-driven Decision-making
+    \item The data can be explained by many models
+    \item Models that represent uncertainty
+    % \item Probabilistic machine learning is all about inferring the right model given the data -- by making use of probability theory.
+    \item Statistical learning theory: Emperical risk minimisation
 
-$\GP$
+Supervised machine learning setting
+$x \in \mathcal{X}$ and $y \in \Reals$, and a dataset $\mathcal{D} = \{x_i, y_i\}_{i}^N$
 
-$\Reals$
-
-$\vmu$
-
+General problem:
 \begin{equation}
-k(x, x') = \sum_i \lambda_i \phi_i(x) \phi_i(x')
+    \argmin_{f} \sum_i L(f(x_i), y_i) + \norm{f}
 \end{equation}
+
+    \item No Free Lunch Theorem
+    \item 
+    \item Bayesian Linear Regression: $f(x) = w^\top \phi(x)$
+    \item Parametric models
+    \item Probabilistic machine learning: Bayes Rule
+    \item Kernel methods
+
+\end{enumerate}
+
+
+\section{Contributions and Layout of this Report}
+
+This report represents my learning and the research that I conducted during the first year of my PhD degree. Most notably, we developed a novel sparse approximation for (deep) Gaussian processes based on the decomposition of the kernel in Spherical harmonics. In \cref{chapter:theoretical-framework} we cover the necessary theoretical background 
+
+\begin{description}
+    \item[Chapter 3] In this chapter we introduce a new class of inter-domain variational GPs where data is mapped onto the unit hypersphere in order to use spherical harmonic representations. The inference scheme is comparable to Variational Fourier Features, but it does not suffer from the curse of dimensionality, and leads to diagonal covariance matrices between inducing variables. This enables a speed-up in inference, because it bypasses the need to invert large covariance matrices. The experiments show that our model is able to fit a regression model for a dataset with 6 million entries two orders of magnitude faster compared to standard sparse GPs, while retaining state of the art accuracy.
+    
+    The content of this chapter is largely based on:
+
+    \fullcite{Dutordoir2020spherical},
+
+    with the exception of the algorithm for computing the spherical harmonics in high dimensions.
+
+    \item[Chapter 3] Following up on the previous chapter, we use the decomposition of zonal kernels to design an interdomain inducing variable that mimics the behaviour of activation functions is neural network layers. 
+
+    The content of this chapter is largely based on:
+
+    \fullcite{dutordoir2021deep}.
+
+    \item[Chapter 4]
+\end{description}
+% Chapter 2 provides the theoretical background 
+% Chapter 3 Spherical Harmonics inducing variables
+% Chapter 4 Connection between NN and DGPs
+% Chapter 5 focuses on future researce
