@@ -6,42 +6,82 @@
 \chapter{Theoretical Framework}
 \label{chapter:theoretical-framework}
 
+This chapter discusses Gaussian processes (GP) and deep Gaussian processes (DGPs), the composite model obtained by stacking multiple GP models on top of each other. We also review how to perform approximate Bayesian inference in these models, with a particular attention to Variational Inference. We also cover the theory of postive definite kernels and the Reproducing Kernel Hilbert Spaces (RKHS) they characterise.
+
 \section{Gaussian Processes}
+\label{sec:chapter1:gp}
+
+
+Gaussian processes (GPs) \citep{rasmussen2006} are non-parametric distributions over functions similar to Bayesian Neural Networks (BNNs). The core difference is that neural networks represent distributions over functions through distributions on weights, while a Gaussian process specifies a distribution on function values at a collection of input locations. This representation allows us to use an infinite number of basis functions, while still enables Bayesian inference \citep{neal1996bayesian}. 
+
+Following from the Kolomogrov extension theorem, we can construct a real-valued stochastic process (i.e. function) on a non-empty set $\mathcal{X}$, $f: \mathcal{X} \rightarrow \Reals$, if there exists on all finite subsets $\{x_1, \ldots x_N\} \subset \mathcal{X}$, a \emph{consistent} collection of finite-dimensional marginal distributions over $f(\{x_1, \ldots, x_n\})$. For a Gaussian process, in particular, the marginal distribution over every finite-dimensional subset is given by a multivariate normal distribution. This implies that, in order to fully specify a Gaussian process, it suffice to only define the mean and covariance (kernel) function because they are the sufficient statistics for every finite-dimensional marginal distribution. We can therefore denote the GP as
+\begin{equation}
+  \label{eq:chapter1:def-gp}
+  f \sim \GP(\mu, k),
+\end{equation}
+where $\mu:\mathcal{X}\rightarrow\Reals$ is the mean function, which encodes the expected value of $f$ at every $x$, $\mu(x) = \Exp{f}{f(x)}$, and $k:\mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is the covariance (kernel) function that describes the covariance between function values, $k(x, x') = \Cov\left(f(x), f(x')\right)$. The covariance function has to adhere to certain properties which we will specify later.
+
+Given a GP as defined in \cref{eq:chapter1:def-gp}, for every finite collection of points $\{x_1, \ldots x_N\} \subset \mathcal{X}$ and for all $N \in \Naturals$, the distribution over the function values follows
+\begin{equation}
+f\big(\{x_i\}_{i=1}^N\big) \sim \NormDist{\vmu_f, \MK_{ff}},\quad\text{where}\ \vmu_f \in \Reals^N\text{ and }\MK_{ff} \in \Reals^{N \times N},
+\end{equation}
+with entries $[\vmu_f]_i = \mu(x_i)$ and $[\MK_{ff}]_{i,j} = k(x_i, x_j)$. Throughout this report we will assume, without loss of generality, a zero \emph{prior} mean function. The Gaussianity, and the fact that we can manipulate function values at some finite points of interest without taking the behaviour at any other points into account (the marginalisation property) make GPs particularly convenient to manipulate and use as priors over functions in Bayesian models.
+
+\subsection{The Beauty of Gaussian Processes: Exact Bayesian Inference}
 
 \begin{enumerate}
-  \item Framework for specifying priors over functions
-  \item Any finite set of which has a multivariate Gaussian distribution
-  \item Fully characterised by a mean function and a kernel (or a covariance function)
+  \item Bayesian Machine Learning
+  \item Bayes rule
+  \item Gaussian likelihood
+  \item posterior, derivate and marginal likelihood
+  \item Plot: Prior, Data, Posterior
+  \item occam's razor
 \end{enumerate}
 
-\subsection{Exact Bayesian Inference}
-
+\paragraph{Problems}
+A common criticism for GPs is that any modification to this approach breaks the Gaussian assumption. 
 \begin{enumerate}
-  \item Gaussian likelihood
-  \item Bayes rule
-  \item posterior, derivate and marginal likelihood
-  \item occam's razor
+  \item Classifaction
+  \item Large datasets
+  \item Transformations
+\end{enumerate}
+
+\paragraph{Solutions}
+\begin{enumerate}
+  \item Laplace
+  \item Expectation Propagation
+  \item Sparse Variational Inference
 \end{enumerate}
 
 
 \section{Approximate Inference in Sparse Gaussian Processes}
+
+\begin{enumerate}
+  \item General introduction to Variational inference \citep{blei2017variational}
 variational inference (VI), where the problem of Bayesian inference is cast as an optimization problem—namely, to maximize a lower bound of the logarithm of the marginal likelihood.
+  \item Sparse approximations \citep{Snelson05,quinonero2005unifying}
+\end{enumerate}
+
+\section{Interdomain Inducing Variables}
+
+\subsection{Example: heavyside inducing variable}
 
 
 \section{Deep Gaussian Processes}
 
-\subsection{GPflux -- a library for deep Gaussian processes}
+% \subsection{GPflux -- a library for deep Gaussian processes}
+\fullcite{dutordoir2021gpflux}
 
 
-\subsection{Interdomain Inducing Variables}
-
-\subsection{Example}
-
-\section{Kernels}
+\section{Covariance Functions}
 
 \begin{enumerate}
-  \item 
+  \item Positive Definite and Symmetry
   \item RKHS
+  \item Bochner's theorem
   \item Mercer Decomposition
-  \item 
+  \item Examples of RKHS
+  \item RKHS through Spectral Decomposition
+  \item Representer Theorem
+  \item Show how sparse approximation links anchor points
 \end{enumerate}
