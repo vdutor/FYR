@@ -1,36 +1,52 @@
 \chapter{Introduction}  %Title of the First Chapter
 
-As the world we live in grows ever more interconnected and complex, making good decisions becomes increasingly difficult. Heterogenous transportation systems in large cities need to be optimised, global supply chains must be operated such thay they are as efficient and reliable as possible, and connected smart agents, such as self-driving cars, need to adhere to a policy that benefits the overall cause. Humans can typically make good decisions when the number of covariates is small, but suffer quickly when they have to consider thousands of influencing factors, or have to take into account the impact of their earlier decisions on future ones. Data-driven decision-making is a general framework that studies this problem. The aim of data-driven decision-making is to use past and current information to build a model of the environment that can be used to reason about future decisions and their impact.
 
-A crucial building block for data-driven decision-making is a \emph{model}, which tries to explain the given data.
-uncertainty
-many explanations for the data
-aleatoric
-epistemic 
+\section{Option 1: Focus on what is in the report}
+
+\begin{enumerate}
+    \item Neural networks and Gaussian processes: complementry strengths and weaknesses
+    \item Ideally we have a single model that can handle low and high dimensional inputs, make robust uncertainty-aware predictions and can be used in big and small data regimes.
+    \item Gaussian processes and Bayesian Neural networks: connection \citep{neal1992bayesian,neal1996bayesian,williams1996gaussian}
+    \item Deep Gaussian processes \citep{Damianou2013}
+    \item Require accurate approximate Bayesian inference procedures
+\end{enumerate}
+
+
+\section{Option 2: Focus on the direction of the future work}
+Introduction to data-driven decision making using Bayesian Machine Learning.
 
 \begin{enumerate}
     \item Data-driven Decision-making
     \item The data can be explained by many models
     \item Models that represent uncertainty
-    % \item Probabilistic machine learning is all about inferring the right model given the data -- by making use of probability theory.
+    \item Probabilistic machine learning is all about inferring the right model given the data -- by making use of probability theory.
     \item Statistical learning theory: Emperical risk minimisation
-
-Supervised machine learning setting
-$x \in \mathcal{X}$ and $y \in \Reals$, and a dataset $\mathcal{D} = \{x_i, y_i\}_{i}^N$
-
-General problem:
-\begin{equation}
-    \argmin_{f} \sum_i L(f(x_i), y_i) + \norm{f}
-\end{equation}
-
     \item No Free Lunch Theorem
-    \item 
     \item Bayesian Linear Regression: $f(x) = w^\top \phi(x)$
     \item Parametric models
     \item Probabilistic machine learning: Bayes Rule
     \item Kernel methods
-
 \end{enumerate}
+
+
+% \subsection{Draft}
+% As the world we live in grows ever more interconnected and complex, making good decisions becomes increasingly difficult. Heterogenous transportation systems in large cities need to be optimised, global supply chains must be operated such thay they are as efficient and reliable as possible, and connected smart agents, such as self-driving cars, need to adhere to a policy that benefits the overall cause. Humans can typically make good decisions when the number of covariates is small, but suffer quickly when they have to consider thousands of influencing factors, or have to take into account the impact of their earlier decisions on future ones. Data-driven decision-making is a general framework that studies this problem. The aim of data-driven decision-making is to use past and current information to build a model of the environment that can be used to reason about future decisions and their impact.
+
+% A crucial building block for data-driven decision-making is a \emph{model}, which tries to explain the given data.
+% uncertainty
+% many explanations for the data
+% aleatoric
+% epistemic 
+
+
+% Supervised machine learning setting
+% $x \in \mathcal{X}$ and $y \in \Reals$, and a dataset $\data = \{x_i, y_i\}_{i}^N$
+
+% % General problem:
+% % \begin{equation}
+% %     \argmin_{f} \sum_i L(f(x_i), y_i) + \norm{f}
+% % \end{equation}
+
 
 
 \section{Contributions and Layout of this Report}
@@ -52,7 +68,7 @@ This report represents my learning and the research that I conducted during the 
 
     \fullcite{dutordoir2021deep}.
 
-    \item[Chapter 4]
+    \item[Chapter 4] In the last chapter of the work we will shed a light on the what the future will bring: ``Gaussian Decision Systems with Geometric Gaussian processes".
 \end{description}
 % Chapter 2 provides the theoretical background 
 % Chapter 3 Spherical Harmonics inducing variables

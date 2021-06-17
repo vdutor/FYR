@@ -11,26 +11,58 @@ This chapter discusses Gaussian processes (GP) and deep Gaussian processes (DGPs
 
 Gaussian processes (GPs) \citep{rasmussen2006} are non-parametric distributions over functions similar to Bayesian Neural Networks (BNNs). The core difference is that neural networks represent distributions over functions through distributions on weights, while a Gaussian process specifies a distribution on function values at a collection of input locations. This representation allows us to use an infinite number of basis functions, while still enables Bayesian inference \citep{neal1996bayesian}. 
 
-Following from the Kolomogrov extension theorem, we can construct a real-valued stochastic process (i.e. function) on a non-empty set $\mathcal{X}$, $f: \mathcal{X} \rightarrow \Reals$, if there exists on all finite subsets $\{x_1, \ldots x_N\} \subset \mathcal{X}$, a \emph{consistent} collection of finite-dimensional marginal distributions over $f(\{x_1, \ldots, x_n\})$. For a Gaussian process, in particular, the marginal distribution over every finite-dimensional subset is given by a multivariate normal distribution. This implies that, in order to fully specify a Gaussian process, it suffice to only define the mean and covariance (kernel) function because they are the sufficient statistics for every finite-dimensional marginal distribution. We can therefore denote the GP as
+Following from the Kolmogorov extension theorem, we can construct a real-valued stochastic process (i.e. function) on a non-empty set $\mathcal{X}$, $f: \mathcal{X} \rightarrow \Reals$, if there exists on all finite subsets $\{x_1, \ldots x_N\} \subset \mathcal{X}$, a \emph{consistent} collection of finite-dimensional marginal distributions over $f(\{x_1, \ldots, x_n\})$. For a Gaussian process, in particular, the marginal distribution over every finite-dimensional subset is given by a multivariate normal distribution. This implies that, in order to fully specify a Gaussian process, it suffice to only define the mean and covariance (kernel) function because they are the sufficient statistics for every finite-dimensional marginal distribution. We can therefore denote the GP as
 \begin{equation}
   \label{eq:chapter1:def-gp}
   f \sim \GP(\mu, k),
 \end{equation}
-where $\mu:\mathcal{X}\rightarrow\Reals$ is the mean function, which encodes the expected value of $f$ at every $x$, $\mu(x) = \Exp{f}{f(x)}$, and $k:\mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is the covariance (kernel) function that describes the covariance between function values, $k(x, x') = \Cov\left(f(x), f(x')\right)$. The covariance function has to adhere to certain properties which we will specify later.
+where $\mu:\mathcal{X}\rightarrow\Reals$ is the mean function, which encodes the expected value of $f$ at every $x$, $\mu(x) = \Exp{f}{f(x)}$, and $k:\mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is the covariance (kernel) function that describes the covariance between function values, $k(x, x') = \Cov\left(f(x), f(x')\right)$. The covariance function has to be a symmetric, positive-definite function. The Gaussianity, and the fact that we can manipulate function values at some finite points of interest without taking the behaviour at any other points into account (the marginalisation property) make GPs particularly convenient to manipulate and use as priors over functions in Bayesian models -- as we will show next.
 
-Given a GP as defined in \cref{eq:chapter1:def-gp}, for every finite collection of points $\{x_1, \ldots x_N\} \subset \mathcal{X}$ and for all $N \in \Naturals$, the distribution over the function values follows
+Throughout this report, we will consider $f$ to be the complete function, and intuitively manipulate it as an infinitely long vector. Moreover, $f(\vx) \in \Reals^N$ denotes the function evaluated at a finite set of points, whereas $f^{\setminus \vx}$ denotes another infinitely long vector similar to $f$ but excluding $f(\vx)$. From the marginalisation property it follows that integrating out over the infinitely many points that are not included in $\vx$, we obtain a valid finite-dimensional density for $f(\vx)$
 \begin{equation}
-f\big(\{x_i\}_{i=1}^N\big) \sim \NormDist{\vmu_f, \MK_{ff}},\quad\text{where}\ \vmu_f \in \Reals^N\text{ and }\MK_{ff} \in \Reals^{N \times N},
+p(f(\vx)) = \int p(f)\,\calcd{f^{\setminus \vx}}.
 \end{equation}
-with entries $[\vmu_f]_i = \mu(x_i)$ and $[\MK_{ff}]_{i,j} = k(x_i, x_j)$. Throughout this report we will assume, without loss of generality, a zero \emph{prior} mean function. The Gaussianity, and the fact that we can manipulate function values at some finite points of interest without taking the behaviour at any other points into account (the marginalisation property) make GPs particularly convenient to manipulate and use as priors over functions in Bayesian models.
+In the case of GPs, this finite-dimensional marginal is given by a multivariate Gaussian distribition, fully characterised by the mean $\mu$ and the covariance function $k$
+\begin{equation} 
+  p(f(\vx)) = \NormDist{\vmu_{\vf}, \Kff},\quad\text{where}\quad [\vmu_\vf]_{i} = \mu(x_i)\ \text{and}\ [\Kff]_{i,j} = k(x_i, x_j).
+\end{equation}
+Conditioning the GP at this finite set of points leads to a conditional distribution for $f^{\setminus \vx}$, which is given by another Gaussian process
+\begin{equation}
+  \label{eq:chapter1:conditional}
+  p(f^{\setminus \vx} \given f(\vx) = \vf) = \GP\big(\kfx^\top \Kff^{-1} (\vf - \vmu_{\vf}),\ \ k(\cdot, \cdot) -  \kfx^\top \Kff^{-1} \kfx\big),
+\end{equation}
+where $[\kfx]_i = k(x_i, \cdot)$. The conditional distribution over the whole function $p(f \given f(\vx) = \vf)$ has the exact same form as in \cref{eq:chapter1:conditional}. This is mathematically slightly confusing because the random variable $f(\vx)$ is included both on the left and right-hand-side of the conditioning, but the equation is technically correct \citep{matthews16}.
 
-\subsection{The Beauty of Gaussian Processes: Exact Bayesian Inference}
+\subsection{The Beauty of Gaussian Process Regression: Exact Bayesian Inference}
+
+One of the key advantages of Gaussian processes for regression is that we can perform exact Bayesian inference. % In this section we briefly discuss the general methodology of Bayesian modelling and how this is performed by GPs.
+% \paragraph{Problem Defintion} 
+Assume a supervised learning setting where $x \in \mathcal{X}$ (typically, $\mathcal{X} = \Reals^d$) and $y \in \Reals$, and we are given a dataset $\data = \{(x_i, y_i)\}_{i=1}^N$ of input and corresponding output pairs. For convenience, we sometimes group the inputs in $\vx = \{x_i\}_{i=1}^N$ into a single design matrix and outputs $\vy = \{y_i\}_{i=1}^N$ into a vector. We further assume that the data is generated by an unknown function $f: \mathcal{X} \rightarrow \Reals$, such that the outputs are perturbed versions of functions evaluations at the corresponding inputs: $y_i = f(x_i) + \epsilon_i$. In the case of regression we assume a Gaussian noise model $\epsilon_i \sim \NormDist{0, \sigma^2}$. We are interested in learning the function $f$ that generated the data. % We denote the evaluation of the function at all inputs as $f(\vx) \in \Reals^N$ and at a single input as $f(x_i) \in \Reals$.
+
+% \paragraph{Bayesian Modelling}
+[General introduction to Bayesian modelling]
+The key idea in Bayesian modelling is to specify a prior distribution over the quantity of interest. The prior encodes what we know at that point in time about the quantity. In general term, this can be a lot or a little. We encode this information in the form of a distribution. Then, as more data becomes available, we use the rules of probability, an in particlar Bayes' rule, to update our prior beliefs and compute a posterior distribution (see \citet{mackay2003information, bisschop} for a thorough introduction).
+
+Following the Bayesian approach, we specify a \emph{prior} over the parameters of interests, which in the case of GPs is the function itself. The prior is important because it characterises the search space over possible solutions for $f$. Through the prior, we can encode strong assumptions, such as linearity, differentiability, periodicity, etc. or any combination thereof, which makes it possible to generalise well from very limited data. Compared to (Bayesian) parametric models, it is much more convenient and intuitive to specify priors directly in \emph{function-space}, rather than on the weights of a parametric model \citep{rasmussen2006}. 
+
+Following \cref{eq:chapter1:def-gp} the prior over function evaluations at the datapoints is defined by the covariance function $k$, as we assume a \`a-priori zero mean function $\mu$ (without loss of generality):
+\begin{equation} 
+  p(f(\vx)) = \NormDist{\vzero, \Kff},\quad\text{where}\quad [\Kff]_{i,j} = k(x_i, x_j).
+  % \vmu_{\vf} \in \Reals^N\text{ and }\MK_{\vf\vf} \in \Reals^{N \times N},
+\end{equation}
+% with entries $[\vmu_\vf]_i = \mu(x_i)$ and $[\MK_{ff}]_{i,j} = k(x_i, x_j)$. Throughout this report we will assume, without loss of generality, a zero \emph{prior} mean function. 
+
+
+\begin{equation}
+  p(f \given \vy) = \frac{p(f) p(\vy \given f)}{p(\vy)}
+\end{equation}
 
 \begin{enumerate}
   \item Bayesian Machine Learning
   \item Bayes rule
   \item Gaussian likelihood
   \item posterior, derivate and marginal likelihood
+  \item Representer theorem
   \item Plot: Prior, Data, Posterior
   \item occam's razor
 \end{enumerate}
@@ -38,9 +70,9 @@ with entries $[\vmu_f]_i = \mu(x_i)$ and $[\MK_{ff}]_{i,j} = k(x_i, x_j)$. Throu
 \paragraph{Problems}
 A common criticism for GPs is that any modification to this approach breaks the Gaussian assumption. 
 \begin{enumerate}
-  \item Classifaction
+  \item Non-Gaussian likelihoods
   \item Large datasets
-  \item Transformations
+  \item Transformations: Count processes (Poisson)
 \end{enumerate}
 
 \paragraph{Solutions}
@@ -51,7 +83,7 @@ A common criticism for GPs is that any modification to this approach breaks the 
 \end{enumerate}
 
 
-\section{Approximate Inference in Sparse Gaussian Processes}
+\section{Approximate Inference with Sparse Gaussian Processes}
 
 \begin{enumerate}
   \item General introduction to Variational inference \citep{blei2017variational}

@@ -541,11 +541,11 @@ supported!}
 % If Font is not set throw a warning.
 \ifsetFont
 \else
-  \ClassWarning{PhDThesisPSnPDF}{Using default font Latin Modern. If you
-    would like to use other pre-defined fonts use `times' (The Cambridge 
-    University PhD thesis guidelines recommend using Times font)  or `fourier'
-    or load a custom font in the preamble.tex file by specifying `customfont' 
-    in the class options}
+  % \ClassWarning{PhDThesisPSnPDF}{Using default font Latin Modern. If you
+  %   would like to use other pre-defined fonts use `times' (The Cambridge 
+  %   University PhD thesis guidelines recommend using Times font)  or `fourier'
+  %   or load a custom font in the preamble.tex file by specifying `customfont' 
+  %   in the class options}
   \RequirePackage{lmodern}
 \fi
 
