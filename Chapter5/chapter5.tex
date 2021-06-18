@@ -1,41 +1,102 @@
 \chapter{Future Research}
 
-\section{Gaussian Decision Systems with Geometric Gaussian Processes}
+\section{Geometric Gaussian Decision Systems}
 
-Alex Terenin (Imperial)\\
-Wellie (Stanford)
-
+\paragraph{Problem setting}
 
 \begin{enumerate}
-    \item Reinforcement Learning
-    \item Bayesian Optimisation
-    \item Active Learning
+    \item Black Box Functions $f: \mathcal{X} \rightarrow \mathcal{Y}$
+    \item We want to estimate a computable property $\mathcal{O}_\mathcal{A}(f)$
+    \item $\mathcal{A}$ is an algorithm $\mathcal{O}_\mathcal{A}(f) = \mathcal{A}(f)$
+    \item Evaluating $f$ is \emph{very} expensive (we can only evaluate it a limited amount of times)
 \end{enumerate}
 
-% Applications
-% Domain + examples
-% Applications
-% Problems
+\paragraph{Examples}
+\begin{enumerate}
+    \item Bayesian Optimisation: $\mathcal{A}(f) = \argmax_{x\in\mathcal{X}} f(x)$, which implies $\mathcal{O}_\mathcal{A}(f) = x^*$.
+    \item Sensor Placement (Active Learning): $\mathcal{O}_\mathcal{A}(f) = \argmax_{X \subset \mathcal{X}, |X| = T} \textrm{MI}(f, f(X))$.
+    \item Level sets: $\mathcal{O}_\mathcal{A}(f) = \{X \subset \mathcal{X}: f(x) > C, \forall x \in X\}$.
+    \item Shortest path: $\mathcal{O}_\mathcal{A}(f) = $ shortest path between two nodes in a graph.
+\end{enumerate}
+
+\paragraph{Model}
+
+We model $f$ by a Gaussian process
+\begin{equation}
+    f \sim \GP
+\end{equation}
 
 \begin{enumerate}
     \item Low dimensions
     \item Prior knowledge
-    \item Limited Data
-    \item Expensive Data
+    \item Limited and very expensive data
+\end{enumerate}
+
+Basically settings where DNNs are never going to be competitive with GPs - low-dim, very data-efficient, high-cost - not even if someone figures out how to do DNN uncertainty right, due to GP regret guarantees (conjecturally under reasonable assumptions) matching the best possible regret achievable by any model/decision system.
+
+\begin{figure}[htb]
+    \centering % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{Chapter5/figures/sphere.png}
+%   \caption{Manifolds}
+  \label{fig:1}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{Chapter5/figures/graph.png}
+%   \caption{Graphs}
+  \label{fig:2}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{Chapter5/figures/BunnyWire.png}
+%   \caption{Meshes}
+  \label{fig:3}
+\end{subfigure}
+
+\medskip
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{Chapter5/figures/cosmos.png}
+%   \caption{Cosmos}
+  \label{fig:4}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{Chapter5/figures/social_network.png}
+%   \caption{image5}
+  \label{fig:5}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.25\textwidth}
+  \includegraphics[width=\linewidth]{Chapter5/figures/mesh_engine.png}
+%   \caption{image6}
+  \label{fig:6}
+\end{subfigure}
+\caption{Domains (top) and applications (bottom)}
+\label{fig:images}
+\end{figure}
+
+\paragraph{Objectives}
+\begin{enumerate}
+    \item Theory and analysis
+    \item Getting these ideas into people's hands to get applications off the ground
+    \begin{enumerate}
+        \item Graph GPs for combinatorial optimization use cases
+        \item Manifold GPs for scientific use cases
+    \end{enumerate}
+\end{enumerate}
+
+\paragraph{Collaborators}
+\begin{enumerate}
+    \item Alex Terenin (Imperial College London)
+    \item Willie Neiswanger (Stanford University)
 \end{enumerate}
 
 
-\subsection{Probabilistic modelling: Geometric Gaussian Processes}
-
-
-\section{Active Projects}
+\section{Projects in Progress}
 \begin{enumerate}
-    \item Pay Attention to Deep Gaussian Processes\\
+    \item ``Pay Attention to Deep Gaussian Processes''\\
     Transformer Layer Gaussian Processes using an explicit feature representation of the attention operation.
     \begin{equation*}
         \exp(\vx^\top \vy) = \Phi^\top(\vx) \Phi(\vy)
     \end{equation*}
-
+    \item A Unifying Theory for Interdomain Gaussian Processes.
     \item VISH-PI: Probabilistic Integration with Variational Inducing Spherical Harmonics.
 \end{enumerate}
 
