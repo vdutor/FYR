@@ -11,3 +11,168 @@
     \item How to compute the Spherical Harmonics: greedy algorithm
     \item Experiments
 \end{enumerate}
+
+
+\section{Spherical Harmonics}
+
+Spherical harmonics are a special set of functions defined on the hypersphere and play central role in harmonic analysis and approximation theory \citep{wendland2005}. They originate from solving Laplace's equation and form a complete set of orthogonal functions. Any sufficiently regular function defined on the sphere can be written as a sum of these spherical harmonics, similar to the Fourier series with sines and cosines. Spherical harmonics are well-studied functions in two and three dimensions and have high performance implementations given their extensive use in computer vision, physics and geometry. However, while no practical implementations exists to the best of our knowledge.
+
+In this work we describe a greedy algorithm to formulate 
+which lends itself well for a practical implementation in modern software frameworks, such as TensorFlow and Jax.
+
+We start by 
+\citep{dai2013,frye2014}
+
+% exist bases of spherical harmonics consisting of entirely zonal harmonics
+
+We adopt the usual $L_2$ inner product for functions $f: \dsphere \rightarrow \Reals$ and $g: \dsphere \rightarrow \Reals$ restricted to the sphere 
+\begin{equation}
+     \langle f, g\rangle_{L_{2}(\dsphere)} = \frac{1}{\darea} \int_{\dsphere} f(x)\,g(x) \, \calcd{\omega(},
+\end{equation}
+where $\calcd{\omega(x)}$ is the surface area measure such that $\darea$ denotes the surface area of $\dsphere$ 
+\begin{equation}
+\label{eq:surface}
+    \darea = \int_{\dsphere} \calcd{\omega(x)} = \frac{2 \pi ^ {d/2}}{\Gamma(d/2)}.
+\end{equation}
+
+For $x = (x_1, \ldots, x_d) \in \Reals^d$ and $\alpha = (\alpha_1, \ldots, \alpha_d) \in \Naturals^d$, a monomial $x^\alpha$ is a product $x^\alpha = x_1^{\alpha_1} \ldots x_d^{\alpha_d}$, which has degree $|\alpha| = \alpha_1 + \ldots \alpha_d$.
+
+A real homogeneous polynomial $P(x)$ of degree $n$ is a linear combination of monomials of degree $n$ with real coefficients, that is $P(x) = \sum_{|\alpha| = n} c_{\alpha} x^{\alpha}$, with $c_\alpha \in \Reals$. We denote $\mathcal{P}_n^d$ as the space of real homogeneous polynomials of degree $n$, and can show that, counting the cardinality of the set $\{\alpha \in \Naturals^d: |\alpha| = n\}$, that $\dim(\mathcal{P}_n^d) = \binom{n + d -1}{n}$.
+
+The Laplacian operator $\Delta$ is given by
+\begin{equation}
+    \Delta = \partial_{x_1}^2 + \ldots + \partial_{x_d}^2,
+\end{equation}
+where $\partial_{x_i}$ denotes the partial derivate w.r.t. the $i$-th variable. A function $f:\Reals^d \rightarrow \Reals$ is said to be \emph{harmonic} if $\Delta f = 0$.
+
+\begin{definition}
+    The spherical harmonics of degree $n$ of $d$ variables, denoted by $\mathcal{H}_{n}^d$, is the linear space of harmonic and homogeneous in degree $n$ polynomials on $\dsphere$, that is 
+    \begin{equation}
+        \mathcal{H}_{n}^d = \{p \in \mathcal{P}_n^d: \Delta p = 0\ \text{and}\ p: \dsphere \rightarrow \Reals \}.
+    \end{equation}
+The dimensionality of $ \mathcal{H}_{n}^d$ is given by
+\begin{equation}
+\label{eq:numharmonics}
+\dim(\mathcal{H}_{n}^d) = \frac{2 n + d - 2}{n} \binom{n + d - 3}{d - 1} := \dnumharmonicsforlevel.
+\end{equation}
+\end{definition}
+
+It can be shown that $\mathcal{H}_{n}^d$ has an orthonormal basis, denoted by $\{\phi_{n,j}\}_{j=1}^{\dnumharmonicsforlevel}$. This implies that
+\begin{equation}
+    \mathcal{H}_{n}^d  = \textrm{span}\left(\phi_{n,1}, \ldots, \phi_{n, \dnumharmonicsforlevel}\right),
+\end{equation}
+and $\left\langle \phi_{n, j}, \phi_{n', j'}\right\rangle_{L_2(\dsphere)} = \delta_{n n'} \delta_{j j'}$. For $d=2$ it is easy to show that $N^{2}_0 = 1$ with $\phi_{0, 1} = 1$ and $N^{2}_n = 2$ for all $n > 0$ with $\phi_{n, 1}(\theta) = \sqrt{2} \cos(n \theta)$ and $\phi_{n, 2}(\theta) = \sqrt{2} \sin(n \theta)$. In other words, on the unit circle $\sphere^1$ correspond the spherical harmonics to the Fourier basis. For $d=3$, $\dnumharmonicsforlevel = 2n + 1$ and are the corresponding basis functions $\{\phi_{n,j}\}_{j=1}^{\dnumharmonicsforlevel}$ given by many references [TODO Cite Wikipedia]. However, for $d > 3$, the only explicit formulation we could find is in \citet[Theorem~5.1]{dai2013} consists of a product over Gegenbauer polynomials which makes the implementation numerically unstable and the derivative slow.
+
+\begin{theorem}[Addition Theorem]
+    \label{theorem:addition}
+    Let $\{\phi_{n,j}\}_{j=1}^{\dnumharmonicsforlevel}$ be an orthonormal basis for the spherical harmonics of degree $n$. Then the Gegenbauer polynomial $C_n^{(\alpha)}$ of degree $n$ may be written as
+\begin{equation}
+    \sum_{j=1}^{\dnumharmonicsforlevel} \phi_{n, j}(x) \phi _{n, j}(x') = \frac{n + \alpha}{\alpha}\,
+    C_n^{(\alpha)}(x\transpose x')\quad\text{with}\quad \alpha = \frac{d-2}{2}.
+\end{equation}
+\end{theorem}
+As a result of the relation between the Gegenbauer polynomial and the spherical harmonics, are the Gegenbauer polynomial sometimes referred to as ultraspherical polynomials. For $d=2$, Theorem~1 recovers the addition formula of the cosine function, as indeed $\cos(\theta) \cos(\theta') + \sin(\theta) \sin(\theta') = \cos(\theta - \theta')$ and $C_n^{(0)}(t) = \cos(n \arccos(t))$. The Gegenbauer polynomials with $\alpha=0$ are better known as the Chebyshev polynomials.
+
+Zonal function?
+
+Construct a basis for spherical harmonics $\mathcal{H}_n^d$ that consists of a linear combination of zonal functions 
+
+\begin{definition}[Fundamental System]
+    A collection of points $\{\eta_1, \ldots, \eta_N \} \in \dsphere$ is called a fundamental system of degree $n$ on the sphere if
+    \begin{equation}
+        \textrm{det}\left({\left[C_n^{(\alpha)}(\eta_i\transpose\eta_j)\right]_{i,j=1}^N}\right) > 0,\qquad
+        {\left[C_n^{(\alpha)}(\eta_i\transpose\eta_j)\right]_{i,j=1}^N} = 
+        \begin{bmatrix}
+            C_n^{(\alpha)}(1) & \ldots & C_n^{(\alpha)}(\eta_1\transpose\eta_N) \\
+            \vdots & & \vdots \\
+            C_n^{(\alpha)}(\eta_N\transpose\eta_1) & \ldots & C_n^{(\alpha)}(1)
+        \end{bmatrix}
+    \end{equation}
+\end{definition}
+
+\begin{lemma}
+    There exists a fundamental system of degree n on the sphere.
+\end{lemma}
+
+
+
+\begin{theorem}
+    If $\{\eta_1, \ldots, \eta_N \} \in \dsphere$ is a fundamental system of points on the sphere, then $\{C_n^{(\alpha)}(\eta_i \cdot)\}_{i=1}^N$ is a basis for $\mathcal{H}_n^d$.
+\end{theorem}
+
+% \begin{theorem}[Addition]
+% \label{appendix:theorem:addition}
+% Between the spherical harmonics of degree $n$ in dimension $d$ and the Gegenbauer polynomials of degree $n$ there exists the relation
+% \begin{equation}
+%     \sum_{j=1}^{\dnumharmonicsforlevel} \sh_{n, j}(\vx) \sh_{n, j}(\vx') = \frac{n + \alpha}{\alpha}\,
+%     C_n^{(\alpha)}(\vx\transpose\vx'),
+% \end{equation}
+% with $\alpha = \frac{d-2}{2}$.
+% \end{theorem}
+
+
+% From the completeness and orthonormality of the spherical harmonic basis, it can be shown that they also form a basis of square-integrable functions $f: \dsphere \rightarrow \Reals$, which means
+% \begin{equation}
+%     f = \sum_{n=0}^{\infty} \sum_{j=1}^{\dnumharmonicsforlevel} \widehat{f}_{n, j} \sh_{n, j},\ \text{with}\ \widehat{f}_{n, j} = \langle f,  \sh_{n, j} \rangle_{L_2(\dsphere)}.
+% \end{equation}
+% Which can be seen as the spherical analogue of the Fourier decomposition of a periodic function in $\Reals$ onto a basis of sines and cosines.
+
+% % \begin{theorem}
+% % \label{appendix:theorem:eigenvalues}
+% % The spherical harmonics are the eigenfunctions of the Laplace-Beltrami operator with eigenvalues $- n (n + d - 2)$ so that
+% % \begin{equation}
+% %     \Delta^{\dsphere} \phi_{n, j} = - n (n + d - 2) \phi_{n, j}.
+% % \end{equation}
+% % \end{theorem}
+
+% \subsection{Gegenbauer polynomials}
+
+% Gegenbauer polynomials $C_n^{(\alpha)}: [-1, 1] \rightarrow \Reals$ are orthogonal polynomials with respect to the weight function $(1 - z^2)^{\alpha - 1/2}$.
+% A variety of characterizations of the Gegenbauer polynomials are available. We use, both, the polynomial characterisation for its numerical stability
+% \begin{equation}
+% \label{appendix:eq:gegenbauer}
+%     C_{n}^{({\alpha})}(z)=\sum _{{j=0}}^{{\lfloor n/2\rfloor }}{\frac  {(-1)^{j}\, \Gamma (n-j+\alpha )}{\Gamma (\alpha )\Gamma({j+1})\Gamma{(n-2j + 1)}}}(2z)^{{n-2j}},
+% \end{equation}
+% and Rodrigues' formulation:
+% \begin{equation}
+% \label{appendix:eq:gegenbauer-rodrigues}
+%    C_{n}^{(\alpha )}(z)={\frac {(-1)^{n}}{2^{n}n!}}{\frac {\Gamma (\alpha +{\frac {1}{2}})\Gamma (n+2\alpha )}{\Gamma (2\alpha )\Gamma (\alpha +n+{\frac {1}{2}})}}(1-z^{2})^{-\alpha +1/2}{\frac {d^{n}}{dz^{n}}}\left[(1-z^{2})^{n+\alpha -1/2}\right].
+% \end{equation}
+% The polynomials normalise by
+% \begin{equation}
+% \label{appendix:eq:gegenbauer-normalisation}
+%     \int_{-1}^{1}  \left[C_{n}^{({\alpha})}(z)\right]^2  (1 - z^2)^{\alpha - \frac{1}{2}} \calcd{z} = \frac{\Omega_{d-1}}{\Omega_{d-2}} \frac{\alpha}{n + \alpha} C_{n}^{({\alpha})}(1) = \frac{\pi 2^{1 - 2\alpha} \Gamma(n + 2 \alpha)}{n! (n + \alpha) \Gamma(\alpha)^2},
+% \end{equation}
+% with $C_{n}^{({\alpha})}(1) = \frac{\Gamma(2\alpha + n)}{\Gamma(2 \alpha)\,n!}$. Also note the following relationship $\frac{n + \alpha}{\alpha} C_n^{(\alpha)}(1) = \dnumharmonicsforlevel$.
+
+
+% There exists a close relationship between Gegenbauer polynomials (also known as \emph{generalized Legendre polynomials}) and spherical harmonics, as we will show in the next theorems. 
+
+% \begin{theorem}[Addition]
+% \label{appendix:theorem:addition}
+% Between the spherical harmonics of degree $n$ in dimension $d$ and the Gegenbauer polynomials of degree $n$ there exists the relation
+% \begin{equation}
+%     \sum_{j=1}^{\dnumharmonicsforlevel} \sh_{n, j}(\vx) \sh_{n, j}(\vx') = \frac{n + \alpha}{\alpha}\,
+%     C_n^{(\alpha)}(\vx\transpose\vx'),
+% \end{equation}
+% with $\alpha = \frac{d-2}{2}$.
+% \end{theorem}
+
+% As a illustrative example, this property is analogues to the trigonometric addition formula: $\sin(x)\sin(x') + \cos(x)\cos(x') = \cos(x - x')$.
+
+% \begin{theorem}[Funk-Hecke]
+% \label{appendix:theorem:funk}
+% Let $s(\cdot)$ be an integrable function such that $\int_{-1}^1 \| s(t)\| (1 - t^2)^{(d-3)/2} \calcd{t}$ is finite and $d \ge 2$. Then for every $\sh_{n,j}$ 
+% \begin{equation}
+%     \frac{1}{\darea} \int_{\dsphere} s(\vx\transpose \vx')\,\sh_{n, j}(\vx')\, \calcd{\omega(\vx')} = {\lambda}_{n}\,\sh_{n,j}(\vx),
+% \end{equation}
+% where $\widehat{a}_{n}$ is a constant defined by
+% \begin{equation}
+%     \lambda_{n}  = 
+%     % \frac{\Omega_{d-2}}{\Omega_{d-1}} 
+%     \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 s(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t},
+% \end{equation}
+% with $\alpha = \frac{d-2}{2}$, $\omega_d = \frac{\Omega_{d-2}}{\Omega_{d-1}} = \frac{\Gamma{(\frac{d}{2}})}{\Gamma(\frac{d-1}{2}) \sqrt{\pi}}$.
+% \end{theorem}
+
+% Funk-Hecke simplifies a $(d\!-\!1)$-variate surface integral on $\dsphere$ to a one-dimensional integral over $[-1, 1]$. This theorem gives us a practical way of computing the Fourier coefficients for any zonal kernel. 
