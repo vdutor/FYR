@@ -27,7 +27,7 @@ We start by
 
 We adopt the usual $L_2$ inner product for functions $f: \dsphere \rightarrow \Reals$ and $g: \dsphere \rightarrow \Reals$ restricted to the sphere 
 \begin{equation}
-     \langle f, g\rangle_{L_{2}(\dsphere)} = \frac{1}{\darea} \int_{\dsphere} f(x)\,g(x) \, \calcd{\omega(},
+     \langle f, g\rangle_{L_{2}(\dsphere)} = \frac{1}{\darea} \int_{\dsphere} f(x)\,g(x) \, \calcd{\omega},
 \end{equation}
 where $\calcd{\omega(x)}$ is the surface area measure such that $\darea$ denotes the surface area of $\dsphere$ 
 \begin{equation}
@@ -99,22 +99,37 @@ Construct a basis for spherical harmonics $\mathcal{H}_n^d$ that consists of a l
 \end{lemma}
 
 
+\begin{theorem}
+    If $\{\eta_1, \ldots, \eta_N \} \in \dsphere$ is a fundamental system of points on the sphere, then $\{C_n^{(\alpha)}(\eta_i \cdot)\}_{i=1}^N$ is a basis for $\mathcal{H}_n^d$.
+\end{theorem}
+
+Orth-normal basis using Gram-Schmidt.
+
+\subsection{How do we construct a fundamental system of points?}
+
 \begin{equation}
     \renewcommand\arraystretch{1.3}
-    \MC(\veta, \eta_{new}) =
+    \MC_n^{(\alpha)}(\veta, \eta_{*}) =
     \left[
         \begin{array}{c|c}
-          C_n^{(\alpha)}(\veta\veta\transpose) \in \Reals^{M \times M} & C_n^{(\alpha)}(\veta\eta_{new}\transpose) \\
+          C_n^{(\alpha)}(\veta\veta\transpose) \in \Reals^{M \times M} & C_n^{(\alpha)}(\veta\eta_{*}\transpose) \in \Reals^{M \times 1} \\
           \hline
-          C_n^{(\alpha)}(\eta_{new}\veta\transpose) & C_n^{(\alpha)}(1) \in \Reals
+          C_n^{(\alpha)}(\veta\eta_{*}\transpose)\transpose \in \Reals^{1 \times M} & C_n^{(\alpha)}(1) \in \Reals
         \end{array}
     \right]
 \end{equation}
 
+Determinant using Schur complement
+\begin{equation}
+    % \mathcal{L}(\eta_{*}) = 
+    \textrm{det}(\MC_n^{(\alpha)}(\veta, \eta_{*})) = \textrm{det}(C_n^{(\alpha)}(\veta\veta\transpose))\,\left(C_n^{(\alpha)}(1) - C_n^{(\alpha)}(\eta_{*}\veta\transpose) \left[C_n^{(\alpha)}(\veta\veta\transpose)\right]^{-1} C_n^{(\alpha)}(\veta\eta_{*}\transpose) \right)
+\end{equation}
 
-\begin{theorem}
-    If $\{\eta_1, \ldots, \eta_N \} \in \dsphere$ is a fundamental system of points on the sphere, then $\{C_n^{(\alpha)}(\eta_i \cdot)\}_{i=1}^N$ is a basis for $\mathcal{H}_n^d$.
-\end{theorem}
+\begin{align}
+    \eta &= \argmax_{\eta_* \in \dsphere}\ \textrm{det}(\MC_n^{(\alpha)}(\veta, \eta_{*})) \\
+    &= \argmin_{\eta_* \in \Reals^d}\ C_n^{(\alpha)}(\frac{\eta_{*}}{\norm{\eta_*}}\veta\transpose) \left[C_n^{(\alpha)}(\veta\veta\transpose)\right]^{-1} C_n^{(\alpha)}(\veta\frac{\eta_{*}\transpose}{\norm{\eta_*}})
+\end{align}
+
 
 % \begin{theorem}[Addition]
 % \label{appendix:theorem:addition}
