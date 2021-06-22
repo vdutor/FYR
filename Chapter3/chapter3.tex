@@ -75,6 +75,10 @@ As a result of the relation between the Gegenbauer polynomial and the spherical 
 
 Zonal function?
 
+$\eta$
+
+\url{https://github.com/vdutor/SphericalHarmonics}
+
 Construct a basis for spherical harmonics $\mathcal{H}_n^d$ that consists of a linear combination of zonal functions 
 
 \begin{definition}[Fundamental System]
@@ -91,9 +95,21 @@ Construct a basis for spherical harmonics $\mathcal{H}_n^d$ that consists of a l
 \end{definition}
 
 \begin{lemma}
-    There exists a fundamental system of degree n on the sphere.
+    There exists a fundamental system of degree $n$ on the sphere.
 \end{lemma}
 
+
+\begin{equation}
+    \renewcommand\arraystretch{1.3}
+    \MC(\veta, \eta_{new}) =
+    \left[
+        \begin{array}{c|c}
+          C_n^{(\alpha)}(\veta\veta\transpose) \in \Reals^{M \times M} & C_n^{(\alpha)}(\veta\eta_{new}\transpose) \\
+          \hline
+          C_n^{(\alpha)}(\eta_{new}\veta\transpose) & C_n^{(\alpha)}(1) \in \Reals
+        \end{array}
+    \right]
+\end{equation}
 
 
 \begin{theorem}
