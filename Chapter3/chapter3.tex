@@ -15,9 +15,9 @@
 
 \section{Spherical Harmonics}
 
-Spherical harmonics are a special set of functions defined on the hypersphere and play a central role in harmonic analysis and approximation theory \citep{wendland2005}. They originate from solving Laplace's equation, and form a complete set of orthogonal functions. Any sufficiently regular function defined on the sphere can be written as a sum of these spherical harmonics, similar to the Fourier series with sines and cosines. Spherical harmonics are defined in arbitrary dimensions \citep{frye2014,dai2013}, but lack practical implementations in dimensions larger than three. This is mainly due to the complexity of solving Laplace's equation in higher dimensions.
+Spherical harmonics are a special set of functions defined on the hypersphere and play a central role in harmonic analysis and approximation theory \citep{wendland2005}. They originate from solving Laplace's equation, and form a complete set of orthogonal functions. Any sufficiently regular function defined on the sphere can be written as a sum of these spherical harmonics, similar to the Fourier series with sines and cosines. Spherical harmonics are defined in arbitrary dimensions \citep{frye2014,dai2013}, but lack practical implementations in dimensions larger than three. %This is mainly due to the complexity of solving Laplace's equation in higher dimensions.
 
-In this section, we propose a novel algorithm to construct spherical harmonics in $d$ dimensions. The algorithm is based on the existence of a fundamental system of points which we select in a greedy fashion. The result are spherical harmonics that are a linear combination of zonal functions and form an orth-normal basis on $\dsphere$. The algorithm lends itself well for a practical implementation in Python and TensorFlow, which we provide at: \url{https://github.com/vdutor/SphericalHarmonics}. The code is accompagnied by a series of tests that show the properties of the functions, as detailed below. Before outlining the algorithm in XXX we briefly define spherical harmonics in $\Reals^d$. We refer the interested reader to \citet{dai2013,frye2014} for a comprehensive review.
+In this section, we propose a novel algorithm to construct spherical harmonics in $d$ dimensions. The algorithm is based on the existence of a fundamental system of points on the hypersphere, which we select in a greedy fashion through optimisation. This result in spherical harmonics that are a linear combination of zonal functions and form an orth-normal basis on $\dsphere$. The algorithm lends itself well for implementation in Python and TensorFlow, which we provide at: \url{https://github.com/vdutor/SphericalHarmonics}. The code is accompagnied by a series of tests that show that the properties of spherical harmonics, as detailed below, hold. Before outlining the algorithm in TODO, we briefly define and cover the important properties of spherical harmonics in $\Reals^d$. We refer the interested reader to \citet{dai2013,frye2014} for a comprehensive review.
 % exist bases of spherical harmonics consisting of entirely zonal harmonics
 
 We adopt the usual $L_2$ inner product for functions $f: \dsphere \rightarrow \Reals$ and $g: \dsphere \rightarrow \Reals$ restricted to the sphere 
@@ -53,7 +53,7 @@ From the completeness and orthonormality of the spherical harmonic basis $\{\phi
 \begin{equation}
     f = \sum_{n=0}^{\infty} \sum_{j=1}^{\dnumharmonicsforlevel} \widehat{f}_{n, j} \phi_{n, j},\quad\text{with}\quad\widehat{f}_{n, j} = \langle f, \phi_{n, j} \rangle_{L_2(\dsphere)},
 \end{equation}
-which can be seen as the spherical analogue of the Fourier decomposition of periodic functions onto a basis of sines and cosines. TODO: discuss uniqueness: any rotations is also a basis.
+which can be seen as the spherical analogue of the Fourier decomposition of periodic functions onto a basis of sines and cosines.
 
 Subsequently, we will coin the set $\{\phi_{n,j}\}$ as the spherical harmonics. They are indexed by $n$ and $j$, where $n=0,1,2,\ldots$ denotes the degree (or level) and $j=1,\cdots,\dnumharmonicsforlevel$ denotes the orientation of the spherical harmonic. We are interested in finding $\{\phi_{n,j}\}$ in arbitrary dimension. For $d=2$, is solving Laplace's equation ($\Delta p = 0$) directly relatively straightforward. Doing so reveals that $N^{2}_0 = 1$ with $\phi_{0, 1} = 1$ and $N^{2}_n = 2$ for all $n > 0$ with $\phi_{n, 1}(\theta) = \sqrt{2} \cos(n \theta)$ and $\phi_{n, 2}(\theta) = \sqrt{2} \sin(n \theta)$. This shows that on the unit circle $\sphere^1$, the spherical harmonics correspond to the Fourier basis. For $d=3$, we can also directly solve Laplace's diffential equation to find $\dnumharmonicsforlevel = 2n + 1$ and a closed form solution for $\{\phi_{n,j}\}$. However, for $d > 3$, explicit formulations for the spherical harmonics become very rare. To the best of our knowledge, the only explicit formulation we could find is in \citet[Theorem~5.1]{dai2013}, which consists of a product over polynomials. This makes the implementation and its derivate numerically unstable, and only practically useful up to 10 dimensions \citep{Dutordoir2020spherical}. To present our algorithm we first need to cover a few more properties of spherical harmonics.
 
@@ -65,13 +65,13 @@ Subsequently, we will coin the set $\{\phi_{n,j}\}$ as the spherical harmonics. 
     C_n^{(\alpha)}(x\transpose x')\quad\text{with}\quad \alpha = \frac{d-2}{2}.
 \end{equation}
 \end{theorem}
-As a result of the relation between the Gegenbauer polynomial and the spherical harmonics, are the Gegenbauer polynomial sometimes referred to as ultraspherical polynomials. For $d=2$, Theorem~1 recovers the addition formula of the cosine function, as indeed $\cos(\theta) \cos(\theta') + \sin(\theta) \sin(\theta') = \cos(\theta - \theta')$ and $C_n^{(0)}(t) = \cos(n \arccos(t))$. The Gegenbauer polynomials with $\alpha=0$ are better known as the Chebyshev polynomials. Another connection between spherical harmonics and Gegenbauer polynomials is given by the Funk-Hecke theorem and applies to zonal functions. A zonal function on $\dsphere$ is a function that is rotationally invariant w.r.t. to a vector $\eta \in \dsphere$. This means that the function only depends on the inner product $\eta\transpose x$.
+As a result of the relation between the Gegenbauer polynomial and the spherical harmonics, are the Gegenbauer polynomial sometimes referred to as ultraspherical polynomials. For $d=2$, Theorem~1 recovers the addition formula of the cosine function, as indeed $\cos(\theta) \cos(\theta') + \sin(\theta) \sin(\theta') = \cos(\theta - \theta')$ and $C_n^{(0)}(t) = \cos(n \arccos(t))$. The Gegenbauer polynomials with $\alpha=0$ are better known as the Chebyshev polynomials. Another connection between spherical harmonics and Gegenbauer polynomials is given by the Funk-Hecke theorem and applies to zonal functions. A zonal function on $\dsphere$ is a function that is rotationally invariant w.r.t. to a point on the sphere, $\eta \in \dsphere$. This means that the function only depends on the inner product $\eta\transpose x$, or equivalently, on the geodestic distance between $\eta$ and $x$.
 
 \begin{theorem}[Funk-Hecke]
     % \label{appendix:theorem:funk}
-    Let $f$ be an integrable function such that $\int_{-1}^1 \| f(t)\| (1 - t^2)^{(d-3)/2} \calcd{t}$ is finite and $d \ge 2$. Then for every $\phi_{n,j}$ 
+    Let $f$ be an integrable function such that $\int_{-1}^1 \| f(t)\| (1 - t^2)^{(d-3)/2} \calcd{t}$ is finite and $d \ge 2$. Then for every $\phi_{n,j}$  and $\eta \in \dsphere$
     \begin{equation}
-        \frac{1}{\darea} \int_{\dsphere} f(x\transpose x')\,\phi_{n, j}(x')\, \calcd{\omega(x')} = {\lambda}_{n}\,\phi_{n,j}(x),
+        \frac{1}{\darea} \int_{\dsphere} f(\eta\transpose x)\,\phi_{n, j}(x)\, \calcd{\omega(x)} = {\lambda}_{n}\,\phi_{n,j}(\eta),
     \end{equation}
     where ${\lambda}_{n}$ is a constant defined by
     \begin{equation}
@@ -81,23 +81,23 @@ As a result of the relation between the Gegenbauer polynomial and the spherical 
     \end{equation}
     with $\alpha = \frac{d-2}{2}$ and $\omega_d = \frac{\Omega_{d-2}}{\Omega_{d-1}}$.
 \end{theorem}
-Zonal function?
 
-In light of the close connection between spherical harmonics and Gegenbauer polynomials 
+\subsection{Zonal Spherical Harmonics}
 
 
-Construct a basis for spherical harmonics $\mathcal{H}_n^d$ that consists of a linear combination of zonal functions 
+The Funk-Hecke and the Addition theorem show the close connection between spherical harmonics and Gegenbauer polynomials. Theorem~4 shows
+
+Construct spherical harmonics that consists of a linear combination of zonal Gegenbauer polynomials, i.e. $\phi_{n,j}(x) = \sum_i \beta_i C_n^{(\alpha)}(\eta_i\transpose x)$.
 
 \begin{definition}[Fundamental System]
     A collection of points $\{\eta_1, \ldots, \eta_N \} \in \dsphere$ is called a fundamental system of degree $n$ on the sphere if
     \begin{equation}
-        \textrm{det}\left({\left[C_n^{(\alpha)}(\eta_i\transpose\eta_j)\right]_{i,j=1}^N}\right) > 0,\qquad
-        {\left[C_n^{(\alpha)}(\eta_i\transpose\eta_j)\right]_{i,j=1}^N} = 
+        \textrm{det}\ 
         \begin{bmatrix}
             C_n^{(\alpha)}(1) & \ldots & C_n^{(\alpha)}(\eta_1\transpose\eta_N) \\
             \vdots & & \vdots \\
             C_n^{(\alpha)}(\eta_N\transpose\eta_1) & \ldots & C_n^{(\alpha)}(1)
-        \end{bmatrix}
+        \end{bmatrix} > 0.
     \end{equation}
 \end{definition}
 
