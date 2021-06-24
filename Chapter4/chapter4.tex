@@ -19,3 +19,200 @@ Building on \citet{salimbeni2017doubly} and to further improve the scalability o
 The analysis of (Bayesian) neural networks has led to several probabilistic models: NN-GPs, GPs and DGPs. In this work, however, rather than focusing on the \emph{prior} induced by these equivalent models, the emphasis lies on the connection between the DGP \emph{posterior} and the DNN. This has received much less attention in the literature, though we argue it is a more interesting regime to study. The connection between GP piors and neural nets is established only in the infinite limit of the number of hidden units. The sparse posterior DGP, on the contrary, is built out of a finite set of basis functions and can thus immediately be connected to finite-width neural networks --- in this paper we connect both models in their modus operandi.
 
 We formulate a DGP configuration for which the approximate posterior mean has the same mathematical structure as a deep neural network with fully connected layers and non-linear activation functions. We can use this unification to train the DGP like a neural network which allow us to leverage all the great research in this area for DGP inference. Furthermore, this connection between DGPs posteriors and DNNs highlights the great potential of DGPs as a model for learning powerful representations from data while being fully Bayesian.
+
+\section{Method: Gaussian Process Layers with Activated Inducing Variables}
+\label{sec:model}
+
+The concepts introduced in the background section can now be used to summarise our approach: We consider DGP models with GP layers that have an Arc Cosine kernel and Variational Fourier Feature style inducing variables $u_m = \langle f(\cdot), {g}_m(\cdot) \rangle_\rkhs$ \citep{hensman2017variational}. We then choose inducing functions $g_m(\cdot)$ that have the same shape as neural network activation functions (\cref{sec:inducing-function}). This yields basis functions for the SVGP model that correspond to activation functions (\cref{sec:relu-inducing-variables}), and thus to a model whose mean function can be interpreted as a classic feed forward neural network. \cref{sec:zonal-kernels-and-rkhs} covers the mathematical intricacies associated with the construction described above.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Activated Inducing Functions and their Spherical Harmonic Decomposition}
+\label{sec:inducing-function}
+
+The RKHS of the Arc Cosine kernel consists solely of functions that are equal to zero at the origin, i.e. $\forall f \in \rkhs: f(\bm{0}) = 0$. 
+%This is not a desired property for many datasets and a common approach
+To circumvent this problem we artificially increase the input space dimension by concatenating a constant to each input vector. In other words, the data space is embedded in a larger space with an offset such that it does not contain the origin anymore. This is analogous to the bias unit in multi-layer perceptron (MLP) layers in neural networks. For convenience we will denote by $(d-1)$ the dimension of the original data space (i.e. the number of input variables), and by $d$ the dimension of the extended space on which the Arc Cosine kernel is defined.
+
+% \begin{figure}[t]
+%     \centering
+%      \begin{subfigure}[b]{0.49\textwidth}
+%          \centering
+%         \includegraphics[clip, trim=0cm 1.8cm 0cm 1.6cm, width=\textwidth]{figures/mapping/relu_mapping.pdf}
+%         %  \caption{$g_m(\vx) = \norm{\vw_m} \norm{\vx} \max\left(0, \frac{\vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}}\right)$}
+%         \caption{ReLU: $\sigma(t) = \max(0, t)$}
+%          \label{fig:projection:relu}
+%      \end{subfigure}
+%      \hfill
+%      \begin{subfigure}[b]{0.49\textwidth}
+%          \centering
+%         \includegraphics[clip, trim=0cm 1.8cm 0cm 1.6cm, width=\textwidth]{figures/mapping/softplus_mapping.pdf}
+%         %  \caption{$g_m(\vx) = \norm{\vw_m}\norm{\vx} \left(\log(1 + \exp(\frac{3 \vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}})) - c\right) $}
+%         \caption{Softplus: $\sigma(t) = \log(1 + \exp(3\,t))$}
+%          \label{fig:projection:softplus}
+%      \end{subfigure}
+%    \caption{Activated inducing function ${g}_m(\vx) = \norm{\vx}\,\norm{\vw_m}\, \relu\left( \vw_m^\top \vx \, / \, \norm{\vw_m}\,\norm{\vx}\right)$ where $\sigma(\cdot)$ correspond to the ReLU \textbf{(a)} and Softplus \textbf{(b)}. Although the input domain is $\Reals^2$ we only plot the value of the function on the unit circle $\sphere^1$ (orange), and on the subspace that has an offset of $1$ in the $x_2$ direction (blue). The linear radial component of ${g}_m(\cdot)$ creates a one-to-one mapping between the blue curve and the upper half of the orange one.}%We observe that for these slices the functions correspond to the ReLU and Softplus neural network activation functions, respectively.}
+%    \label{fig:projection}
+% \end{figure}
+
+The inducing functions $g_m(\cdot)$ play an important role because they determine the shape of the SVGP's basis functions. Ideally they should be defined such that their restriction to the $(d - 1)$-dimensional original data space matches classic activation functions, such as the ReLU or the Softplus, exactly. However, this results in an angular component for $g_m(\cdot)$ that is not necessarily zonal. Since this property will be important later on, we favour the following alternative definition that enforces zonality:
+\begin{equation}
+\label{eq:def-inducing-function}
+    g_m: \Reals^d \rightarrow \Reals,\qquad \vx \mapsto \norm{\vx}\,\norm{\vw_m}\, \sigma\left(\frac{\vw_m^\top \vx}{\norm{\vw_m}\,\norm{\vx}}\right), 
+\end{equation}
+with $\vw_m \in \Reals^d$ a parameter, and $\sigma: [-1, 1] \rightarrow \Reals$ the function that determines the value of $g_m(\cdot)$ on the unit hypersphere. In \cref{fig:projection}, we show that choosing $\sigma(\cdot)$ to be a ReLU ($\sigma(t) = \max(0, t)$) or a Softplus ($\sigma(t) = \log(1 + \exp(3\,t))$) activation function leads to inducing functions that closely resemble the classic ReLU and Softplus on the data space. In the specific case of the ReLU it can actually be shown that the match is exact. In both cases, The parameter $\vw_m \in \Reals^d$ determines the orientation and slope of the activation function---they play the same role as the pre-activation weights in a NN.
+
+The zonality that we enforced in \cref{eq:def-inducing-function} is particularly convenient when it comes to representing $g_m(\cdot)$ in the basis of the eigenfunctions of $\rkhs$, which is required for computing inner products. It indeed allows us to make use of the Funk-Hecke theorem (see \cref{app:sec:harmonics}) and to eventually obtain
+\begin{equation}
+\begin{aligned}
+\label{eq:fourier-decomposition-activation-functions-new}
+    g_m(\vx) = \norm{\vx}\, \norm{\vw_m} \sum_{n=0}^\infty &\sum_{j=1}^{\dnumharmonicsforlevel}  \sigma_n \sh_{n, j}\left(\frac{\vw_m}{\norm{\vw_m}}\right)\, \sh_{n, j}\left(\frac{\vx}{\norm{\vx}}\right), \\
+   & \text{where \quad} \sigma_{n} = 
+   \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 \sigma(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t}.
+\end{aligned}
+\end{equation}
+Analytical expressions for $\sigma_n$ when $\sigma(t)=\max(0, t)$ are given in \cref{app:sec:compute-eigenvalues}.
+
+% [Representing functions on the sphere as a truncated series \cref{fig:activation-functions}]
+
+
+
+
+\subsection{Activated Interdomain Inducing Variables}
+\label{sec:relu-inducing-variables}
+
+We define our \emph{activated} interdomain inducing variables as
+\begin{equation}
+\label{eq:def-inducing-variable}
+    u_m = \big\langle f(\cdot), {g}_m(\cdot) \big\rangle_\rkhs.
+\end{equation}
+Since the GP samples do not belong to the RKHS there are mathematical subtleties associated with such a definition, which are detailed in \cref{sec:zonal-kernels-and-rkhs}. Assuming for now that they are indeed well defined, using these interdomain inducing variables as part of the SVGP framework requires access to two quantities: (i) their pairwise covariance, and (ii) the covariance between the GP and the inducing variables. The pairwise covariance, which is needed to populate $\MC$, is given by
+\begin{equation}
+\label{eq:kuu}
+\Cov(u_{m}, u_{m'})
+= \langle {g}_m(\cdot), {g}_{m'}(\cdot) \rangle_\rkhs
+= \sum_{\substack{n=0 \\ \lambda_n \neq 0}}^{\infty}
+    \frac{\sigma^2}{\lambda_n}\,\frac{n + \alpha}{\alpha}\,C_n^{(\alpha)}\left(\frac{\vw_m^\top \vw_{m'}}{\norm{\vw_m}\,\norm{\vw_{m'}}}\right).  
+\end{equation}
+The above is obtained using the RKHS inner product from \cref{eq:RKHSinnerproduct}, the Fourier coefficients from \cref{eq:fourier-decomposition-activation-functions-new} and the addition theorem for spherical harmonics from \cref{app:sec:harmonics}. Secondly, the covariance between the GP and $u_m$, which determines $[c_u(\cdot)]_m$, is given by:
+\begin{equation}
+\label{eq:kuf}
+  \Cov(u_m, f(\vx)) = 
+    % \Cov(u_m, f(\cdot)) = % \Exp{f}{f(\vx) \langle f(\cdot), g_m(\cdot) \rangle_\rkhs} = 
+    \langle k(\vx, \cdot), {g}_m(\cdot) \rangle_\rkhs = {g}_m(\vx) 
+    % = \norm{\vw_m} \norm{\vx} \sum_{n=0}^{\tilde{N}} \sigma_n \frac{n + \alpha}{\alpha}\,C_n^{(\alpha)}(\frac{\vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}}).
+\end{equation}
+as a result of the reproducing property of the RKHS. It becomes clear that this procedure gives rise to basis functions that are equal to our inducing functions. By construction, these inducing functions match neural network activation functions in the data plane, as shown in \cref{fig:projection}. Using these inducing variables thus leads to an approximate posterior GP (\cref{eq:qf}) which has a mean that is equivalent to a fully-connected layer with a non-linear activation function (e.g.~ReLU, Softplus, Swish). 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Analysis of the interplay between kernels and inducing functions}
+\label{sec:zonal-kernels-and-rkhs}
+
+In this section we describe the mathematical pitfalls that can be encountered \citep[e.g.,][]{sun2021neural} when defining new inducing variables of the form of \cref{eq:def-inducing-variable}, and how we address them. We discuss two problems: 1) the GP and the inducing function are not part of the RKHS, 2) the inducing functions are not expressive enough to explain the prior. Both problems manifest themselves in an approximation that is overly smooth and over-estimates the predictive variance.
+
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/truncation_activations_circle.pdf}
+%     \caption{The exact ReLU and Softplus activation function and its approximation for different truncation levels and dimensions. These functions correspond to the orange function in \cref{fig:projection} plotted on a line rather than on the circle.}
+%     \label{fig:activation-functions}
+% \end{figure}
+
+The Mercer representation of the kernel given in \cref{eq:mercer} implies that we have direct access to the Karhunen–Lo\`eve representation of the GP:
+\begin{equation}
+\label{eq:karhunen-loeve}
+    f(\vx) =  \sum_{n=0}^\infty \sum_{j=1}^{\dnumharmonicsforlevel}  \xi_{n,j} \sqrt{\lambda_n} \norm{\vx} \sh_{n, j}\left(\frac{\vx}{\norm{\vx}}\right), \text{\quad where the } \xi_{n,j} \text{ are i.i.d. } \mathcal{N}(0, 1).
+\end{equation}
+Using this expression to compute the RKHS norm of a GP sample $f(\cdot)$ yields $\norm{f}^2 = \sum_{n, j} \xi_{n,j}^2$, which is a diverging series. This is a clear indication that the GP samples do not belong to the RKHS \citep{kanagawa2018gaussian}, and that expressions such as $\langle f(\cdot), g(\cdot) \rangle_{\rkhs}$ should be manipulated with care. According to the definition given in \cref{eq:RKHSinnerproduct}, the RKHS inner product is a series that converges if computed for any two elements  $g(\cdot), h(\cdot) \in \rkhs$. The inner product operator can however be extended to the case where one input lives in a space larger than $\rkhs$, provided that restrictions are introduced on the second input to guarantee the convergence of the series. In other words, even if the decay of the Fourier coefficients of $f(\cdot)$ is too slow to make it an element of \rkhs, if the Fourier coefficients of $g(\cdot)$ decay quickly enough for the series $\sum_{n,j} \xi_{n,j} g_{n,j}/ \sqrt{\lambda_n}$ to converge then $\langle f(\cdot), g(\cdot) \rangle_{\rkhs}$ is well defined.
+%Though the theoretical setup in the previous paragraphs gives us an equivalence between a fully-connected neural network layer with a non-linear activation and the mean of an approximate SVGP, we need to proceed with caution to make sure that our method is mathematically sound, and practically useful. Indeed, since the GP samples do not belong to the RKHS, there are mathematical subtleties associated with manipulating expressions such as $\langle f(\cdot), g_m(\cdot) \rangle_{\rkhs}$ and attention must be paid to ensure this expression is meaningful. This is sometimes overlooked and can result in inducing variables with limited expressiveness, as it is the case in \citet{sun2021neural}.
+
+%For the definition of the inducing variable (see~\cref{eq:fourier-decomposition-activation-functions-new}) to be valid a necessary condition is that $f(\cdot)$ and $g_m(\cdot)$ are both part of the RKHS. We already know that a GP sample does not belong to the RKHS \citep{kanagawa2018gaussian}, and, while we managed to write $g_m(\cdot)$ as a linear combination of the basis functions $\sh_{n, j}(\cdot)$ in \cref{eq:fourier-decomposition-activation-functions-new}, this does not guarantee its presence in $\rkhs$. This makes our inducing variables definition questionable. For the ReLU inducing function (i.e. $g_m(\cdot)$ with $\sigma(t) = \max(0,t)$ as in \cref{fig:projection:relu}), this concern is justified. Through the decay rate of $\sigma_n$, which is proportional to the square root of those of the corresponding Arc Cosine \citep{bach2017breaking,bietti2020deep}, it is easy to see that $\norm{g_m(\cdot)}_{\rkhs} > \infty$. This means that the ReLU inducing functions are not part of the first-order Arc Cosine RKHS ---reflecting the discontinuous nature of the function. Fortunately, by using smoother activation functions for $\sigma(t)$ (e.g.,~Softplus), for which the coefficients $\sigma_n$ decay faster than the eigenvalues of the kernel, the norm can be made finite and the activated inducing function part of the RKHS.
+
+The above reasoning indicates that, for a given kernel $k(\cdot, \cdot)$, some activation functions $g_m(\cdot)$ will result in inducing variables $u_m = \langle f(\cdot), g_m(\cdot) \rangle_{\rkhs}$ that are well defined whereas other activation functions do not. For example, if we consider the case of the Arc Cosine kernel and the ReLU inducing function, the decay rate of $\sigma_n$ is proportional to the square root of $\lambda_n$~\citep{bach2017breaking,bietti2020deep}. This implies that the inner product series diverges and that this kernel and inducing variable cannot be used together. Alternatively, using smoother activation functions for $\sigma(t)$, such as the Softplus, results in a faster decay of the coefficients $\sigma_n$ and can guarantee that inducing variables are well defined.
+
+An alternative to ensure the series convergence for any combination of kernel and activation function is to use a truncated approximation of the activation function $\tilde{g}_m(\cdot)$ where all the Fourier coefficients above a given level $\tilde N$ are set to zero, which basically turns the inner product series into a finite sum. % Making use of the addition theorem (see \cref{app:sec:harmonics}), this yields:
+% \begin{equation}
+%     \tilde{g}_m(\vx) = \norm{\vw_m} \norm{\vx} \sum_{n=0}^{\tilde{N}} \sigma_n \frac{n + \alpha}{\alpha}\,C_n^{(\alpha)}(\frac{\vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}}).
+% \end{equation}
+\Cref{fig:activation-functions} shows how the true and truncated activation functions for the ReLU and Softplus compare. These correspond to the orange functions in \cref{fig:projection}, but are now plotted on a line. In the low to medium dimensional regime, we see that even for small truncation levels we approximate the ReLU and Softplus well. In higher dimensions this becomes more challenging for the ReLU. % and we notice high frequency variations near the boundary that are reminiscent of the Gibbs phenomenon in Fourier analysis. 
+
+\paragraph{Unexpressive inducing variables through truncation (\cref{fig:trunc})} The main concern with this truncation approach, however, comes from elsewhere: the larger $\tilde N$ is, the closer $\tilde{g}_m(\cdot)$ is to $g_m(\cdot)$, but the larger $\norm{\tilde{g}_m(\cdot)}_{\rkhs}$ becomes (to the point where it may be arbitrarily large). Similarly to ridge regression where the norm acts as a regulariser, using inducing functions with a large norm in SVGP models comes with a penalty which enforces more smoothness in the approximate posterior and limits its expressiveness.
+\Cref{fig:trunc} shows how the norm of our ReLU inducing functions grow in the RKHS. So by making $\tilde{N}$ larger such that we approximate the ReLU better, we incur a greater penalty in the ELBO for using them. This leads to unexpressive inducing variables, which can be seen by the growing predictive uncertainty. The Softplus, which is part of the RKHS, does not suffer from this.
+
+% 
+
+% \begin{figure}[t]
+% \centering
+% \begin{minipage}{.48\textwidth}
+%   \centering
+%   \includegraphics[width=\linewidth]{figures/truncation_colors.pdf}
+%   \captionof{figure}{\textbf{Top:} Predictive variance an SVGP fit on a synthetic dataset using our ReLU (left) and Softplus (right) inducing variables for $\tilde{N}={\color{C0}10}, {\color{C1}15}$ and ${\color{C3}25}$. \textbf{Bottom:} the norm of the inducing function $\tilde{g}_m(\cdot)$ as a function of $\tilde{N}$.}
+%   \label{fig:trunc}
+% \end{minipage}\hfill
+% \begin{minipage}{.48\textwidth}
+%   \centering
+%   \includegraphics[width=\linewidth]{figures/fits_and_variance_mat52_arccosine.pdf}
+%   \captionof{figure}{\textbf{Top:} Predictive mean and variance for an SVGP model using our Softplus inducing variables for the Mat\'ern-5/2 (left) and Arc Cosine (right) kernel. \textbf{Bottom:} The two terms that constitute the predictive variance.}
+%   \label{fig:matern-vs-arccosine}
+% \end{minipage}
+% \end{figure}
+
+\paragraph{Unexpressive inducing variables through spectra mismatch (\cref{fig:matern-vs-arccosine})} Any stationary kernel whose inputs $\vx,\vx' \in \dsphere$ are restricted to the unit hypersphere is a zonal kernel (i.e., the kernel only depends on the dot-product). This means that we are not limited to only the Arc Cosine because we can replace the shape function in \cref{eq:arccosine} by any stationary kernel, and our approach would still hold. For example, we could use the Mat\'ern-5/2 shape function with $s_{\text{mat-5/2}}(t) = \left(1+{{{\sqrt {5}} t}}+{{5 t^{2}}/{3}}\right)\exp \left(-{{{\sqrt {5}} t}}\right)$. However, in \cref{fig:matern-vs-arccosine} we compare the fit of an SVGP model using a Mat\'ern-5/2 kernel (left) to a model using an Arc Cosine kernel (right). While both models use our Softplus inducing variables, we clearly observe that the Mat\'ern kernel gives rise to a worse posterior model (lower ELBO and an over-estimation of the variance). In what follows we explain why this is the case.
+
+% In the bottom panel in \cref{fig:matern-vs-arccosine} we see that for the Mat\'ern-5/2, the Nystr\"om approximation $\Qff = \Cfu \Cuu^{-1} \Cfu^\top$ is unable to explain the prior $\Kff$, imposed by the kernel. This leads to the overestimation of the predictive variance in the top plot. The reason for this problem is the mismatch between the eigenvalues $\lambda_n$ (\cref{eq:compute-fourier-coefficients}) of the Mat\'ern and the Fourier coefficients $\sigma_n$ (\cref{eq:fourier-decomposition-activation-functions-new}) of the Softplus inducing function. As shown in \cref{fig:spectra}, the Mat\'ern kernel has a full spectrum (i.e., $\lambda_n \neq 0,\ \forall n \in \Naturals$), whereas the coefficients for the Softplus $\sigma_n$ are zero at levels $n=3, 5, 7,\cdots$. We are thus trying to approximate our prior kernel, containing all levels, by a set of functions that is missing many. This problem does not occur for the combination of Softplus (or ReLU) inducing functions and the Arc Cosine kernel (right-hand side) because their spectral decomposition match. In other words, the Arc Cosine kernel has zero coefficients for the same levels as our activated inducing functions. 
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Experiments
+
+\section{Experiments}
+\label{sec:experiments}
+
+We have shown that that we can build SVGP models with basis functions that behave like neural net activations. This equivalence has the practical advantage that we can train the means of the GP layers in our DGP as if they are a neural network model --- making use of the great advances made by the deep learning community. Once the mean of the DGP is trained, we can further optimise the remaining model hyper- and variational parameters w.r.t. the ELBO, which is a more principled objective \citep{Fong2019On}. This approach allows us to exploit the benefit of both, the efficient training of the DNN in combination with the principled uncertainty estimate of the DGP. For all SVGP models we use the Arc Cosine kernel and inducing variables obtained with the Softplus activation (\cref{sec:inducing-function}) with $\tilde{N} = 20$, for the reasons explained in \cref{sec:zonal-kernels-and-rkhs}.
+
+The aim of the experiments is to highlight that (i) our method leads to valid inducing variables, (ii) our initialisation improves DGPs in terms of accuracy, and (iii) we are able to improve on Dropout-based \citep{Gal2016dropout} neural networks in terms of calibrated uncertainty. 
+%We show this on a wide range of problems.
+We acknowledge that the NNs we benchmark against are the models for which we can build an equivalent DGP. While this leads to a fair comparison, it excludes recent improvements such as Transformer and Batch Norm layers.
+
+
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/banana-M-ELBO.pdf}
+%     \caption{Fits on the Banana binary classification dataset with growing number of inducing variables $M$. \textbf{left three panels:} In blue and orange we display the data. The model's $p(y \given \vx)$ is given as shades of grey. \textbf{right panel:} ELBO as a function of the number of inducing variables.}
+%     \label{fig:banana}
+% \end{figure}
+
+% \paragraph{2D classification on Banana dataset} An attractive property of SVGPs (and DGPs) is that the objective is a lower bound on the log marginal likelihood, where the gap is the KL divergence between the true and approximate posterior. By increasing the number of inducing variables we make the approximate posterior richer, lowering the error, or equivalently, tighten the bound. In \cref{fig:banana} we verify this property for a single-layer SVGP model with our Softplus activated inducing variables and an Arc Cosine kernel. Given the small dataset size, we optimised the model's parameter using BFGS. This experiment validates that we designed valid inducing variables and that, as theory suggest, the ELBO improves with number of inducing variables.
+
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=\linewidth]{figures/bananafull.pdf}
+%     \caption{We compare the fit of a single-layer and three-layer DNN optimised using binary cross-entropy and it's equivalent DGP trained using the ELBO. The DNNs are very confident, even far away from the data. We used the DNNs to initialise the equivalent DGP posterior mean before optimising the ELBO, which in both situations leads to a model exhibiting more calibrated uncertainty.}
+%     \label{fig:deep-banana}
+% \end{figure}
+
+\paragraph{From Neural Network to Activated DGP} \Cref{fig:deep-banana} shows the difference in predictive probability $p(y \given \vx)$ for a DNN and our activated DGP, in the single-layer and three-layer case. We configure the models with a Softplus activation function and set the number of both inducing variables of the GP and hidden units of the DNN to 100. In this experiment, the first step is to optimise the DNN w.r.t. the binary cross-entropy objective, upon convergence we initialise the DGP with this solution and resume training of the DGP w.r.t. the ELBO. Especially in the single-layer case, we notice how the sharp edges from the NN are relaxed by the GP fit, and we see how the GP expresses uncertainty away from the data by letting $p(y \given \vx) \approx 0.5$. This is thanks to the ELBO, which balances both data fit and model complexity and simultaneously trains the uncertainty.
+
+\paragraph{Regression on UCI benchmarks}
+We compare a suit of models on a range of regression problems. The important aspect is that we keep the model configuration and training procedure fixed across datasets. We use three-layered models with 128 inducing variables or hidden units. In each layer, the number of output heads is equal to the input dimensionality of the data. The Activated DGP (ADGP) and neural network approaches (Vanilla and Dropout) use Softplus activation functions. The Dropout model~\citep{Gal2016dropout} uses a rate of $0.1$ during train and test, and the Vanilla model is a deterministic neural network that uses the training MSE as the empirical variance during prediction.
+
+The DGP and ADGP both use the Arc Cosine kernel. The main difference is that the DGP has standard inducing points $u_m = f(\vz_m)$, whereas ADGP makes use of our activated inducing variables $u_m = \langle f, g_m \rangle_\rkhs^{}$. The ADGP is trained in two steps: we first train the mean of the approximate posterior w.r.t. the MSE, and then optimise all parameters w.r.t. the ELBO.
+
+In \cref{fig:uci} we see that in general our ADGP model is more accurate than its neural network initialisation (Vanilla model) in terms of RMSE. This is a result of the second stage of training in which we use the ELBO rather than the MSE, which is especially beneficial to prevent overfitting on the smaller datasets. When it comes to NLPD, ADGP shows improvements over its NN initialisation for 5 datasets out of 7 and consistently outperforms classic DGPs.
+
+% \begin{figure}
+%     \centering
+%     \includegraphics[width=\textwidth]{figures/uci_small.pdf}
+%     \caption{UCI: Root Mean Squared Error (RMSE) and Negative Log Predictive Density (NLPD) with 25\% and 75\% quantile error bars based on 5 splits. Dataset size and dimension given in parentheses.}
+%     \label{fig:uci}
+% \end{figure}
+
+\paragraph{Large scale image classification}
+% \label{sec:experiment:classification}
+In this experiment we measure the performance of our models under dataset shifts \citep{Ovadia2019}. For MNIST and Fashion-MNIST the out-of-distribution (OOD) test sets consist of rotated digits --- from 0\textdegree (i.e. the original test set) to 180\textdegree. For CIFAR-10 we apply four different types of corruption to the test images with increasing intensity levels from 0 to 5. For MNIST and FASHION-MNIST the models consist of two convolutional and max-pooling layers, followed by two dense layers with 128 units and 10 output heads. The dense layers are either fully-connected neural network layers using a Softplus activation function (Vanilla and Dropout), or our Activated GP layers using the Arc Cosine kernel and Softplus inducing variables (ADGP). For the CIFAR-10 models, we use the residual convolutional layers from a ResNet~\citep{he2016deep} to extract useful features before passing them to our dense GP or NN layers. Details of the model architectures are given in \cref{app:sec:experiment}. As previously, the ADGP model is initialised to the solution of the Vanilla model, and training is then continued using the ELBO. In \cref{fig:image-classification} we observe that the models perform very similar in terms of prediction accuracy, but that ADGP better account for uncertainty as evidenced by the Test Log Likelihood metric.% (TLL) we see that the ADGP outperforms the NN approaches by quite a margin.
+
+% \begin{figure}[t]
+%     \centering   
+%     \includegraphics[width=\textwidth]{figures/image_classification.pdf}
+%     \caption{Results on the rotated MNIST, FASHION-MNIST and corrupted CIFAR-10, showing the mean and std. dev. of the accuracy \textbf{(top)}, and test log-likelihood (TLL) \textbf{(bottom)}.}
+%     \label{fig:image-classification}
+% \end{figure}
