@@ -97,6 +97,9 @@ variational inference (VI), where the problem of Bayesian inference is cast as a
 
 \section{Interdomain Inducing Variables}
 
+The basis functions used in the approximate posterior mean TODO ref are determined by the covariance between the inducing variables and other function evaluations $\left[c_u(\cdot)\right]_m = \Cov(f(\cdot), u_m)$. Commonly, the inducing variables are taken to be function values $u_{m} = f(w_m)$, which leads to the kernel becoming the basis function $[c_u(\cdot)]_{m} = k(\vw_m, \cdot)$. \emph{Interdomain} inducing variables \citep{lazaro2009inter} select different properties of the GP (e.g.~integral transforms $u_m = \int f(\vx) g_m(\vx)\calcd{\vx}$), which modifies this covariance (see \citep{van2020framework,Leibfried2020Tutorial} for an overview), and therefore gives control over the basis functions.
+Most current interdomain methods are designed to improve computational properties \citep{hensman2017variational,burt2020variational,Dutordoir2020spherical}. Our aim is to control $c_u(\cdot)$ to be a typical NN actvation function like a ReLU or Softplus. This was also investigated by \citet{sun2021neural}, although they found less common saturating activation functions.
+
 \subsection{Example: heavyside inducing variable}
 
 $f \sim \GP$ defined on $\sphere^1$ (the unit circle), $f: [-\pi, \pi] \rightarrow \Reals, \theta \mapsto f(\theta)$.
