@@ -2,6 +2,15 @@
 
 \section{Geometric Gaussian Decision Systems}
 
+To date, my research has focussed on moving Gaussian processes (GPs) into the realm of deep learning. I have developed Deep Convolutional Gaussian processes that mimic the convolutional and layared architectures, Conditional density estimation model which are similar to Variational Auto Encoders, and more recently I have worked on Deep Gaussian processes that have activation functions as basis funcions. This research has been fruitful and I believe we have advanced the field of approximate Bayesian inference in deep compositional models, and showed how deep Gaussian processes are an interesting non-parametric alternative to Bayesian neural networks.
+
+In what comes next, I want to be more clear about the differences of neural networks and Gaussian processes, and the regimes in which they thrive. For example, NNs can handle---and in practice require---very large datasets, whereas Gaussian process models are more comfortable in the small data regime. Neural networks, in the presence of large datasets, are extremely good at learning integrate latent representations in very non-linear tasks, as evidenced by the latest models in language modelling and image . Non-parametric Gaussian processes, however, 
+non-parametric nature makes exact Bayesian inference also too expensive. 
+Defining a kernel is extremely difficult and Bayesian inference too costly
+key in uncertainty.
+
+Uncertainty is important in many situations, as it hyperparmaeter learning, but it is most vital in decision making systems. A model that can represent what is does not know is as valuable as being accurate most of the time. This is especially the case when your model is part of system that drives decisions that put expensive resources at stake and only few historical datapoints are available. Example: kidney transplation algo.
+
 \paragraph{Problem setting}
 
 \begin{enumerate}
@@ -33,6 +42,21 @@ We model $f$ by a Gaussian process
 \end{enumerate}
 
 Basically settings where DNNs are never going to be competitive with GPs - low-dim, very data-efficient, high-cost - not even if someone figures out how to do DNN uncertainty right, due to GP regret guarantees (under reasonable assumptions) matching the best possible regret achievable by any model/decision system.
+
+
+\paragraph{Objectives}
+\begin{enumerate}
+    \item Theory and analysis
+        Theory -- test of time by Krausse paper UCB
+        regret bounds
+        Although dependant on the prior 
+        Kidney matching algorithm
+    \item Getting these ideas into people's hands to get applications off the ground
+    \begin{enumerate}
+        \item Graph GPs for combinatorial optimization use cases
+        \item Manifold GPs for scientific use cases
+    \end{enumerate}
+\end{enumerate}
 
 % \begin{figure}[htb]
 %     \centering % <-- added
@@ -71,16 +95,6 @@ Basically settings where DNNs are never going to be competitive with GPs - low-d
 % \caption{Domains (top) and applications (bottom)}
 % \label{fig:images}
 % \end{figure}
-
-% \paragraph{Objectives}
-% \begin{enumerate}
-%     \item Theory and analysis
-%     \item Getting these ideas into people's hands to get applications off the ground
-%     \begin{enumerate}
-%         \item Graph GPs for combinatorial optimization use cases
-%         \item Manifold GPs for scientific use cases
-%     \end{enumerate}
-% \end{enumerate}
 
 \paragraph{Collaborators}
 \begin{enumerate}
