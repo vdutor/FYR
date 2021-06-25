@@ -136,9 +136,42 @@ kernel (Arc Cosine order 0):
 \fullcite{dutordoir2021gpflux}
 
 
-\section{Covariance Functions}
+\section{Kernels and Reproducing Kernel Hilbert Space}
+
+Kernel have a rich history in machine learning and functional analysis. Kernels became widely noticed  by the ML community when linear SVMs [CITE] were kernelised. This made SVMs a compelling model for non-linear modelling problems. Prior to the deep learning revolution that began in the late nillies, kernel SVMs sat the state of the art results in many tasks: XXX. Kernels are also used in splines, Priniciple Component Analysis (PCA), Gaussian processes and in general allow for the developement of versatile algorithms to analyse and process data. Kernels operate through pairwise comparisons on datapoints and are versitale because they do not impose strong assumptions regarding the type of data, such as vectors, graphs or strings, they operate on. In what follows, we are going to focus on the theoretical properties of Mercer kernels with the application of Gaussian processes in mind, and the infinite vector space these kernels characterise. This background material will be important for the remaining chapters of the thesis. The inspiration for this section came from course Julian Marial and review paper on XXX.
+
+\begin{definition}
+A positive definite (p.d.) kernel (or Mercer kernel [TODO]) on a set $\mathcal{X}$ is a function $k: \mathcal{X} \times \mathcal{X} \rightarrow \Reals$ that is
+\begin{enumerate}
+  \item symmetric $k(x, x') = k(x', x)$, and
+  \item satisfies for all $x_i$, $x_j \in \mathcal{X}$ and $c \in \Reals$: $\sum_{i}\sum_j c_i c_j k(x_i, x_j)\ge 0$.
+\end{enumerate}
+\end{definition}
+One of the simplest examples of a p.d. kernel is $k(x, x') = xx'$, where $\mathcal{X} = \Reals$. This kernel is often called the linear kernel. While being simple, as we will see through the next few theorems, the associated space of functions induced by this kernel is often too restricte
+In the next theorems we will see how kernels characterise a space over functions. Some of these spaces will be very explicit. For example, we will show how the linear kernel leads to a space of functions that are also linear, i.e. of the form $x \mapsto a x + b$. Other spaces belonging to kernel will be defined in a more abstract way. 
+
+\begin{theorem}[Aronszjan, 1950 TODO]
+  \label{theorem:k-and-H}
+  The kernel $k$ is a p.d. kernel on $\mathcal{X}$ i.f.f. there exists a Hilbert space $\rkhs$ and a mapping $\phi: \mathcal{X} \rightarrow \rkhs$ such that $\forall x,x' \in \mathcal{X}$:
+  \begin{equation}
+    k(x, x') = \langle \phi(x), \phi(x') \rangle_{\rkhs}
+  \end{equation}
+\end{theorem}
+
+We want to remind the reader that a Hilbert space $\rkhs$ is a (possibly infinite) vector space with an inner product $\langle f, g \rangle_{\rkhs}$ and norm $\norm{f} = \langle f, f \rangle_{\rkhs}^{\frac{1}{2}}$, and where any Cauchy sequence in $\rkhs$ converges in $\rkhs$. A Cauchy sequence is a sequence whose elements become arbitrarly close as the sequence progresses. Intuitively, a Hilbert space can be seen as a generalisation of an Euclidian space that is infinite dimensional. In the machine learning literature, $\rkhs$ is also commonly referred to as the feature space and $\phi$ the feature map.
+
+A Reproducing Kernel Hilbert Space (RKHS) is a special type of Hilbert space mentioned in \cref{theorem:k-and-H}. It is a space over function from $\mathcal{X}$ to $\Reals$ that are ``parameterised'' by an element in $\mathcal{X}$. In other words, a datapoint $x \in \mathcal{X}$ is mapped to a function in the RKHS: $\phi(x) \in \rkhs$. To make it more explicit we also write $\phi(x) = k_x$ to highlight that $k_x$ is another function with domains $\mathcal{X} \rightarrow \Reals$.
+
+\begin{definition}
+  Let $\mathcal{X}$ be a set and $\rkhs$ a Hilbert space with inner-product $\langle \cdot, \cdot \rangle_{\rkhs}$. The function $k: \mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is called a reproducing kernel of $\rkhs$ if
+  \begin{enumerate}
+    \item $\rkhs$ contains all functions of the form 
+    \item 
+  \end{enumerate}
+\end{definition}
 
 \begin{enumerate}
+  \item History: RKHS pure math and into machine learning for SVM, splines and 
   \item Positive Definite and Symmetry
   \item RKHS
   \item Bochner's theorem
@@ -148,3 +181,5 @@ kernel (Arc Cosine order 0):
   \item Representer Theorem
   \item Show how sparse approximation links anchor points
 \end{enumerate}
+
+\section{Spectral Representation of Gaussian Processes}
