@@ -1,15 +1,37 @@
 \chapter{Introduction}  %Title of the First Chapter
 
-Bayesian inference has the potential to improve deep neural networks (DNNs) by providing 1) uncertainty estimates for robust prediction and downstream decision-making, and 2) an objective function (the marginal likelihood) for hyperparameter selection \citep{mackay1992practical,mackay1992bmc,mackay2003information}. The recent success of deep learning \citep{alexnet,attention,Schrittwieser2020MasteringAG} has renewed interest in large-scale Bayesian Neural Networks (BNNs) as well, with effort mainly focused on obtaining useful uncertainty estimates \citep{blundell2015,Kingma2015local,Gal2016dropout}.
-Despite already providing usable uncertainty estimates, there is significant evidence that current approximations to the uncertainty on neural network weights can still be significantly improved \citep{hron2017variational,foong2019expressiveness}. The accuracy of the uncertainty approximation is also linked to the quality of the marginal likelihood estimate \citep{blei2017variational}. Since hyperparameter learning using the marginal likelihood fails for most common approximations \citep[e.g.,][]{blundell2015}, the accuracy of the uncertainty estimates is also questionable.
+Using past experience to update ones behaviour is what differentiates intelligent beings from other objects in our world. To artificially create these systems is the crowning goal of the field of Artificial Intelligence (AI) and Machine Learning (ML). In Machine Learning, this is done through the manipulation of mathematical formalisms that can be translated into computer algorithms. Realising this goal will have large impact on the world and society we live in as it will free up humans from trivial tasks that require cognition, like driving cars, booking appointments, and, eventually, interpreting and acting on medical records. Though arguably the field has still a long way to go to fullfil its full potential [CITE].
+
+A principled and elegant approach to formalise the concept of learning from current and past experience is Bayesian probability theory. In this framework one specifies beliefs over quantities of interest and updates them after observing new data. The beliefs are represented using probability distributions: the \emph{prior} distribution describes what is known about the quantity before any data is observed, . Using Bayes' rule 
+a prior distribution encodes  . prior, likelihood and posterior. 
+Taking actions after learning , expectations 
+A defining attribute of Bayesian learning is the posterior distribution, and the uncertainty associated with that distribution. exploration and exploitation
+
+The performance of a decision-making system will depend on the speed at which it can learn and the optimality of the decisions made.
+
+A decision making system can use these posterior distributions to take actions. What makes a good decision making system
+uncertainty is important
+
+In my opinion, Gaussian processes compr the right trade-offs between 
+Studying Gaussian processes 
+Commercial settings
+
+In this report, 
+
+MacKay throwing the baby out with the bathwater
+
+
+
+% Bayesian inference has the potential to improve deep neural networks (DNNs) by providing 1) uncertainty estimates for robust prediction and downstream decision-making, and 2) an objective function (the marginal likelihood) for hyperparameter selection \citep{mackay1992practical,mackay1992bmc,mackay2003information}. The recent success of deep learning \citep{alexnet,attention,Schrittwieser2020MasteringAG} has renewed interest in large-scale Bayesian Neural Networks (BNNs) as well, with effort mainly focused on obtaining useful uncertainty estimates \citep{blundell2015,Kingma2015local,Gal2016dropout}.
+% Despite already providing usable uncertainty estimates, there is significant evidence that current approximations to the uncertainty on neural network weights can still be significantly improved \citep{hron2017variational,foong2019expressiveness}. The accuracy of the uncertainty approximation is also linked to the quality of the marginal likelihood estimate \citep{blei2017variational}. Since hyperparameter learning using the marginal likelihood fails for most common approximations \citep[e.g.,][]{blundell2015}, the accuracy of the uncertainty estimates is also questionable.
 
 % Instead of representing probability distributions on weights, Gaussian processes (GPs) can be used to represent uncertainty directly on the function that the weights represent \citep{rasmussen2006}. \citet{Damianou2013} used Gaussian processes as layers to create a different Bayesian analogue to a DNN. These Deep Gaussian Processes (DGPs) are particularly promising because Bayesian approximations seem to be of higher quality than those of weight-space BNNs, e.g.~as supported by the successful use of marginal likelihood estimates for hyperparameter learning \citep{Damianou2013,damianou2015thesis,Dutordoir2020convolutional}.
 
-\citet{Damianou2013} used Gaussian processes \citep{rasmussen2006} as layers to create a different Bayesian analogue to a DNN: the Deep Gaussian process (DGP). Gaussian processes (GPs) are a different representation of a single layer neural network, which is promising because it allows high-quality approximations to uncertainty \citep{titsias2009,burt2019}. DGPs are promising, since they seem to inherit these high-quality approximations, as indicated by the successful use of marginal likelihood approximations for hyperparameter learning \citep{Damianou2013,Dutordoir2020convolutional}.
+% \citet{Damianou2013} used Gaussian processes \citep{rasmussen2006} as layers to create a different Bayesian analogue to a DNN: the Deep Gaussian process (DGP). Gaussian processes (GPs) are a different representation of a single layer neural network, which is promising because it allows high-quality approximations to uncertainty \citep{titsias2009,burt2019}. DGPs are promising, since they seem to inherit these high-quality approximations, as indicated by the successful use of marginal likelihood approximations for hyperparameter learning \citep{Damianou2013,Dutordoir2020convolutional}.
 
 %Despite their advantages, DGPs have not been adopted as widely as DNNs, which can mainly be attributed to 1) larger computational costs, and 2) slow optimisation.
-Despite their advantages, DGPs have not been adopted as widely as DNNs, which can mainly be attributed to their larger computational cost and the fact that their are challenging to optimise.
-In the past, these challenges were also present in DNNs, although decades of work has led to standard practices (e.g.~ReLU activations \citep{relu}, Xavier weight initialisations \citep{glorot2010understanding}, and batch normalisation \citep{batchnorm}) that have largely eliminated them. So far, it has not been possible to directly apply these methods to DGPs due to the mathematical differences between the models.
+% Despite their advantages, DGPs have not been adopted as widely as DNNs, which can mainly be attributed to their larger computational cost and the fact that their are challenging to optimise.
+% In the past, these challenges were also present in DNNs, although decades of work has led to standard practices (e.g.~ReLU activations \citep{relu}, Xavier weight initialisations \citep{glorot2010understanding}, and batch normalisation \citep{batchnorm}) that have largely eliminated them. So far, it has not been possible to directly apply these methods to DGPs due to the mathematical differences between the models.
 
 % \section{Option 1: Focus on what is in the report}
 
