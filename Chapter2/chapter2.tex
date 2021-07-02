@@ -100,33 +100,33 @@ variational inference (VI), where the problem of Bayesian inference is cast as a
 The basis functions used in the approximate posterior mean TODO ref are determined by the covariance between the inducing variables and other function evaluations $\left[c_u(\cdot)\right]_m = \Cov(f(\cdot), u_m)$. Commonly, the inducing variables are taken to be function values $u_{m} = f(w_m)$, which leads to the kernel becoming the basis function $[c_u(\cdot)]_{m} = k(\vw_m, \cdot)$. \emph{Interdomain} inducing variables \citep{lazaro2009inter} select different properties of the GP (e.g.~integral transforms $u_m = \int f(\vx) g_m(\vx)\calcd{\vx}$), which modifies this covariance (see \citep{van2020framework,Leibfried2020Tutorial} for an overview), and therefore gives control over the basis functions.
 Most current interdomain methods are designed to improve computational properties \citep{hensman2017variational,burt2020variational,Dutordoir2020spherical}. Our aim is to control $c_u(\cdot)$ to be a typical NN actvation function like a ReLU or Softplus. This was also investigated by \citet{sun2021neural}, although they found less common saturating activation functions.
 
-\subsection{Example: heavyside inducing variable}
+% \subsection{Example: heavyside inducing variable}
 
-$f \sim \GP$ defined on $\sphere^1$ (the unit circle), $f: [-\pi, \pi] \rightarrow \Reals, \theta \mapsto f(\theta)$.
+% $f \sim \GP$ defined on $\sphere^1$ (the unit circle), $f: [-\pi, \pi] \rightarrow \Reals, \theta \mapsto f(\theta)$.
 
-kernel (Arc Cosine order 0):
+% kernel (Arc Cosine order 0):
 
-\begin{equation}
-  k(\theta, \theta') = \kappa(\rho) = \pi - |\theta - \theta'|
-\end{equation}
+% \begin{equation}
+%   k(\theta, \theta') = \kappa(\rho) = \pi - |\theta - \theta'|
+% \end{equation}
 
-\begin{equation}
-  \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta, \theta') = 
-\end{equation}
+% \begin{equation}
+%   \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta, \theta') = 
+% \end{equation}
 
-\begin{equation}
-  u_m = \mathcal{L}_m(f)
-\end{equation}
+% \begin{equation}
+%   u_m = \mathcal{L}_m(f)
+% \end{equation}
 
-\begin{equation}
-  \mathcal{L}_m = \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} + \int \calcd{\theta}
-\end{equation}
+% \begin{equation}
+%   \mathcal{L}_m = \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} + \int \calcd{\theta}
+% \end{equation}
 
-\begin{align}
-  \Cov(u_m, f(\theta')) &= \Exp{f}{\mathcal{L}_m(f)\,f(\theta')} \\
-                      &=  \mathcal{L}_m k(\theta', \cdot) \\
-                      &= \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta', \theta) + \int_{-\pi}^\pi k(\theta', \theta) \calcd{\theta}
-\end{align}
+% \begin{align}
+%   \Cov(u_m, f(\theta')) &= \Exp{f}{\mathcal{L}_m(f)\,f(\theta')} \\
+%                       &=  \mathcal{L}_m k(\theta', \cdot) \\
+%                       &= \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta', \theta) + \int_{-\pi}^\pi k(\theta', \theta) \calcd{\theta}
+% \end{align}
 
 
 
@@ -138,7 +138,7 @@ kernel (Arc Cosine order 0):
 
 \section{Kernels and Reproducing Kernel Hilbert Space}
 
-Kernel have a rich history in machine learning and functional analysis. Kernels became widely noticed  by the ML community when linear SVMs [CITE] were kernelised. This means that rather than using $x\top\x'$, one uses a function $k(x, x')$, which corresonponds to an inner-product in some space $\phi(x)\top \phi(x')$. This concept is also referred to as the ``kernel trick'' in the litarture. This made SVMs a compelling model for non-linear modelling problems. Prior to the deep learning revolution that began in the late nillies, kernel SVMs sat the state of the art results in many tasks: XXX. Kernels are also used in splines, Priniciple Component Analysis (PCA), Gaussian processes and in general allow for the developement of versatile algorithms to analyse and process data. Kernels operate through pairwise comparisons on datapoints and are versitale because they do not impose strong assumptions regarding the type of data, such as vectors, graphs or strings, they operate on. In what follows, we are going to focus on the theoretical properties of Mercer kernels with the application of Gaussian processes in mind, and the infinite vector space these kernels characterise. This background material will be important for the remaining chapters of the thesis. The inspiration for this section came from course Julian Marial and review paper on XXX.
+Kernel have a rich history in machine learning and functional analysis. Kernels became widely noticed  by the ML community when linear SVMs [CITE] were kernelised. This means that rather than using $x\top x'$, one uses a function $k(x, x')$, which corresonponds to an inner-product in some space $\phi(x)\top \phi(x')$. This concept is also referred to as the ``kernel trick'' in the litarture. This made SVMs a compelling model for non-linear modelling problems. Prior to the deep learning revolution that began in the late nillies, kernel SVMs sat the state of the art results in many tasks: XXX. Kernels are also used in splines, Priniciple Component Analysis (PCA), Gaussian processes and in general allow for the developement of versatile algorithms to analyse and process data. Kernels operate through pairwise comparisons on datapoints and are versitale because they do not impose strong assumptions regarding the type of data, such as vectors, graphs or strings, they operate on. In what follows, we are going to focus on the theoretical properties of Mercer kernels with the application of Gaussian processes in mind, and the infinite vector space these kernels characterise. This background material will be important for the remaining chapters of the thesis. The inspiration for this section came from course Julian Marial and review paper on XXX.
 
 \begin{definition}
 A positive definite (p.d.) kernel (or Mercer kernel [TODO]) on a set $\mathcal{X}$ is a function $k: \mathcal{X} \times \mathcal{X} \rightarrow \Reals$ that is

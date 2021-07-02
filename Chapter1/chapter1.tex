@@ -1,25 +1,25 @@
 \chapter{Introduction}  %Title of the First Chapter
 
-Using past experience to update ones behaviour is what differentiates intelligent beings from other objects in our world. To artificially create these systems is the crowning goal of the field of Artificial Intelligence (AI) and Machine Learning (ML). In Machine Learning, this is done through the manipulation of mathematical formalisms that can be translated into computer algorithms. Realising this goal will have large impact on the world and society we live in as it will free up humans from trivial tasks that require cognition, like driving cars, booking appointments, and, eventually, interpreting and acting on medical records. Though arguably the field has still a long way to go to fullfil its full potential [CITE].
+Using past experience to update ones behaviour is what differentiates intelligent beings from other creatures in our world. To artificially create said systems, that can learn from data acquired through experience, is the crowning goal of the field of Artificial Intelligence (AI) and Machine Learning (ML).
+%In Machine Learning, which is a subdomain of AI, this is done through the manipulation of mathematical formalisms that can be translated into computer algorithms. 
+Realising this goal will have a large impact on the world and society we live in, as it will free up humans from tasks that require cognition, like driving cars, booking appointments, and interpreting and acting on medical records, to give a few examples. Though, arguably, the field has still a long way to go before fullfilling its full potential.
 
-A principled and elegant approach to formalise the concept of learning from current and past experience is Bayesian probability theory. In this framework one specifies beliefs over quantities of interest and updates them after observing new data. The beliefs are represented using probability distributions: the \emph{prior} distribution describes what is known about the quantity before any data is observed, . Using Bayes' rule 
-a prior distribution encodes  . prior, likelihood and posterior. 
-Taking actions after learning , expectations 
-A defining attribute of Bayesian learning is the posterior distribution, and the uncertainty associated with that distribution. exploration and exploitation
+An elegant approach to formalise the concept of learning through acquired experience is \emph{Bayesian learning}. In this framework one specifies beliefs over quantities of interest, and updates them after observing data. The beliefs are represented using probability distributions: the \emph{prior} describes what is known about the quantity before any data is observed, and the so-called \emph{likelihood} describes the relation between the observed data and the quantity of interest. The framework provides a recipe for obtaining an updated belief over the quantity of interest after data has been observed. This distribution is known as the \emph{posterior}. Bayesian learning makes decisions atop these beliefs and uses the posterior to reason about the optimality of a decision or the cost associated to a certain action.
 
-The performance of a decision-making system will depend on the speed at which it can learn and the optimality of the decisions made.
+The performance of a decision-making system will depend on the speed at which it can learn and the optimality of the decisions made---quantified by the \emph{regret}. It can be shown that, under certain assumptions, Bayesian learning gives rise to the optimal regret. However, such excellence comes at a high computational cost, which in many scenarios renders Bayesian learning---in its purest form---unpratical. Fortunately, the literature has proposed many approximate methods which have lightened the computational complexity of the Bayesian paradigm.
 
-A decision making system can use these posterior distributions to take actions. What makes a good decision making system
-uncertainty is important
+Unquestionably, (approximate) models for decision-making systems need to be able to handle \emph{uncertainty}. They need to be able to quantify what is known, and what is not known. The importance of quantifying uncertainty for decision-making systems becomes clear from the many sources it can stem from. For example, there can be multiple different settings of a model that explain the data, so one needs to be uncertain about the setting that actually generated it. One also needs to be uncertain about the model itself, as most probably the model at hand is a simplification of the real-world process. Moreover, the environment in which the system operates may also be inherintly uncertain, in which case even an infinite amount of data (i.e. experience) would not make the system any smarter (e.g., trying to predict the outcome of rolling a fair dice).
 
-In my opinion, Gaussian processes compr the right trade-offs between 
-Studying Gaussian processes 
-Commercial settings
+In my opinion, Gaussian processes are the perfect compromise between computational complexity and Bayesian rigor. Their non-parameteric nature makes them complex enough to model a wide range of problems, while their kernel formulation makes them applicable to many different domains: graphs, vectors, images, etc. Instead of representing probability distributions on weights, Gaussian processes can be used to represent uncertainty directly on the function that the weights represents. This makes Gaussian processes, as opposed to parametric models, more amenable to mathematical analysis, which makes it possible to give strong garantuees on the future performance of the system. This may be necessary for deploying these systems in commerical applications. For these reasons, I believe, studying Gaussian processes is very worthwhile.
 
-In this report, 
+In this report, I present two pieces of novel research in the domain of approximate Bayesian inference for Gaussian process models. In \cref{chapter:vish}, I introduce an interdomain inducing variable approach that speeds up inference and prediction in Gaussian processes by two orders of magnitude. An important building block for this work are spherical harmonics, for which we developed an efficient algorithm for their evaluation in high dimensions. In \cref{sec:spherical-harmonics} I present this algorithm and its theoretical foundation. In \cref{chapter:dnn-as-point-estimate-for-dgps} we marry the strengths of deep neural networks and deep Gaussian processes by establishing an equivalence between the forward passes of both models. This results in models that can either be seen as neural networks with improved uncertainty prediction or deep Gaussian processes with increased prediction accuracy. The final part of this report, \cref{chapter:future-research}, is devoted to future research. Finally, we start with covering the necessary theoretical background in \cref{chapter:theoretical-framework}.
 
-MacKay throwing the baby out with the bathwater
-
+The material presented in \cref{chapter:vish,chapter:dnn-as-point-estmate-for-dgps} is published or is currently under review:
+\begin{enumerate}
+    \item \fullcite{Dutordoir2020spherical}
+    \item \fullcite{dutordoir2021deep}
+    \item \fullcite{dutordoir2021gpflux}
+\end{enumerate}
 
 
 % Bayesian inference has the potential to improve deep neural networks (DNNs) by providing 1) uncertainty estimates for robust prediction and downstream decision-making, and 2) an objective function (the marginal likelihood) for hyperparameter selection \citep{mackay1992practical,mackay1992bmc,mackay2003information}. The recent success of deep learning \citep{alexnet,attention,Schrittwieser2020MasteringAG} has renewed interest in large-scale Bayesian Neural Networks (BNNs) as well, with effort mainly focused on obtaining useful uncertainty estimates \citep{blundell2015,Kingma2015local,Gal2016dropout}.
@@ -82,27 +82,29 @@ MacKay throwing the baby out with the bathwater
 
 
 
-\section{Contributions and Layout of this Report}
+% \section{Contributions and Layout of this Report}
 
-This report represents my learning and the research that I conducted during the first year of my PhD degree. Most notably, we developed a novel sparse approximation for (deep) Gaussian processes based on the decomposition of the kernel in Spherical harmonics. In \cref{chapter:theoretical-framework} we cover the necessary theoretical background.
+% This report represents my learning and the research that I conducted during the first year of my PhD degree. Most notably, we developed a novel sparse approximation for (deep) Gaussian processes based on the decomposition of the kernel in Spherical harmonics. In \cref{chapter:theoretical-framework} we cover the necessary theoretical background.
 
-\begin{description}
-    \item[Chapter 3] In this chapter we introduce a new class of inter-domain variational GPs where data is mapped onto the unit hypersphere in order to use spherical harmonic representations. The inference scheme is comparable to Variational Fourier Features, but it does not suffer from the curse of dimensionality, and leads to diagonal covariance matrices between inducing variables. This enables a speed-up in inference, because it bypasses the need to invert large covariance matrices. The experiments show that our model is able to fit a regression model for a dataset with 6 million entries two orders of magnitude faster compared to standard sparse GPs, while retaining state of the art accuracy.
+% \begin{description}
+%     \item[Chapter 3] In this chapter we introduce a new class of inter-domain variational GPs where data is mapped onto the unit hypersphere in order to use spherical harmonic representations. The inference scheme is comparable to Variational Fourier Features, but it does not suffer from the curse of dimensionality, and leads to diagonal covariance matrices between inducing variables. This enables a speed-up in inference, because it bypasses the need to invert large covariance matrices. The experiments show that our model is able to fit a regression model for a dataset with 6 million entries two orders of magnitude faster compared to standard sparse GPs, while retaining state of the art accuracy.
     
-    The content of this chapter is largely based on:
+%     The content of this chapter is largely based on:
 
-    \fullcite{Dutordoir2020spherical},
+%     \fullcite{Dutordoir2020spherical},
 
-    with the exception of the algorithm for computing the spherical harmonics in high dimensions.
+%     with the exception of the algorithm for computing the spherical harmonics in high dimensions.
 
-    \item[Chapter 3] Following up on the previous chapter, we use the decomposition of zonal kernels to design an interdomain inducing variable that mimics the behaviour of activation functions is neural network layers. 
+%     \item[Chapter 3] Following up on the previous chapter, we use the decomposition of zonal kernels to design an interdomain inducing variable that mimics the behaviour of activation functions is neural network layers. 
 
-    The content of this chapter is largely based on:
+%     The content of this chapter is largely based on:
 
-    \fullcite{dutordoir2021deep}.
+%     \fullcite{dutordoir2021deep}.
 
-    \item[Chapter 4] In the last chapter of the report we will shed a light on what the future work will focus on: ``Gaussian Decision Systems with Geometric Gaussian processes".
-\end{description}
+%     \item[Chapter 4] In the last chapter of the report we will shed a light on what the future work will focus on: ``Gaussian Decision Systems with Geometric Gaussian processes".
+% \end{description}
+
+
 % Chapter 2 provides the theoretical background 
 % Chapter 3 Spherical Harmonics inducing variables
 % Chapter 4 Connection between NN and DGPs
