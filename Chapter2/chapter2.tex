@@ -36,7 +36,7 @@ We can now specify the GP at this finite set of points and use the rules of cond
   \label{eq:chapter1:conditional}
   p(f^{\setminus \vx}(\cdot) \given f(\vx) \shorteq \vf) = \GP\Big(\mu(\cdot) + \kfx^\top \Kff^{-1} (\vf - \vmu_{\vf}),\ \ k(\cdot, \cdot) -  \kfx^\top \Kff^{-1} \kfx\Big),
 \end{equation}
-where $[\kfx]_i = k(x_i, \cdot)$. The conditional distribution over the whole function $p(f(\cdot) \given f(\vx) = \vf)$ has the exact same form as in \cref{eq:chapter1:conditional}. This is mathematically slightly confusing because the random variable $f(\vx)$ is included both on the left and right-hand-side of the conditioning, but the equation is technically correct, as discussed in \citet{matthews16,van2020framework,Leibfried2020Tutorial}.
+The conditional distribution over the whole function $p(f(\cdot) \given f(\vx) = \vf)$ has the exact same form as in \cref{eq:chapter1:conditional}. This is mathematically slightly confusing because the random variable $f(\vx)$ is included both on the left and right-hand-side of the conditioning, but the equation is technically correct, as discussed in \citet{matthews16,van2020framework,Leibfried2020Tutorial}.
 
 \subsection{The Beauty of Gaussian Process Regression: Exact Bayesian Inference}
 
@@ -78,7 +78,7 @@ Despite the convenience of the analytic expressions, computing this exact poster
 
 Sparse Gaussian processes combined with Variational Inference (VI) provide an elegant way to address these two shortcomings \citep{titsias2009, hensman2013, hensman2015scalable}. VI consists of introducing a distribution $q(f)$ that depends on some parameters, and finding the values of these parameters such that $q(f)$ gives the best possible approximation of the exact posterior $p(f \given \vy )$. It is worth noting that there exists other approaches in the literature that adress the same issues. In particular, Expectation Propagation (EP) \citep{minka2001expectation,bui2017unifying} formulates, similar to VI, an approximation to the posterior but uses a different objective to optimise the approximation. Tangently, other sparse GP methods (e.g., FITC) \citep{Snelson05,quinonero2005unifying} approximate the model rather than the posterior. A downside of this is that the posteriors lose their non-parametric nature, which can be detrimental for the uncertainty estimates \citep{bauer2016understanding}. In what follows we will focus on Sparse Gaussian processes with variational inference because of its general applicability and overall robust performance.
 
-We first discuss the objective used in general variational inference before specifying our particular choice for $q(f)$ for sparse GPs. Let us therefore define $q(f)$ as the approximate to the posterior, then the idea is to optimise $q(f)$ so that the distance measured by the Kullback–Leibler (KL) divergence from $q(f)$ to $p(f \given \vy)$ is minimal. Rewriting $p(f \given \vy)$ using Bayes' rule, we obtain:
+We first discuss the objective used in general variational inference before specifying our particular choice for $q(f)$. Let us therefore define $q(f)$ as the approximate to the posterior, then the idea is to optimise $q(f)$ so that the distance measured by the Kullback–Leibler (KL) divergence from $q(f)$ to $p(f \given \vy)$ is minimal. Rewriting $p(f \given \vy)$ using Bayes' rule, we obtain:
 \begin{equation}
   \KL{q(f)}{p(f \given \vy)} = -{\Exp{q(f)}{\log \frac{p(\vy \given f) p(f)}{q(f)}}} + \log p(\vy).
 \end{equation}
@@ -92,17 +92,24 @@ The r.h.s. of \cref{eq:elbo} is known as the Evidence Lower BOund (ELBO). It is 
 
 Intuitively, VI casts the problem of Bayesian inference, namely marginalisation, as an optimisation problem. The objective for the optimisation problem is the ELBO, which depends on the variational approximation, the prior and the data but, importantly, not the true posterior. This approach has several advantages. Firstly, optimisation, as opposed to marginalisation, is garantueed to converge ---albeit possibly to a local optima. Secondly, VI provides a framework in which one can trade computational cost for accuracy: by expanding the family of approximating distributions we can only tighten the bound. An interesting example of this is importance weighting, where in the limit of infinite compute the true posterior is part of the approximating family \citep{Domke2018IWVI}. Finally, the bound and its derivates can be computed with stochastic estimations using the reparametrisation trick or score function estimators which enables big data settings.
 
-So far we have discussed the bound in VI, but have left $q(f)$ unspecified. In general, we want the family of variational distributions to be flexible enough, such that it can approximate the true posterior well, while also being computationally efficient and mathematically convenient to manipulate. % Mark van der Wilk discusses in his thesis \citep{vdw2019thesis} also the importance of  maintaining the non-parametric uncertainty in the approximation. 
-We follow the sparse approximation proposed by \citet{titsias2009}, which parameterises the approximation using a set of $M$ pseudo inputs $\vz = \{z_1, \ldots, z_M\} \in \Reals^{M \times d}$ corresponding to $M$ inducing variables $\vu = f(\vz) \in \Reals^M$. We specify a Gaussian distribution over the inducing variables with a free mean and variance
+So far we have discussed the bound in VI, but have left $q(f)$ unspecified, we now focus our attention to this. In general, we want the family of variational distributions to be flexible enough, such that some setting of the parameters can can approximate the true posterior well, while also being computationally efficient and mathematically convenient to manipulate. % Mark van der Wilk discusses in his thesis \citep{vdw2019thesis} also the importance of  maintaining the non-parametric uncertainty in the approximation. 
+We follow the approach proposed by \citet{titsias2009}, which parameterises the approximation using a set of $M$ pseudo inputs $\vz = \{z_1, \ldots, z_M\} \in \Reals^{M \times d}$ corresponding to $M$ inducing variables $\vu = f(\vz) \in \Reals^M$. 
+We choose to factorise the variational approximation as $q(f, \vu) = q(\vu) p(f\given f(\vz) \shorteq \vu)$, where
 \begin{equation}
-  q(\vu) = \NormDist{\vm, S}
+  p(f \given f(\vz) \shorteq \vu) = \GP\Big(\kux^\top \Kuu^{-1}\vu,\ \ k(\cdot, \cdot) -  \kux^\top \Kuu^{-1} \kux\Big), 
 \end{equation}
-We choose to write the approximating distribution as $q(f) = q(\vu)p(f\given f(\MZ) \shorteq \vu)$. This results in a distribution $q(f)$ that is parametrised by the variational parameters $\vm \in \Reals^M$, and $S \in \Reals^{M\times M}$:
+where $[\Kuu]_{i,j} = k(z_i, z_j)$, $[\kux]_i = k(z_i, \cdot)$. We specify a Gaussian distribution for the variational posterior over the inducing variables with a freely parameterised mean and covariance
 \begin{equation}
-  \label{eq:qf}
-  p(f \given f() \shorteq \vf) = \GP\Big(\mu(\cdot) + \kfx^\top \Kff^{-1} (\vf - \vmu_{\vf}),\ \ k(\cdot, \cdot) -  \kfx^\top \Kff^{-1} \kfx\Big),
+  q(\vu) = \NormDist{\vm, \MS}
 \end{equation}
+such that the overall approximate posterior is given by
+\begin{equation}
+  q(f) = \int_{\vu} q(f, \vu)\,\calcd{\vu} = \GP\Big(\kux^\top \Kuu^{-1}\vm,\ \ k(\cdot, \cdot) -  \kux^\top \Kuu^{-1} (\Kuu + \MS)\Kuu^{-1} \kux\Big).
+\end{equation}
+as a result of the conjugacy of the variational posterior $q(\vu)$ and the conditional. 
+The approximation admits certain interesting properties. Firstly, in the case that we set the pseudo inputs at the locations where we have data (i.e. $\vz \shorteq \vx$) and a Gaussian likelihood, then family contains the true distribution. More specifaclly, we can solve for $m$ and $S$ such that q(f) where m = m* and S = S* equals p(f given D). Secondly, the approximate posterior is still non-parameteric and predictions are made using an infinite amount of basis functions. For non-degenarate kernels this leads to error bars unconstrained by the input locations of the data. Finally, - David Burts work
 
+Going back to the bound:
 \begin{equation}
   \textrm{ELBO} = 
 \end{equation}
