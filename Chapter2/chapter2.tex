@@ -70,7 +70,7 @@ Similarly, the marginal likelihood (model evidence) is also available in closed-
 \end{equation}
 The availablility of the posterior and the marginal likelihood in analytic form makes GPs a unique tool for inferring unknown functions from data. The marginal 
 
-[TODO: occam's razor [Rasmussen and Ghahramani, 2001]
+TODO: occam's razor [Rasmussen and Ghahramani, 2001]
 
 Despite the convenience of the analytic expressions, computing this exact posterior requires inverting the $N \times N$ matrix $\Kff$, which has a $\BigO(N^3)$ computational complexity and a $\BigO(N^2)$ memory footprint. Interestingly, the computational intractibility in GPR models originates from the prior and \emph{not} the complexity of marginalisation as is often the case for other Bayesian methods [CITE]. Indeed, these methods resort to MCMC to avoid computing intractable normalising constant, which is a problem that GPR does not encounter.  Another shortcoming of GPR models is that there is no known analytical expression for the posterior distribution when the likelihood (\cref{eq:likelihood}) is not Gaussian, as encountered in classification for instance. In the next paragraph we discuss solutions to both problems.
 
@@ -116,12 +116,34 @@ We optimise the variational parameters $\{\vm, \MS\}$ by maximising the ELBO \cr
 \end{equation}
 Crucially, the original KL between the two infinite-dimensional processes $\KL{q(f)}{p(f)}$ is mathematically equivalent to the finite-dimensional KL between the variational posterior and prior over the inducing variables. We refer the interested reader to \citet{matthews16} for a theoretical analysis of the equivalence and to \citet[Section 4.1]{Leibfried2020Tutorial} for a more intuitive explanation. The objective in \cref{eq:elbo-gp}, introduced in \citet{hensman2013,hensman2015scalable} reduces the computational complexity to $\BigO(M^2 N + M^3)$. It also allows for stochastic estimation through minibatching \citep{hensman2013} and for non-Gaussian likelihoods through Gauss-Hermite quadrature of the one-dimensinoal expectation over $q(f(x_i))$ \citep{hensman2015scalable}.
 
-\section{Interdomain Inducing Variables}
+\subsection{Interdomain Inducing Variables}
 
-The basis functions used in the approximate posterior mean TODO ref are determined by the covariance between the inducing variables and other function evaluations $\left[c_u(\cdot)\right]_m = \Cov(f(\cdot), u_m)$. Commonly, the inducing variables are taken to be function values $u_{m} = f(w_m)$, which leads to the kernel becoming the basis function $[c_u(\cdot)]_{m} = k(\vw_m, \cdot)$. \emph{Interdomain} inducing variables \citep{lazaro2009inter} select different properties of the GP (e.g.~integral transforms $u_m = \int f(\vx) g_m(\vx)\calcd{\vx}$), which modifies this covariance (see \citep{van2020framework,Leibfried2020Tutorial} for an overview), and therefore gives control over the basis functions.
-Most current interdomain methods are designed to improve computational properties \citep{hensman2017variational,burt2020variational,Dutordoir2020spherical}. Our aim is to control $c_u(\cdot)$ to be a typical NN actvation function like a ReLU or Softplus. This was also investigated by \citet{sun2021neural}, although they found less common saturating activation functions.
+Inter-domain Gaussian processes use alternative forms of inducing variables such that the resulting sparse GP models consists of a different set of features. TODO: maybe refer to chapter 3 and 4. In interdomain GPs the inducing variables are obtained using a linear transformation of the GP, $u_m = \mathcal{L}_m f$. This redefinition of $\vu$ implies that the expressions of $\Kuu$ and $\kux$ change, but the inference scheme of interdomain GPs and the mathematical expressions for the posterior mean and variance are exactly the same as classic sparse GPs. This is thanks to the linearity of the operator and the preservation of (joint) Gaussian behaviour under linear transformations.
 
-\subsection{Example: heavyside inducing variable}
+A common linear operator is the integral operator with an inducing function $g_m$ \citep{lazaro2009inter}:
+\begin{equation*}
+    \mathcal{L}_m\,f = \int f(x)\,g_m(x)\,\calcd{x}\,.
+\end{equation*}
+In the case of the integral operator, we need to compute the covariance matrices as follows:
+\begin{equation}
+ [\Kuu]_{m,m'}  = \Cov(\mathcal{L}_m f, \mathcal{L}_{m'} f) = \int \int k(x, x') g_{m}(x) g_{m'}(x') \calcd{x} \calcd{x'}
+\end{equation}
+and 
+\begin{equation}
+ [\kux]_{m}  = \Cov(\mathcal{L}_m f, f)) = \int k(\cdot, x') g_{m'}(x') \calcd{x'}.
+\end{equation}
+
+Most current interdomain methods are designed to improve computational properties \citep{hensman2017variational,burt2020variational,Dutordoir2020spherical}. For example, Variational Fourier Features (VFF)~\citep{hensman2017variational} is an interdomain method where the inducing variables are given by a Mat\'ern RKHS inner product between the GP and elements of the Fourier basis:
+\begin{equation*}
+u_m = \langle f, \psi_m \rangle_\rkhs,
+\end{equation*}
+where $\psi_0 = 1$, $\psi_{2m}=\cos(m x)$ and $\psi_{2m+1}=\sin(m x)$ if the input space is $[0, 2 \pi]$. This leads to
+\begin{equation*}
+    \Kuu = \left[\langle \psi_i , \psi_{j} \rangle_\rkhs^{} \right]_{i, j = 0}^{M-1}\qquad\text{and}\qquad\kux = \left[ \psi_i(x)\right]_{i = 0}^{M-1}\, .
+\end{equation*}
+This results in several advantages. First, the features $\kux$ are exactly the elements of the Fourier basis, which are independent of the kernel parameters and can be precomputed. Second, the matrix $\Kuu$ is the sum of a diagonal matrix plus low rank matrices. This structure can be used to drastically reduce the computational complexity, and the experiments showed one or two orders of magnitude speed-ups compared to classic sparse GPs. Another motivation to use interdomain inducing variables is the ability is gives to control $\kux$, which in the case of classic inducing points is simply given by $k(z, \cdot)$ ---as shown in the next example.
+
+\subsubsection*{Example: heavyside inducing variable}
 
 $f \sim \GP$ defined on $\sphere^1$ (the unit circle), $f: [-\pi, \pi] \rightarrow \Reals, \theta \mapsto f(\theta)$.
 

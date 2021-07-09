@@ -1,13 +1,21 @@
 \chapter{Future Research}
 \label{chapter:future-research}
 
-\section{Non-Parametric Decision Systems in Non-Euclidian Spaces}
+\section{Non-Parametric Sequential Decision Making in Non-Euclidian Spaces}
 
-To date, my research has focussed on pushing Gaussian processes (GPs) into the realm of deep learning. I have developed deep convolutional Gaussian processes that mimic the convolutional and layered architectures encountered in many deep learning models \citep{Dutordoir2020convolutional}, Conditional density estimation models which are similar to Variational Auto Encoders (VAEs) \citep{dutordoir2018cde}, and more recently, deep Gaussian processes that have basis functions that are similar to neural network activation functions \citep{dutordoir2021deep}. Through this line of work, I believe that we have showed that (deep) Gaussian processes are an interesting non-parametric alternative to Bayesian neural networks.
+To date, my research has focussed on pushing Gaussian processes (GPs) into the realm of deep learning. I have developed deep convolutional Gaussian processes that mimic the convolutional and layered architectures encountered in many deep learning models \citep{Dutordoir2020convolutional}, Conditional density estimation models which are similar to Variational Auto Encoders (VAEs) \citep{dutordoir2018cde}, and more recently, deep Gaussian processes that have basis functions that are similar to neural network activation functions \citep{dutordoir2021deep}. Through this line of work, I believe that we have showed that (deep) Gaussian processes are an interesting non-parametric alternative to Bayesian neural networks. TODO: Curve fitting
 
 In what comes next, I want to separate the different regimes in which neural networks and Gaussian processes operate and thrive. For example, NNs can handle---and in practice require---very large datasets, whereas Gaussian process models are more comfortable in the small data regime. Neural networks, in the presence of large datasets, are extremely good at learning complex latent representations, as evidenced by the latest models in natural language processing and computer vision. Non-parametric Gaussian processes, on the contrary, work best on limited and noisy datasets. Datasets where each datapoint can be very expensive in terms of cost or time to obtain. I believe that this is a setting---in the era of deep learning---that has been under studied and valued, yet of high importance for many scientific or commercial applications.
 
 Many real-world problems can be described as inferring properties of an expensive black-box function $f: \mathcal{X} \rightarrow \mathcal{Y}$, subject to a computational budget of $T$ function evaluations. Typical examples are (global) optimisation, finding a level set (i.e. the set of points in $X \subset \mathcal{X}$ for which $f(x) > C,\forall x \in X$), or finding the shortest path between two nodes in a graph. In the graph example, the black-box function $f$ would return the cost of traversing an edge and query the cost of an edge would be very expensive. Naively applying Dijkstra would require the evaluation of $f$ at every edge and thus potentially grossly exceeding the given budget of $T$ evaluations.
+
+\paragraph{Problem definition}
+- Actions
+- Function
+
+- Contextual multi-arm
+- Bayesian optimisation can be cast 
+- multi arm setting is bayesian optimisation with discrete inputs
 
 
 \paragraph{Gaussian processes as surrogate model in non-Euclidian spaces}
