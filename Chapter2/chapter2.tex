@@ -102,52 +102,52 @@ where $[\Kuu]_{i,j} = k(z_i, z_j)$, $[\kux]_i = k(z_i, \cdot)$. We specify a Gau
 \begin{equation}
   q(\vu) = \NormDist{\vm, \MS}
 \end{equation}
-such that the overall approximate posterior is given by
+such that the overall approximate posterior is given by another GP
 \begin{equation}
   q(f) = \int_{\vu} q(f, \vu)\,\calcd{\vu} = \GP\Big(\kux^\top \Kuu^{-1}\vm,\ \ k(\cdot, \cdot) -  \kux^\top \Kuu^{-1} (\Kuu + \MS)\Kuu^{-1} \kux\Big).
 \end{equation}
 as a result of the conjugacy of the variational posterior $q(\vu)$ and the conditional. 
-The approximation admits certain interesting properties. Firstly, in the case that we set the pseudo inputs at the locations where we have data (i.e. $\vz \shorteq \vx$) and a Gaussian likelihood, then family contains the true distribution. More specifaclly, we can solve for $m$ and $S$ such that q(f) where m = m* and S = S* equals p(f given D). Secondly, the approximate posterior is still non-parameteric and predictions are made using an infinite amount of basis functions. For non-degenarate kernels this leads to error bars unconstrained by the input locations of the data. Finally, - David Burts work
+The approximation admits several interesting properties. Firstly, in the case of a Gaussian likelihood and a number of inducung points that equals the amount of data, $q(f)$ contains the true posterior. That is, if $\vz \shorteq \vx$, it is possible to find $\vm$ and $\MS$ such that $q(f) = p(f \given \vy)$ \citep{titsias2009}. Secondly, by approximating the posterior, rather than the model, we obtain a non-parametric approximation which makes predictions with an infinite amount of basis functions, such as the true posterior. For non-degenarate kernels this leads to error bars that are unconstrained by the data. Finally, \citet{burt2019} showed that for $N \rightarrow \infty$, the approximate posterior can be made arbitrarly close to the true posterior for $M = \BigO(\log N)$.
 
-Going back to the bound:
+We optimise the variational parameters $\{\vm, \MS\}$ by maximising the ELBO \cref{eq:elbo}. Assuming a general likelihood of the form $p(\vy \given f) = \prod_i p(y_i \given f(x_i))$ the ELBO objective can be written as
 \begin{equation}
-  \textrm{ELBO} = 
+  \label{eq:elbo-gp} 
+  \textrm{ELBO} = \sum_{i=1}^N \Exp{q(f(x_i))}{\log p(y_i \given f(x_i))} - \KL{q(\vu)}{p(\vu)} \,. 
 \end{equation}
-- minibatching
-- quadrature for non-Gaussian likelihoods
+Crucially, the original KL between the two infinite-dimensional processes $\KL{q(f)}{p(f)}$ is mathematically equivalent to the finite-dimensional KL between the variational posterior and prior over the inducing variables. We refer the interested reader to \citet{matthews16} for a theoretical analysis of the equivalence and to \citet[Section 4.1]{Leibfried2020Tutorial} for a more intuitive explanation. The objective in \cref{eq:elbo-gp}, introduced in \citet{hensman2013,hensman2015scalable} reduces the computational complexity to $\BigO(M^2 N + M^3)$. It also allows for stochastic estimation through minibatching \citep{hensman2013} and for non-Gaussian likelihoods through Gauss-Hermite quadrature of the one-dimensinoal expectation over $q(f(x_i))$ \citep{hensman2015scalable}.
 
 \section{Interdomain Inducing Variables}
 
 The basis functions used in the approximate posterior mean TODO ref are determined by the covariance between the inducing variables and other function evaluations $\left[c_u(\cdot)\right]_m = \Cov(f(\cdot), u_m)$. Commonly, the inducing variables are taken to be function values $u_{m} = f(w_m)$, which leads to the kernel becoming the basis function $[c_u(\cdot)]_{m} = k(\vw_m, \cdot)$. \emph{Interdomain} inducing variables \citep{lazaro2009inter} select different properties of the GP (e.g.~integral transforms $u_m = \int f(\vx) g_m(\vx)\calcd{\vx}$), which modifies this covariance (see \citep{van2020framework,Leibfried2020Tutorial} for an overview), and therefore gives control over the basis functions.
 Most current interdomain methods are designed to improve computational properties \citep{hensman2017variational,burt2020variational,Dutordoir2020spherical}. Our aim is to control $c_u(\cdot)$ to be a typical NN actvation function like a ReLU or Softplus. This was also investigated by \citet{sun2021neural}, although they found less common saturating activation functions.
 
-% \subsection{Example: heavyside inducing variable}
+\subsection{Example: heavyside inducing variable}
 
-% $f \sim \GP$ defined on $\sphere^1$ (the unit circle), $f: [-\pi, \pi] \rightarrow \Reals, \theta \mapsto f(\theta)$.
+$f \sim \GP$ defined on $\sphere^1$ (the unit circle), $f: [-\pi, \pi] \rightarrow \Reals, \theta \mapsto f(\theta)$.
 
-% kernel (Arc Cosine order 0):
+kernel (Arc Cosine order 0):
 
-% \begin{equation}
-%   k(\theta, \theta') = \kappa(\rho) = \pi - |\theta - \theta'|
-% \end{equation}
+\begin{equation}
+  k(\theta, \theta') = \kappa(\rho) = \pi - |\theta - \theta'|
+\end{equation}
 
-% \begin{equation}
-%   \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta, \theta') = 
-% \end{equation}
+\begin{equation}
+  \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta, \theta') = 
+\end{equation}
 
-% \begin{equation}
-%   u_m = \mathcal{L}_m(f)
-% \end{equation}
+\begin{equation}
+  u_m = \mathcal{L}_m(f)
+\end{equation}
 
-% \begin{equation}
-%   \mathcal{L}_m = \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} + \int \calcd{\theta}
-% \end{equation}
+\begin{equation}
+  \mathcal{L}_m = \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} + \int \calcd{\theta}
+\end{equation}
 
-% \begin{align}
-%   \Cov(u_m, f(\theta')) &= \Exp{f}{\mathcal{L}_m(f)\,f(\theta')} \\
-%                       &=  \mathcal{L}_m k(\theta', \cdot) \\
-%                       &= \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta', \theta) + \int_{-\pi}^\pi k(\theta', \theta) \calcd{\theta}
-% \end{align}
+\begin{align}
+  \Cov(u_m, f(\theta')) &= \Exp{f}{\mathcal{L}_m(f)\,f(\theta')} \\
+                      &=  \mathcal{L}_m k(\theta', \cdot) \\
+                      &= \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta', \theta) + \int_{-\pi}^\pi k(\theta', \theta) \calcd{\theta}
+\end{align}
 
 
 
