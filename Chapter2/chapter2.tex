@@ -115,7 +115,7 @@ such that the overall approximate posterior is given by another GP
   q(f) = \int_{\vu} q(f, \vu)\,\calcd{\vu} = \GP\Big(\kux^\top \Kuu^{-1}\vm,\ \ k(\cdot, \cdot) -  \kux^\top \Kuu^{-1} (\Kuu + \MS)\Kuu^{-1} \kux\Big).
 \end{equation}
 as a result of the conjugacy of the variational posterior $q(\vu)$ and the conditional. 
-The approximation admits several interesting properties. Firstly, in the case of a Gaussian likelihood and a number of inducung points that equals the amount of data, $q(f)$ contains the true posterior. That is, if $\vz \shorteq \vx$, it is possible to set $\vm$ and $\MS$ such that $q(f) = p(f \given \vy)$ \citep{titsias2009}. Secondly, \citet{burt2019} showed that for $N \rightarrow \infty$, the approximate posterior can be made arbitrarly close to the true posterior for $M = \BigO(\log N)$. Finally, we notice that the approximate mean exhibits the same structure as a parametric model with basis functions $\kux$ and weights $\Kuu\inv \vm$. The variance, however, remains non-parametric, which means that predictions are made with an infinite amount of basis functions---exactly like in the true posterior. For non-degenarate kernels, this leads to error bars that are unconstrained by the data.
+The approximation admits several interesting properties. Firstly, in the case of a Gaussian likelihood and a number of inducung points that equals the amount of data, $q(f)$ contains the true posterior. That is, if $\vz \shorteq \vx$, it is possible to set $\vm$ and $\MS$ such that $q(f) = p(f \given \vy)$ \citep{titsias2009}. Secondly, \citet{burt2019} showed that for $N \rightarrow \infty$, the approximate posterior can be made arbitrarly close to the true posterior for $M = \BigO(\log N)$. Finally, we notice that the approximate mean exhibits the same structure as a parametric model with basis functions $\kux$ and weights $\Kuu\inv \vm$. The variance, however, remains non-parametric, which means that predictions are made with an infinite amount of basis functions---exactly like in the true posterior. For non-degenarate kernels, this leads to error bars that are unconstrained by the data. We will come back to parameteric nature of the approximate mean in \cref{chapter:dnn-as-point-estimate-for-dgps}.
 
 We optimise the variational parameters $\{\vm, \MS\}$ by maximising the ELBO \cref{eq:elbo}. Assuming a general likelihood of the form $p(\vy \given f) = \prod_i p(y_i \given f(x_i))$ the ELBO objective can be written as
 \begin{equation}
@@ -235,12 +235,50 @@ A Reproducing Kernel Hilbert Space (RKHS) is a special type of Hilbert space men
   \end{enumerate}
 If a reproducing kernel exists, then $\rkhs$ is called a reproducing kernel Hilbert space (RKHS).
 \end{definition}
+
+\subsection{Connection between GPs and RKHS}
+
 It can be shown that the reproducing kernel belonging to an RKHS is unique and, conversely, that a function can only be the reproducing kernel of a single RKHS. Furthermore, a function $k:\mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is a positive definite kernel if and only if it is a reproducing kernel.
 
-\begin{enumerate}
-  \item Bochner's theorem
-  \item Mercer Decomposition
-  \item RKHS through Spectral Decomposition
-\end{enumerate}
 
 \section{Spectral Representation of Gaussian Processes}
+
+Spectral decomposition of the kernel operator
+
+Kernel Operator $\mathcal{K}$ 
+
+\begin{equation}
+  \mathcal{K} f = \int k(x, x') f(x') \calcd{\mu(x')},
+\end{equation}
+where $\mu$ denotes a measure. In our case this measure will typically stem from the input distribution on $x$ and reduce to $p(x)\calcd{x}$.
+
+It can be shown that $\mathcal{K}$ is positive (i.e. $<f, L f> \ge 0$) and self-adjoint (i.e. $<L f, g> = <f, L g>$).
+
+eigenfunctions
+\begin{equation}
+  \mathcal{K} \phi = \lambda \phi
+\end{equation}
+
+orthonormal set
+
+\begin{theorem}[Karhunen-Lo\`eve]
+  \begin{equation}
+    f = \sum_n \sqrt{\lambda_n} \varepsilon_n \phi_n\quad\text{with}\quad\varepsilon_n \sim \NormDist{0, 1}
+  \end{equation}
+
+\end{theorem}
+
+\begin{enumerate}
+  \item Integral operator
+  \item Mercer Decomposition
+  \item RKHS through Spectral Decomposition
+  \item Karhunen Loeve
+
+  \item Bochner's theorem for stationary kernels
+\end{enumerate}
+
+
+For a stationary process $f(t)$, the Wiener-Khintchine theorem states (as a special case of Bochner's theorem, see \citet{rasmussen2006}) that the covariance function $k(r)$, is the inverse Fourier transform of the spectral density $S(\omega)$
+\begin{equation}
+  k(r) = \int_{\Reals^d} S(\omega) e^{i 2 \pi \omega r} \calcd{\omega} \quad\text{and}\quad S(\omega) = \int_{\Reals^d} S(\omega) e^{-i 2 \pi \omega r} \calcd{r}.
+\end{equation}
