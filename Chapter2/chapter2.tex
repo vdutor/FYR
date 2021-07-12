@@ -1,4 +1,11 @@
 %!TEX root = ../thesis.tex
+\ifpdf
+    \graphicspath{{Chapter2/Figs/Raster/}{Chapter2/Figs/PDF/}{Chapter2/Figs/}}
+\else
+    \graphicspath{{Chapter2/Figs/Vector/}{Chapter2/Figs/}}
+\fi
+
+
 
 \chapter{Theoretical Framework}
 \label{chapter:theoretical-framework}
@@ -92,7 +99,7 @@ The r.h.s. of \cref{eq:elbo} is known as the Evidence Lower BOund (ELBO). It is 
 
 Intuitively, VI casts the problem of Bayesian inference, namely marginalisation, as an optimisation problem. The objective for the optimisation problem is the ELBO, which depends on the variational approximation, the prior and the data but, importantly, not the true posterior. This approach has several advantages. Firstly, optimisation, as opposed to marginalisation, is garantueed to converge ---albeit possibly to a local optima. Secondly, VI provides a framework in which one can trade computational cost for accuracy: by expanding the family of approximating distributions we can only tighten the bound. An interesting example of this is importance weighting, where in the limit of infinite compute the true posterior is part of the approximating family \citep{Domke2018IWVI}. Finally, the bound and its derivates can be computed with stochastic estimations using the reparametrisation trick or score function estimators which enables big data settings.
 
-So far we have discussed the bound in VI, but have left $q(f)$ unspecified, we now focus our attention to this. In general, we want the family of variational distributions to be flexible enough, such that some setting of the parameters can can approximate the true posterior well, while also being computationally efficient and mathematically convenient to manipulate. % Mark van der Wilk discusses in his thesis \citep{vdw2019thesis} also the importance of  maintaining the non-parametric uncertainty in the approximation. 
+So far we have discussed the bound in VI, but have left $q(f)$ unspecified, we now focus our attention to this. In general, we want the family of variational distributions to be flexible enough, such that some setting of the parameters can approximate the true posterior well, while also being computationally efficient and mathematically convenient to manipulate. % Mark van der Wilk discusses in his thesis \citep{vdw2019thesis} also the importance of  maintaining the non-parametric uncertainty in the approximation. 
 We follow the approach proposed by \citet{titsias2009}, which parameterises the approximation using a set of $M$ pseudo inputs $\vz = \{z_1, \ldots, z_M\} \in \Reals^{M \times d}$ corresponding to $M$ inducing variables $\vu = f(\vz) \in \Reals^M$. 
 We choose to factorise the variational approximation as $q(f, \vu) = q(\vu) p(f\given f(\vz) \shorteq \vu)$, where
 \begin{equation}
@@ -104,10 +111,11 @@ where $[\Kuu]_{i,j} = k(z_i, z_j)$, $[\kux]_i = k(z_i, \cdot)$. We specify a Gau
 \end{equation}
 such that the overall approximate posterior is given by another GP
 \begin{equation}
+  \label{eq:qf}
   q(f) = \int_{\vu} q(f, \vu)\,\calcd{\vu} = \GP\Big(\kux^\top \Kuu^{-1}\vm,\ \ k(\cdot, \cdot) -  \kux^\top \Kuu^{-1} (\Kuu + \MS)\Kuu^{-1} \kux\Big).
 \end{equation}
 as a result of the conjugacy of the variational posterior $q(\vu)$ and the conditional. 
-The approximation admits several interesting properties. Firstly, in the case of a Gaussian likelihood and a number of inducung points that equals the amount of data, $q(f)$ contains the true posterior. That is, if $\vz \shorteq \vx$, it is possible to find $\vm$ and $\MS$ such that $q(f) = p(f \given \vy)$ \citep{titsias2009}. Secondly, by approximating the posterior, rather than the model, we obtain a non-parametric approximation which makes predictions with an infinite amount of basis functions, such as the true posterior. For non-degenarate kernels this leads to error bars that are unconstrained by the data. Finally, \citet{burt2019} showed that for $N \rightarrow \infty$, the approximate posterior can be made arbitrarly close to the true posterior for $M = \BigO(\log N)$.
+The approximation admits several interesting properties. Firstly, in the case of a Gaussian likelihood and a number of inducung points that equals the amount of data, $q(f)$ contains the true posterior. That is, if $\vz \shorteq \vx$, it is possible to set $\vm$ and $\MS$ such that $q(f) = p(f \given \vy)$ \citep{titsias2009}. Secondly, \citet{burt2019} showed that for $N \rightarrow \infty$, the approximate posterior can be made arbitrarly close to the true posterior for $M = \BigO(\log N)$. Finally, we notice that the approximate mean exhibits the same structure as a parametric model with basis functions $\kux$ and weights $\Kuu\inv \vm$. The variance, however, remains non-parametric, which means that predictions are made with an infinite amount of basis functions---exactly like in the true posterior. For non-degenarate kernels, this leads to error bars that are unconstrained by the data.
 
 We optimise the variational parameters $\{\vm, \MS\}$ by maximising the ELBO \cref{eq:elbo}. Assuming a general likelihood of the form $p(\vy \given f) = \prod_i p(y_i \given f(x_i))$ the ELBO objective can be written as
 \begin{equation}
@@ -118,15 +126,13 @@ Crucially, the original KL between the two infinite-dimensional processes $\KL{q
 
 \subsection{Interdomain Inducing Variables}
 
-Inter-domain Gaussian processes use alternative forms of inducing variables such that the resulting sparse GP models consists of a different set of features. TODO: maybe refer to chapter 3 and 4. In interdomain GPs the inducing variables are obtained using a linear transformation of the GP, $u_m = \mathcal{L}_m f$. This redefinition of $\vu$ implies that the expressions of $\Kuu$ and $\kux$ change, but the inference scheme of interdomain GPs and the mathematical expressions for the posterior mean and variance are exactly the same as classic sparse GPs. This is thanks to the linearity of the operator and the preservation of (joint) Gaussian behaviour under linear transformations.
-
-A common linear operator is the integral operator with an inducing function $g_m$ \citep{lazaro2009inter}:
+Interdomain Gaussian processes use alternative forms of inducing variables such that the resulting sparse GP models consists of a different set of features. \cref{chapter:vish} and \cref{chapter:dnn-as-point-estimate-for-dgps} heavily rely on this paradigm. In interdomain GPs, the inducing variables are obtained using a linear transformation of the GP, which we denote by $u_m = \mathcal{L}_m f$. This redefinition of $\vu$ implies that the expressions of $\Kuu$ and $\kux$ change, but the inference scheme of interdomain GPs and the mathematical expressions for the posterior mean and variance are exactly the same as classic sparse GPs. This is thanks to the linearity of the operator and the preservation of (joint) Gaussian behaviour under linear transformations. A common linear operator is the integral operator with an inducing function $g_m$ \citep{lazaro2009inter}:
 \begin{equation*}
     \mathcal{L}_m\,f = \int f(x)\,g_m(x)\,\calcd{x}\,.
 \end{equation*}
-In the case of the integral operator, we need to compute the covariance matrices as follows:
+In this case, $\Kuu$ and $\kux$ take the form
 \begin{equation}
- [\Kuu]_{m,m'}  = \Cov(\mathcal{L}_m f, \mathcal{L}_{m'} f) = \int \int k(x, x') g_{m}(x) g_{m'}(x') \calcd{x} \calcd{x'}
+ [\Kuu]_{m,m'}  = \Cov(\mathcal{L}_m f, \mathcal{L}_{m'} f) = \int\!\int k(x, x') g_{m}(x) g_{m'}(x') \calcd{x}\,\calcd{x'}
 \end{equation}
 and 
 \begin{equation}
@@ -141,88 +147,100 @@ where $\psi_0 = 1$, $\psi_{2m}=\cos(m x)$ and $\psi_{2m+1}=\sin(m x)$ if the inp
 \begin{equation*}
     \Kuu = \left[\langle \psi_i , \psi_{j} \rangle_\rkhs^{} \right]_{i, j = 0}^{M-1}\qquad\text{and}\qquad\kux = \left[ \psi_i(x)\right]_{i = 0}^{M-1}\, .
 \end{equation*}
-This results in several advantages. First, the features $\kux$ are exactly the elements of the Fourier basis, which are independent of the kernel parameters and can be precomputed. Second, the matrix $\Kuu$ is the sum of a diagonal matrix plus low rank matrices. This structure can be used to drastically reduce the computational complexity, and the experiments showed one or two orders of magnitude speed-ups compared to classic sparse GPs. Another motivation to use interdomain inducing variables is the ability is gives to control $\kux$, which in the case of classic inducing points is simply given by $k(z, \cdot)$ ---as shown in the next example.
+This results in several advantages. First, the features $\kux$ are exactly the elements of the Fourier basis, which are independent of the kernel parameters and can be precomputed. Second, the matrix $\Kuu$ is the sum of a diagonal matrix plus low rank matrices. This structure can be used to drastically reduce the computational complexity, and the experiments showed one or two orders of magnitude speed-ups compared to classic sparse GPs. Another reason to use interdomain inducing variables is the ability is gives to control $\kux$---as shown in the next example.
 
-\subsubsection*{Example: heavyside inducing variable}
+\subsubsection*{Example: Heavyside Inducing Variable}
 
-$f \sim \GP$ defined on $\sphere^1$ (the unit circle), $f: [-\pi, \pi] \rightarrow \Reals, \theta \mapsto f(\theta)$.
 
-kernel (Arc Cosine order 0):
+\begin{figure}[tbh!]
+  \centering
+\begin{subfigure}{0.3\textwidth}
+  \includegraphics[width=\textwidth]{heaviside2}
+  \caption{Samples}
+  \label{fig:heaviside1}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.3\textwidth}
+  \includegraphics[width=\textwidth]{heaviside1}
+  \caption{$u_m = f(\theta_m)$}
+  \label{fig:heaviside2}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.3\textwidth}
+  \includegraphics[width=\textwidth]{heaviside3}
+  \caption{$u_m = \mathcal{L}_m f$}
+  \label{fig:heaviside3}
+\end{subfigure}
+\caption{Example of interdomain inducing variables for the first-order Arc Cosine kernel.}
+\label{fig:images}
+\end{figure}
 
+Using interdomain inducing variables in Sparse Variational Gaussian processes makes it possible to construct approximate GPs in which the basis functions exhibit interesting behaviour. As an illustration, in this example we design an inducing variable, through a linear transformation of the GP, for which the basis functions $\kux$ are given by the Heavide function. Therefore, assume $f \sim \GP(0, k)$ defined on $\sphere^1$ (the unit circle), $f: [-\pi, \pi] \rightarrow \Reals, \theta \mapsto f(\theta)$ and $k$ the zero-th order Arc Cosine kernel \citep{cho2009kernel}, defined as:
 \begin{equation}
-  k(\theta, \theta') = \kappa(\rho) = \pi - |\theta - \theta'|
+  k(\theta, \theta') = 1 - \frac{\varphi}{\pi},
 \end{equation}
+where $\varphi \in [0, \pi]$ is the shortest angle between the two inputs. In \cref{fig:heaviside1} we show samples from this GP and in \cref{fig:heaviside2} we plot $k(\theta_m, \theta)$ for three different values of $\theta_m$.
 
+Let us now define the $m$-th linear operator as the sum of the derivate at $\theta_m$ and the integral over the domain:
 \begin{equation}
-  \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta, \theta') = 
+  \mathcal{L}_m = \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} + \frac{\pi}{2} \int_{-\pi}^{\pi} \calcd{\theta},
 \end{equation}
-
-\begin{equation}
-  u_m = \mathcal{L}_m(f)
-\end{equation}
-
-\begin{equation}
-  \mathcal{L}_m = \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} + \int \calcd{\theta}
-\end{equation}
-
+and $u_m = \mathcal{L}_m f$, then the covariance between $f$ and $u_m$ is given by
 \begin{align}
-  \Cov(u_m, f(\theta')) &= \Exp{f}{\mathcal{L}_m(f)\,f(\theta')} \\
-                      &=  \mathcal{L}_m k(\theta', \cdot) \\
-                      &= \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta', \theta) + \int_{-\pi}^\pi k(\theta', \theta) \calcd{\theta}
+  [\kux]_m = \Cov(u_m, f(\cdot)) &= \Exp{f}{\mathcal{L}_m f\,f(\cdot)} && \text{Definition covariance} \\
+                      &=  \mathcal{L}_m k(\theta, \cdot)  && \text{Swap order $\mathcal{L}_m$ and $\mathbb{E}_f$} \\
+                      &= \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta, \cdot) + \frac{\pi}{2} \int_{-\pi}^\pi k(\theta, \cdot) \calcd{\theta} && \text{Definition $\mathcal{L}_m$} \\
+                      &= \mathbb{H}(\cdot - \theta_m) && \text{Computation}.
 \end{align}
+The last step follows from the fact that derivative of $k$ w.r.t. $\theta$ is $-1$ for $\theta < \theta_m$ and $+1$ otherwise. The integral part of the $\mathcal{L}_m$ is constant and simply shift the covariance by +1, such that $\kux$ equals the Heaviside function. In \cref{fig:heaviside3}, we show $\kux$ computed emperically using $1000$ samples from the GP for three different values of $\theta_m$. Using this construction and noting the parametric form of the mean of $q(f)$ (see~\cref{eq:qf}) we created an approximate posterior GP that is equivalent to a linear combination of Heaviside functions. In \cref{chapter:dnn-as-point-estimate-for-dgps} we will employ a similar approach to construct a GP where the basis functions are ReLU.
 
-
-
-\section{Deep Gaussian Processes}
-
-% \subsection{GPflux -- a library for deep Gaussian processes}
-% \fullcite{dutordoir2021gpflux}
 
 
 \section{Kernels and Reproducing Kernel Hilbert Space}
 
-Kernel have a rich history in machine learning and functional analysis. Kernels became widely noticed  by the ML community when linear SVMs [CITE] were kernelised. This means that rather than using $x\top x'$, one uses a function $k(x, x')$, which corresonponds to an inner-product in some space $\phi(x)\top \phi(x')$. This concept is also referred to as the ``kernel trick'' in the litarture. This made SVMs a compelling model for non-linear modelling problems. Prior to the deep learning revolution that began in the late nillies, kernel SVMs sat the state of the art results in many tasks: XXX. Kernels are also used in splines, Priniciple Component Analysis (PCA), Gaussian processes and in general allow for the developement of versatile algorithms to analyse and process data. Kernels operate through pairwise comparisons on datapoints and are versitale because they do not impose strong assumptions regarding the type of data, such as vectors, graphs or strings, they operate on. In what follows, we are going to focus on the theoretical properties of Mercer kernels with the application of Gaussian processes in mind, and the infinite vector space these kernels characterise. This background material will be important for the remaining chapters of the thesis. The inspiration for this section came from course Julian Marial and review paper on XXX.
+Kernel have a rich history in machine learning and functional analysis, and have enabled the developement of versatile algorithms to analyse and process data. Kernels became widely noticed by the ML community through Support Vector Machines (SVMs), who prior to the deep learning revolution, dominated many machine learning benchmarks. %, where they were used as a replacement of the simple we used a kernel function $k(x,x')$ instead of $x\transpose x'$. This means that rather than using $x\top x'$, one uses a function $k(x, x')$, which corresonponds to an inner-product in some space $\phi(x)\top \phi(x')$. This concept is also referred to as the ``kernel trick'' in the litarture. This made SVMs a compelling model for non-linear modelling problems. 
+% Prior to the deep learning revolution, kernel SVMs sat atop the leaderboards on many machine learning problems. 
+For instance, the winner of the 2011 ImageNet Large Scale Visual Recognition Challenge (ILSVRC) was an SVM that used a Fisher kernel \citep{perronnin2010large}. The year after, however, the same compitition was---by a large margin---won by AlexNet \citep{alexnet}---a deep convolutional neural network approach. Nonetheless, kernels have always remained relevant and have surfaced in many other methods in the literature, such as splines, Priniciple Component Analysis (PCA) and Gaussian processes. Today, kernels are seen as an important tool to understand and analyse the behaviour of (deep) neural networks \citep[e.g.,][]{jacot2018neural}. % They always operate through pairwise comparisons on datapoints and are versitale because they do not impose strong assumptions regarding the type of data they operatr on, such as vectors, graphs or strings. 
+In what follows, we are going to focus on the theoretical properties of Mercer kernels with the application of Gaussian processes in mind. Some of the theorems and definitions in this section are quoted from the excellent course ``Machine learning with kernel methods''\footnote{\url{https://members.cbio.mines-paristech.fr/~jvert/svn/kernelcourse/course/2021mva}} by Julien Mairal and Jean-Philippe Vert, which I voluntarily auditted during my first year.
 
 \begin{definition}
-A positive definite (p.d.) kernel (or Mercer kernel [TODO]) on a set $\mathcal{X}$ is a function $k: \mathcal{X} \times \mathcal{X} \rightarrow \Reals$ that is
+A positive definite (p.d.) kernel (or Mercer kernel) on a set $\mathcal{X}$ is a function $k: \mathcal{X} \times \mathcal{X} \rightarrow \Reals$ that is
 \begin{enumerate}
   \item symmetric $k(x, x') = k(x', x)$, and
-  \item satisfies for all $x_i$, $x_j \in \mathcal{X}$ and $c \in \Reals$: $\sum_{i}\sum_j c_i c_j k(x_i, x_j)\ge 0$.
+  \item satisfies for all $x_i \in \mathcal{X}$ and $c_i \in \Reals$: $\sum_{i}\sum_j c_i c_j k(x_i, x_j)\ge 0$.
 \end{enumerate}
 \end{definition}
-One of the simplest examples of a p.d. kernel is $k(x, x') = xx'$, where $\mathcal{X} = \Reals$. This kernel is often called the linear kernel. While being simple, as we will see through the next few theorems, the associated space of functions induced by this kernel is often too restricte
-In the next theorems we will see how kernels characterise a space over functions. Some of these spaces will be very explicit. For example, we will show how the linear kernel leads to a space of functions that are also linear, i.e. of the form $x \mapsto a x + b$. Other spaces belonging to kernel will be defined in a more abstract way. 
-
-\begin{theorem}[Aronszjan, 1950 TODO]
+One of the simplest examples of a valid p.d. kernel is the linear kernel $k(x, x') = xx'$ with $\mathcal{X} = \Reals$. In the next theorem we will see that kernels induce a space over functions. For the linear kernel, for example, this space will consist of linear functions of the form $x \mapsto a x + b$. For more complicated kernels, however, it will be harder to explicity formulate the space of functions they induce.
+% While being simple, as we will see through the next few theorems, the associated space of functions induced by this kernel is often too restricte
+% In the next theorems we will see how kernels characterise a space over functions. Some of these spaces will be very explicit. For example, we will show how the linear kernel leads to a space of functions that are also linear, i.e. of the form $x \mapsto a x + b$. Other spaces belonging to kernel will be defined in a more abstract way. 
+\begin{theorem}[\citet{aronszajn1950theory}]
   \label{theorem:k-and-H}
   The kernel $k$ is a p.d. kernel on $\mathcal{X}$ i.f.f. there exists a Hilbert space $\rkhs$ and a mapping $\phi: \mathcal{X} \rightarrow \rkhs$ such that $\forall x,x' \in \mathcal{X}$:
   \begin{equation}
     k(x, x') = \langle \phi(x), \phi(x') \rangle_{\rkhs}
   \end{equation}
 \end{theorem}
+Intuitively, a kernel corresonponds to the inner product after embedding the data space in some Hilbert space. We want to remind the reader that a Hilbert space $\rkhs$ is a (possibly infinite) vector space with an inner product $\langle f, g \rangle_{\rkhs}$ and norm $\norm{f} = \langle f, f \rangle_{\rkhs}^{\frac{1}{2}}$, and where any Cauchy sequence in $\rkhs$ converges in $\rkhs$. A Cauchy sequence is a sequence whose elements become arbitrarly close as the sequence progresses. A Hilbert space can be seen as a generalisation of an Euclidian space that is infinite dimensional. In the machine learning literature, $\rkhs$ is also commonly referred to as the feature space and $\phi$ the feature map.
 
-We want to remind the reader that a Hilbert space $\rkhs$ is a (possibly infinite) vector space with an inner product $\langle f, g \rangle_{\rkhs}$ and norm $\norm{f} = \langle f, f \rangle_{\rkhs}^{\frac{1}{2}}$, and where any Cauchy sequence in $\rkhs$ converges in $\rkhs$. A Cauchy sequence is a sequence whose elements become arbitrarly close as the sequence progresses. Intuitively, a Hilbert space can be seen as a generalisation of an Euclidian space that is infinite dimensional. In the machine learning literature, $\rkhs$ is also commonly referred to as the feature space and $\phi$ the feature map.
-
-A Reproducing Kernel Hilbert Space (RKHS) is a special type of Hilbert space mentioned in \cref{theorem:k-and-H}. It is a space over function from $\mathcal{X}$ to $\Reals$ that are ``parameterised'' by an element in $\mathcal{X}$. In other words, a datapoint $x \in \mathcal{X}$ is mapped to a function in the RKHS: $\phi(x) \in \rkhs$. To make it more explicit we also write $\phi(x) = k_x$ to highlight that $k_x$ is another function in the space $\mathcal{X} \rightarrow \Reals$.
-
+A Reproducing Kernel Hilbert Space (RKHS) is a special type of Hilbert space mentioned in \cref{theorem:k-and-H}. It is a space over function from $\mathcal{X}$ to $\Reals$ where certain elements are ``parameterised'' by an element in $\mathcal{X}$. In other words, a datapoint $x \in \mathcal{X}$ is mapped to a function in the RKHS: $\phi(x) \in \rkhs$. To make this more explicit we write $\phi(x) = k_x(\cdot)$ to highlight that $k_x(\cdot)$ is another function in $\rkhs$.
 \begin{definition}
   Let $\mathcal{X}$ be a set and $\rkhs$ a Hilbert space with inner-product $\langle \cdot, \cdot \rangle_{\rkhs}$. The function $k: \mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is called a reproducing kernel of $\rkhs$ if
   \begin{enumerate}
-    \item $\rkhs$ contains all functions of the form 
-    \item 
+    \item $\rkhs$ contains all functions of the form
+    \begin{equation}
+      \forall x \in \mathcal{X},\quad k_x: \mathcal{X} \rightarrow \Reals, k_x(x') \mapsto k(x, x')
+    \end{equation}
+    \item For every $x \in \mathcal{X}$ and $f \in \rkhs$ the reproducing property holds:
+    \begin{equation}
+      f(x) = \langle f, k(x, \cdot) \rangle_{\rkhs}
+    \end{equation}
   \end{enumerate}
+If a reproducing kernel exists, then $\rkhs$ is called a reproducing kernel Hilbert space (RKHS).
 \end{definition}
+It can be shown that the reproducing kernel belonging to an RKHS is unique and, conversely, that a function can only be the reproducing kernel of a single RKHS. Furthermore, a function $k:\mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is a positive definite kernel if and only if it is a reproducing kernel.
 
 \begin{enumerate}
-  \item History: RKHS pure math and into machine learning for SVM, splines and 
-  \item Positive Definite and Symmetry
-  \item RKHS
   \item Bochner's theorem
   \item Mercer Decomposition
-  \item Examples of RKHS
   \item RKHS through Spectral Decomposition
-  \item Representer Theorem
-  \item Show how sparse approximation links anchor points
 \end{enumerate}
 
 \section{Spectral Representation of Gaussian Processes}
