@@ -75,11 +75,10 @@ Similarly, the marginal likelihood (model evidence) is also available in closed-
   \label{eq:log-marginal-likelihood}
   p(\vy) = \NormDist{\vy \given \vzero, \Kff + \sigma^2 \Eye}.
 \end{equation}
-The availablility of the posterior and the marginal likelihood in analytic form makes GPs a unique tool for inferring unknown functions from data. The marginal 
+The availablility of the posterior and the marginal likelihood in analytic form makes GPs a unique tool for inferring unknown functions from data. 
+% TODO: The marginal Occam's razor [Rasmussen and Ghahramani, 2001]
 
-TODO: occam's razor [Rasmussen and Ghahramani, 2001]
-
-Despite the convenience of the analytic expressions, computing this exact posterior requires inverting the $N \times N$ matrix $\Kff$, which has a $\BigO(N^3)$ computational complexity and a $\BigO(N^2)$ memory footprint. Interestingly, the computational intractibility in GPR models originates from the prior and \emph{not} the complexity of marginalisation as is often the case for other Bayesian methods [CITE]. Indeed, these methods resort to MCMC to avoid computing intractable normalising constant, which is a problem that GPR does not encounter.  Another shortcoming of GPR models is that there is no known analytical expression for the posterior distribution when the likelihood (\cref{eq:likelihood}) is not Gaussian, as encountered in classification for instance. In the next paragraph we discuss solutions to both problems.
+Despite the convenience of the analytic expressions, computing this exact posterior requires inverting the $N \times N$ matrix $\Kff$, which has a $\BigO(N^3)$ computational complexity and a $\BigO(N^2)$ memory footprint. Interestingly, the computational intractibility in GPR models originates from the prior and \emph{not} the complexity of marginalisation as is often the case for other Bayesian methods [TODO: CITE]. Indeed, these methods resort to MCMC to avoid computing intractable normalising constant, which is a problem that GPR does not encounter.  Another shortcoming of GPR models is that there is no known analytical expression for the posterior distribution when the likelihood (\cref{eq:likelihood}) is not Gaussian, as encountered in classification for instance. In the next paragraph we discuss solutions to both problems.
 
 \section{Approximate Inference with Sparse Gaussian Processes}
 
@@ -200,7 +199,7 @@ The last step follows from the fact that derivative of $k$ w.r.t. $\theta$ is $-
 Kernel have a rich history in machine learning and functional analysis, and have enabled the developement of versatile algorithms to analyse and process data. Kernels became widely noticed by the ML community through Support Vector Machines (SVMs), who prior to the deep learning revolution, dominated many machine learning benchmarks. %, where they were used as a replacement of the simple we used a kernel function $k(x,x')$ instead of $x\transpose x'$. This means that rather than using $x\top x'$, one uses a function $k(x, x')$, which corresonponds to an inner-product in some space $\phi(x)\top \phi(x')$. This concept is also referred to as the ``kernel trick'' in the litarture. This made SVMs a compelling model for non-linear modelling problems. 
 % Prior to the deep learning revolution, kernel SVMs sat atop the leaderboards on many machine learning problems. 
 For instance, the winner of the 2011 ImageNet Large Scale Visual Recognition Challenge (ILSVRC) was an SVM that used a Fisher kernel \citep{perronnin2010large}. The year after, however, the same compitition was---by a large margin---won by AlexNet \citep{alexnet}---a deep convolutional neural network approach. Nonetheless, kernels have always remained relevant and have surfaced in many other methods in the literature, such as splines, Priniciple Component Analysis (PCA) and Gaussian processes. Today, kernels are seen as an important tool to understand and analyse the behaviour of (deep) neural networks \citep[e.g.,][]{jacot2018neural}. % They always operate through pairwise comparisons on datapoints and are versitale because they do not impose strong assumptions regarding the type of data they operatr on, such as vectors, graphs or strings. 
-In what follows, we are going to focus on the theoretical properties of Mercer kernels with the application of Gaussian processes in mind. Some of the theorems and definitions in this section are quoted from the excellent course ``Machine learning with kernel methods''\footnote{\url{https://members.cbio.mines-paristech.fr/~jvert/svn/kernelcourse/course/2021mva}} by Julien Mairal and Jean-Philippe Vert, which I voluntarily auditted during my first year.
+In what follows, we are going to focus on the theoretical properties of Mercer kernels with the application of Gaussian processes in mind. Some of the theorems and definitions in this section are quoted from the excellent course ``Machine learning with kernel methods''\footnote{\url{https://members.cbio.mines-paristech.fr/~jvert/svn/kernelcourse/course/2021mva}} by Julien Mairal and Jean-Philippe Vert, which I voluntarily auditted during my first year. Another excellent resource for this topic is \citet{kanagawa2018gaussian}.
 
 \begin{definition}
 A positive definite (p.d.) kernel (or Mercer kernel) on a set $\mathcal{X}$ is a function $k: \mathcal{X} \times \mathcal{X} \rightarrow \Reals$ that is
@@ -251,7 +250,7 @@ We can define the RKHS, associated to a p.d. kernel $k$, as follows:
 \begin{equation}
   \rkhs = \left\{f = \sum_{i=1}^\infty c_i k(x_i, \cdot), \forall c_i \in \Reals, x_i \in \mathcal{X}:\quad \norm{f}_{\rkhs}^2 = \sum_{i,j} c_i c_j k(x_i, x_j) < \infty \right\}
 \end{equation}
-where the inner product between $f = \sum_i a_i k(x_i, \cdot)$ and $g = \sum_i b_j k(x_j, \cdot)$ is given by $\langle f,g \rangle_\rkhs = \sum_{i,j} a_i b_j k(x_i, x_j)$ and the norm is induced by the inner product $\norm{f}^2_{\rkhs} = \langle f, f \rangle_{\rkhs}$.
+where the inner product between $f = \sum_i a_i k(x_i, \cdot)$ and $g = \sum_j b_j k(x_j, \cdot)$ is given by $\langle f,g \rangle_\rkhs = \sum_{i,j} a_i b_j k(x_i, x_j)$ and the norm is induced by the inner product $\norm{f}^2_{\rkhs} = \langle f, f \rangle_{\rkhs}$.
 
 
 \subsection{Spectral Formulation}
@@ -264,44 +263,58 @@ Associated to a kernel $k$ we can define the kernel operator
 where $\nu$ denotes a measure. In our case this will typically be the Lebesgue measure or depend on the input distribution: $\nu(x) = p(x)\calcd{x}$.
 \end{definition}
 
-It can be shown that for p.d. kernels the associated operator $\mathcal{K}$ is compact, positive (i.e. $\langle f, \mathcal{K} f\rangle_\rkhs \ge 0$) and self-adjoint (i.e. $\langle f, \mathcal{K} g\rangle_\rkhs = \langle \mathcal{K} f, g\rangle_\rkhs$). Then according to the spectral theorem [TODO] the operator can be diagonalised as there exists a complete orthonormal set $\{\phi_1, \phi_2, \ldots \}$ of eigenfunctions in $\rkhs$ with real and non-negative eigenvalues $\lambda_1 \ge \lambda_2 \ge \ldots \ge 0$. This corresponds to
+It can be shown that for p.d. kernels the associated operator $\mathcal{K}$ is compact, positive (i.e. $\langle f, \mathcal{K} f\rangle_\rkhs \ge 0$) and self-adjoint (i.e. $\langle f, \mathcal{K} g\rangle_\rkhs = \langle \mathcal{K} f, g\rangle_\rkhs$). Then according to the spectral theorem \citep[e.g.,][Chapter 17]{lang1993} the operator can be diagonalised as there exists a complete orthonormal set $\{\phi_1, \phi_2, \ldots \}$ of eigenfunctions in $\rkhs$ with real and non-negative eigenvalues $\lambda_1 \ge \lambda_2 \ge \ldots \ge 0$. This corresponds to
 \begin{equation}
   \mathcal{K} \phi_n = \lambda_n \phi_n\quad\text{and}\quad \langle \phi_n, \phi_m \rangle_{\rkhs} = \delta_{nm},
 \end{equation}
-where $\delta_{nm} = 1$ if $n=m$ and $0$ otherwise. The number of eigenfunctions and associated eigenvalues can be countably infinite (i.e. $\Naturals$) or finite $\{1, \ldots, N\}$. This result is analogues to the fact that semi-definite matrices can be decomposed into a finite set of eigenvectors and non-negative eigenvalues and where the eigenvectors form a basis for the space.
+where $\delta_{nm} = 1$ if $n=m$ and $0$ otherwise. The number of eigenfunctions and associated eigenvalues can be countably infinite $\Naturals$ or finite $\{1, \ldots, N\}$. This result is analogues to the fact that semi-definite matrices can be decomposed into a finite set of eigenvectors and non-negative eigenvalues and where the eigenvectors form a basis for the space.
 
 Mercer's theorem describes the kernel $k$ in terms of $\{(\lambda_n, \phi_n)\}$, and as such opens interesting connections to GPs.
 \begin{theorem}[Mercer]
-  Let $\mathcal{X}$ be a compact metric space, $\nu$ a positive measure on $\mathcal{X}$ and $\{(\lambda_n, \phi_n)\}$ the eigensystem as described above, then
+  Let $\mathcal{X}$ be a compact metric space, $\nu$ a positive measure on $\mathcal{X}$ and $\{(\lambda_n, \phi_n)\}$ the eigensystem of a p.d. kernel as described above, then
 \begin{equation}
   k(x,x')  = \sum_n \lambda_n \phi_n(x) \phi_n(x'),\quad\text{for}\ x,x\in \mathcal{X}
 \end{equation}
 where the convergence is absolute and uniform.
 \end{theorem}
-It is important to note that $\{(\lambda_n, \phi_n)\}$ will depend on the measure $\nu(x)$ which implicitly will depend on the domain $\mathcal{X}$. Furthermore, while Mercer's theorem is a beautiful and very powerful result, there are only a few cases in which it is possible to compute the eigensystem associated with a kernel. In \cref{chapter:vish} we discuss such as case.
+It is important to note that $\{(\lambda_n, \phi_n)\}$ will depend on the measure $\nu(x)$, which implicitly also depends on the domain $\mathcal{X}$. Furthermore, while Mercer's theorem is a very powerful result, there are only a few cases in which it is possible to compute the eigensystem associated with a kernel. In \cref{chapter:vish} we discuss such as case.
 
-% Feature map:
-% \begin{equation}
-%   k(x, x') = \langle  \rangle_{\ell^2}
-% \end{equation}
-
-RKHS:
+We can use the eigen-decomposition of the kernel operator to represent the RKHS of a kernel
+\begin{theorem}[Mercer Representation of an RKHS]
+  Let $\mathcal{X}$ be a compact metric space, $k$ a p.d. kernel and $\{(\lambda_n, \phi_n)\}$ the eigensystem of the kernel operator for positive measure $\nu$, then the RKHS of $k$ is given by
 \begin{equation}
-  \rkhs = \left\{ \right\}
+    \label{eq:mercer-rkhs}
+    \rkhs = \left\{
+    f = \sum_n a_n \phi_{n}:
+    \norm{f}_{\rkhs} = \sum_n \frac{a_n^2}{\lambda_n} < \infty
+    \right\},
+\end{equation}
+with an inner product between $f,g \in \rkhs$ given by
+\begin{equation}
+  \langle f, g \rangle_{\rkhs} = \frac{a_n b_n}{\lambda_n},\quad\text{where}\ f = \sum_n a_n \phi_n\ \text{and}\ g = \sum_n b_n \phi_n.
+\end{equation}
+\end{theorem}
+The reproducing property of the Mercer representation of an RKHS is straightforward to show. Let $f \in \rkhs$ have coefficients $\{a_n\}$ and $k$ be the kernel associated to $\rkhs$ of which we assume that the Mercer representation is known, then
+\begin{equation}
+  \langle f, k(x, \cdot) \rangle_\rkhs = \sum_n \frac{a_n \lambda_n \phi_n(x)}{\lambda_n} = \sum_n a_n \phi_n(x) = f(x).
 \end{equation}
 
-\begin{theorem}[Karhunen-Lo\`eve]
-  \begin{equation}
-    f = \sum_n \sqrt{\lambda_n} \varepsilon_n \phi_n\quad\text{with}\quad\varepsilon_n \sim \NormDist{0, 1}
-  \end{equation}
-\end{theorem}
+Through the Mercer decomposition of a kernel we can define a Gaussian process, this is known as the Karhunen-Lo\`eve expansion. We can define $f \sim \GP(0, k)$ as
+\begin{equation}
+    f = \sum_n \sqrt{\lambda_n} \xi_n \phi_n\quad\text{with}\quad\xi_n \sim \NormDist{0, 1}
+\end{equation}
+as indeed the covariance between two points is given by
+\begin{equation}
+  \Cov(f(x), f(x')) = \sum_{n,m} \sqrt{\lambda_m} \sqrt{\lambda_n} \ExpSymb[\xi_n \xi_m] \phi_n(x) \phi_m(x') = \sum_n \lambda_n \phi_n(x) \phi_n(x') = k(x, x'),
+\end{equation}
+as a consequence of the i.d.d. and unit variance of the random variables $\{\xi_n\}$.
 
-Show that GP samples are not in the RKHS
+Using the  Karhunen-Lo\`eve expression to compute the RKHS norm of a GP sample $f$ yields $\norm{f}^2_\rkhs = \sum_{n} \xi_{n}^2$, which is a diverging series. This shows that GP samples do not belong to the RKHS of their defining kernel, which may seem surprising. A straightforward solution to this problem is to truncate the Karhunen-Lo\`eve expansion and to only use the first $\tilde{N}$ eigenvalues and functions: $f = \sum_n^{\tilde{N}} \sqrt{\lambda_n} \xi_n \phi_n$, which approximates the kernel and the corresonponding GP.
 
+
+% TODO:
 % \subsubsection{Stationary kernels}
-
 % - kernel operator becomes convolution
-
 % For a stationary process $f(t)$, the Wiener-Khintchine theorem states (as a special case of Bochner's theorem, see \citet{rasmussen2006}) that the covariance function $k(r)$, is the inverse Fourier transform of the spectral density $S(\omega)$
 % \begin{equation}
 %   k(r) = \int_{\Reals^d} S(\omega) e^{i 2 \pi \omega r} \calcd{\omega} \quad\text{and}\quad S(\omega) = \int_{\Reals^d} S(\omega) e^{-i 2 \pi \omega r} \calcd{r}.
