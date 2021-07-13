@@ -83,7 +83,7 @@ Despite the convenience of the analytic expressions, computing this exact poster
 
 \section{Approximate Inference with Sparse Gaussian Processes}
 
-Sparse Gaussian processes combined with Variational Inference (VI) provide an elegant way to address these two shortcomings \citep{titsias2009, hensman2013, hensman2015scalable}. VI consists of introducing a distribution $q(f)$ that depends on some parameters, and finding the values of these parameters such that $q(f)$ gives the best possible approximation of the exact posterior $p(f \given \vy )$. It is worth noting that there exists other approaches in the literature that adress the same issues. In particular, Expectation Propagation (EP) \citep{minka2001expectation,bui2017unifying} formulates, similar to VI, an approximation to the posterior but uses a different objective to optimise the approximation. Tangently, other sparse GP methods (e.g., FITC) \citep{Snelson05,quinonero2005unifying} approximate the model rather than the posterior. A downside of this is that the posteriors lose their non-parametric nature, which can be detrimental for the uncertainty estimates \citep{bauer2016understanding}. In what follows we will focus on Sparse Gaussian processes with variational inference because of its general applicability and overall robust performance.
+Sparse Gaussian processes combined with Variational Inference (VI) provide an elegant way to address these two shortcomings \citep{titsias2009, hensman2013, hensman2015scalable}. VI consists of introducing a distribution $q(f)$ that depends on some parameters, and finding the values of these parameters such that $q(f)$ gives the best possible approximation of the exact posterior $p(f \given \vy )$. It is worth noting that there exists other approaches in the literature that address the same issues. In particular, Expectation Propagation (EP) \citep{minka2001expectation,bui2017unifying} formulates, similar to VI, an approximation to the posterior but uses a different objective to optimise the approximation. Tangently, other sparse GP methods (e.g., FITC) \citep{Snelson05,quinonero2005unifying} approximate the model rather than the posterior. A downside of this is that the posteriors lose their non-parametric nature, which can be detrimental for the uncertainty estimates \citep{bauer2016understanding}. In what follows we will focus on Sparse Gaussian processes with variational inference because of its general applicability and overall robust performance.
 
 We first discuss the objective used in general variational inference before specifying our particular choice for $q(f)$. Let us therefore define $q(f)$ as the approximate to the posterior, then the idea is to optimise $q(f)$ so that the distance measured by the Kullback–Leibler (KL) divergence from $q(f)$ to $p(f \given \vy)$ is minimal. Rewriting $p(f \given \vy)$ using Bayes' rule, we obtain:
 \begin{equation}
@@ -105,7 +105,7 @@ We choose to factorise the variational approximation as $q(f, \vu) = q(\vu) p(f\
 \begin{equation}
   p(f \given f(\vz) \shorteq \vu) = \GP\Big(\kux^\top \Kuu^{-1}\vu,\ \ k(\cdot, \cdot) -  \kux^\top \Kuu^{-1} \kux\Big), 
 \end{equation}
-where $[\Kuu]_{i,j} = k(z_i, z_j)$, $[\kux]_i = k(z_i, \cdot)$. We specify a Gaussian distribution for the variational posterior over the inducing variables with a freely parameterised mean and covariance
+with $[\Kuu]_{i,j} = k(z_i, z_j)$, $[\kux]_i = k(z_i, \cdot)$. We specify a Gaussian distribution for the variational posterior over the inducing variables with a freely parameterised mean and covariance
 \begin{equation}
   q(\vu) = \NormDist{\vm, \MS}
 \end{equation}
@@ -115,9 +115,9 @@ such that the overall approximate posterior is given by another GP
   q(f) = \int_{\vu} q(f, \vu)\,\calcd{\vu} = \GP\Big(\kux^\top \Kuu^{-1}\vm,\ \ k(\cdot, \cdot) -  \kux^\top \Kuu^{-1} (\Kuu + \MS)\Kuu^{-1} \kux\Big).
 \end{equation}
 as a result of the conjugacy of the variational posterior $q(\vu)$ and the conditional. 
-The approximation admits several interesting properties. Firstly, in the case of a Gaussian likelihood and a number of inducung points that equals the amount of data, $q(f)$ contains the true posterior. That is, if $\vz \shorteq \vx$, it is possible to set $\vm$ and $\MS$ such that $q(f) = p(f \given \vy)$ \citep{titsias2009}. Secondly, \citet{burt2019} showed that for $N \rightarrow \infty$, the approximate posterior can be made arbitrarly close to the true posterior for $M = \BigO(\log N)$. Finally, we notice that the approximate mean exhibits the same structure as a parametric model with basis functions $\kux$ and weights $\Kuu\inv \vm$. The variance, however, remains non-parametric, which means that predictions are made with an infinite amount of basis functions---exactly like in the true posterior. For non-degenarate kernels, this leads to error bars that are unconstrained by the data. We will come back to parameteric nature of the approximate mean in \cref{chapter:dnn-as-point-estimate-for-dgps}.
+The approximation admits several interesting properties. Firstly, in the case of a Gaussian likelihood and the number of inducing points that equals the amount of data, $q(f)$ contains the true posterior. That is, if $\vz \shorteq \vx$, it is possible to set $\vm$ and $\MS$ such that $q(f) = p(f \given \vy)$ \citep{titsias2009}. Secondly, \citet{burt2019} showed that for $N \rightarrow \infty$, the approximate posterior can be made arbitrarly close to the true posterior for $M = \BigO(\log N)$. Finally, we notice that the approximate mean exhibits the same structure as a parametric model with basis functions $\kux$ and weights $\Kuu\inv \vm$. The variance, however, remains non-parametric, which means that predictions are made with an infinite amount of basis functions---exactly like in the true posterior. For non-degenarate kernels, this leads to error bars that are unconstrained by the data. We will come back to the parameteric nature of the approximate mean in \cref{chapter:dnn-as-point-estimate-for-dgps}.
 
-We optimise the variational parameters $\{\vm, \MS\}$ by maximising the ELBO \cref{eq:elbo}. Assuming a general likelihood of the form $p(\vy \given f) = \prod_i p(y_i \given f(x_i))$ the ELBO objective can be written as
+We optimise the variational parameters $\{\vm, \MS\}$ by maximising the ELBO \cref{eq:elbo}. Assuming a general likelihood of the form $p(\vy \given f) = \prod_i p(y_i \given f(x_i))$ the objective can be written as
 \begin{equation}
   \label{eq:elbo-gp} 
   \textrm{ELBO} = \sum_{i=1}^N \Exp{q(f(x_i))}{\log p(y_i \given f(x_i))} - \KL{q(\vu)}{p(\vu)} \,. 
@@ -126,7 +126,8 @@ Crucially, the original KL between the two infinite-dimensional processes $\KL{q
 
 \subsection{Interdomain Inducing Variables}
 
-Interdomain Gaussian processes use alternative forms of inducing variables such that the resulting sparse GP models consists of a different set of features. \cref{chapter:vish} and \cref{chapter:dnn-as-point-estimate-for-dgps} heavily rely on this paradigm. In interdomain GPs, the inducing variables are obtained using a linear transformation of the GP, which we denote by $u_m = \mathcal{L}_m f$. This redefinition of $\vu$ implies that the expressions of $\Kuu$ and $\kux$ change, but the inference scheme of interdomain GPs and the mathematical expressions for the posterior mean and variance are exactly the same as classic sparse GPs. This is thanks to the linearity of the operator and the preservation of (joint) Gaussian behaviour under linear transformations. A common linear operator is the integral operator with an inducing function $g_m$ \citep{lazaro2009inter}:
+Interdomain Gaussian processes use alternative forms of inducing variables such that the resulting sparse GP models consists of a different set of features. %\cref{chapter:vish} and \cref{chapter:dnn-as-point-estimate-for-dgps} heavily rely on this paradigm. 
+Classically, inducing variables are defined as pseudo function evaluations: $u_m = f(z_m)$, but in interdomain GPs the inducing variables are obtained using a linear transformation of the GP: $u_m = \mathcal{L}_m f$. This redefinition of $\vu$ implies that the expressions of $\Kuu$ and $\kux$ change, but the inference scheme of interdomain GPs and the mathematical expressions for the posterior mean and variance are exactly the same as classic sparse GPs. This is thanks to the linearity of the operator and the preservation of (joint) Gaussian behaviour under linear transformations. A common linear operator is the integral operator with an inducing function $g_m$ \citep{lazaro2009inter}:
 \begin{equation*}
     \mathcal{L}_m\,f = \int f(x)\,g_m(x)\,\calcd{x}\,.
 \end{equation*}
@@ -190,7 +191,7 @@ and $u_m = \mathcal{L}_m f$, then the covariance between $f$ and $u_m$ is given 
                       &= \frac{\calcd{}}{\calcd{\theta}}\Bigr|_{\theta = \theta_m} k(\theta, \cdot) + \frac{\pi}{2} \int_{-\pi}^\pi k(\theta, \cdot) \calcd{\theta} && \text{Definition $\mathcal{L}_m$} \\
                       &= \mathbb{H}(\cdot - \theta_m) && \text{Computation}.
 \end{align}
-The last step follows from the fact that derivative of $k$ w.r.t. $\theta$ is $-1$ for $\theta < \theta_m$ and $+1$ otherwise. The integral part of the $\mathcal{L}_m$ is constant and simply shift the covariance by +1, such that $\kux$ equals the Heaviside function. In \cref{fig:heaviside3}, we show $\kux$ computed emperically using $1000$ samples from the GP for three different values of $\theta_m$. Using this construction and noting the parametric form of the mean of $q(f)$ (see~\cref{eq:qf}) we created an approximate posterior GP that is equivalent to a linear combination of Heaviside functions. In \cref{chapter:dnn-as-point-estimate-for-dgps} we will employ a similar approach to construct a GP where the basis functions are ReLU.
+The last step follows from the fact that derivative of $k$ w.r.t. $\theta$ is $-1$ for $\theta < \theta_m$ and $+1$ otherwise. The integral part of the $\mathcal{L}_m$ is constant and simply shifts the covariance by +1, such that $\kux$ equals the Heaviside function. In \cref{fig:heaviside3}, we show $[\kux]_m = \Cov(u_m, f(\theta))$ computed emperically using $1000$ samples from the GP for three different values of $\theta_m$. Using this construction and noting the parametric form of the mean of $q(f)$ (see~\cref{eq:qf}) we created an approximate posterior GP that is equivalent to a linear combination of Heaviside functions. In \cref{chapter:dnn-as-point-estimate-for-dgps} we will employ a similar approach to construct a GP where the basis functions are ReLU.
 
 
 
@@ -218,15 +219,16 @@ One of the simplest examples of a valid p.d. kernel is the linear kernel $k(x, x
     k(x, x') = \langle \phi(x), \phi(x') \rangle_{\rkhs}
   \end{equation}
 \end{theorem}
-Intuitively, a kernel corresonponds to the inner product after embedding the data space in some Hilbert space. We want to remind the reader that a Hilbert space $\rkhs$ is a (possibly infinite) vector space with an inner product $\langle f, g \rangle_{\rkhs}$ and norm $\norm{f} = \langle f, f \rangle_{\rkhs}^{\frac{1}{2}}$, and where any Cauchy sequence in $\rkhs$ converges in $\rkhs$. A Cauchy sequence is a sequence whose elements become arbitrarly close as the sequence progresses. A Hilbert space can be seen as a generalisation of an Euclidian space that is infinite dimensional. In the machine learning literature, $\rkhs$ is also commonly referred to as the feature space and $\phi$ the feature map.
+Intuitively, a kernel corresponds to the inner product after embedding the data in some Hilbert space. We want to remind the reader that a Hilbert space $\rkhs$ is a (possibly infinite) vector space with an inner product $\langle f, g \rangle_{\rkhs}$ and norm $\norm{f} = \langle f, f \rangle_{\rkhs}^{\frac{1}{2}}$, and where any Cauchy sequence in $\rkhs$ converges in $\rkhs$. A Cauchy sequence is a sequence whose elements become arbitrarly close as the sequence progresses. A Hilbert space can be seen as a generalisation of an Euclidian space that is infinite dimensional. In the machine learning literature, $\rkhs$ is also commonly referred to as the feature space and $\phi$ the feature map.
 
 A Reproducing Kernel Hilbert Space (RKHS) is a special type of Hilbert space mentioned in \cref{theorem:k-and-H}. It is a space over function from $\mathcal{X}$ to $\Reals$ where certain elements are ``parameterised'' by an element in $\mathcal{X}$. In other words, a datapoint $x \in \mathcal{X}$ is mapped to a function in the RKHS: $\phi(x) \in \rkhs$. To make this more explicit we write $\phi(x) = k_x(\cdot)$ to highlight that $k_x(\cdot)$ is another function in $\rkhs$.
 \begin{definition}
+  \label{def:rkhs}
   Let $\mathcal{X}$ be a set and $\rkhs$ a Hilbert space with inner-product $\langle \cdot, \cdot \rangle_{\rkhs}$. The function $k: \mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is called a reproducing kernel of $\rkhs$ if
   \begin{enumerate}
     \item $\rkhs$ contains all functions of the form
     \begin{equation}
-      \forall x \in \mathcal{X},\quad k_x: \mathcal{X} \rightarrow \Reals, k_x(x') \mapsto k(x, x')
+      \forall x \in \mathcal{X},\quad k_x: \mathcal{X} \rightarrow \Reals, x' \mapsto k(x, x')
     \end{equation}
     \item For every $x \in \mathcal{X}$ and $f \in \rkhs$ the reproducing property holds:
     \begin{equation}
@@ -235,50 +237,72 @@ A Reproducing Kernel Hilbert Space (RKHS) is a special type of Hilbert space men
   \end{enumerate}
 If a reproducing kernel exists, then $\rkhs$ is called a reproducing kernel Hilbert space (RKHS).
 \end{definition}
-
-\subsection{Connection between GPs and RKHS}
-
-It can be shown that the reproducing kernel belonging to an RKHS is unique and, conversely, that a function can only be the reproducing kernel of a single RKHS. Furthermore, a function $k:\mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is a positive definite kernel if and only if it is a reproducing kernel.
-
-
-\section{Spectral Representation of Gaussian Processes}
-
-Spectral decomposition of the kernel operator
-
-Kernel Operator $\mathcal{K}$ 
-
+As a result of the reproducing property, remark that $k$ can be written as an inner product in $\rkhs$:
 \begin{equation}
-  \mathcal{K} f = \int k(x, x') f(x') \calcd{\mu(x')},
+  k(x, x') = \langle k(x, \cdot), k(x', \cdot) \rangle_\rkhs,\quad\text{for}\,x,x'\in\mathcal{X},
 \end{equation}
-where $\mu$ denotes a measure. In our case this measure will typically stem from the input distribution on $x$ and reduce to $p(x)\calcd{x}$.
+and therefore $k(x, \cdot)$ is sometimes referred to as the canonical feature map of $x$.
 
-It can be shown that $\mathcal{K}$ is positive (i.e. $<f, L f> \ge 0$) and self-adjoint (i.e. $<L f, g> = <f, L g>$).
+% \subsection{Connection GPs and RKHSs}
 
-eigenfunctions
+By the the Moore-Aronszajn theorem \citep{aronszajn1950theory}, it can be shown that the reproducing kernel belonging to an RKHS is unique and, conversely, that a function can only be the reproducing kernel of a single RKHS. Furthermore, a function $k:\mathcal{X} \times \mathcal{X} \rightarrow \Reals$ is a positive definite kernel if and only if it is a reproducing kernel. In other words, there exists a one-to-one mapping between p.d. kernels and \emph{their} RKHSs.
+
+We can define the RKHS, associated to a p.d. kernel $k$, as follows:
 \begin{equation}
-  \mathcal{K} \phi = \lambda \phi
+  \rkhs = \left\{f = \sum_{i=1}^\infty c_i k(x_i, \cdot), \forall c_i \in \Reals, x_i \in \mathcal{X}:\quad \norm{f}_{\rkhs}^2 = \sum_{i,j} c_i c_j k(x_i, x_j) < \infty \right\}
 \end{equation}
+where the inner product between $f = \sum_i a_i k(x_i, \cdot)$ and $g = \sum_i b_j k(x_j, \cdot)$ is given by $\langle f,g \rangle_\rkhs = \sum_{i,j} a_i b_j k(x_i, x_j)$ and the norm is induced by the inner product $\norm{f}^2_{\rkhs} = \langle f, f \rangle_{\rkhs}$.
 
-orthonormal set
+
+\subsection{Spectral Formulation}
+
+\begin{definition}[Kernel Operator]
+Associated to a kernel $k$ we can define the kernel operator
+\begin{equation}
+  \mathcal{K} f = \int k(\cdot, x) f(x) \calcd{\nu(x)},
+\end{equation}
+where $\nu$ denotes a measure. In our case this will typically be the Lebesgue measure or depend on the input distribution: $\nu(x) = p(x)\calcd{x}$.
+\end{definition}
+
+It can be shown that for p.d. kernels the associated operator $\mathcal{K}$ is compact, positive (i.e. $\langle f, \mathcal{K} f\rangle_\rkhs \ge 0$) and self-adjoint (i.e. $\langle f, \mathcal{K} g\rangle_\rkhs = \langle \mathcal{K} f, g\rangle_\rkhs$). Then according to the spectral theorem [TODO] the operator can be diagonalised as there exists a complete orthonormal set $\{\phi_1, \phi_2, \ldots \}$ of eigenfunctions in $\rkhs$ with real and non-negative eigenvalues $\lambda_1 \ge \lambda_2 \ge \ldots \ge 0$. This corresponds to
+\begin{equation}
+  \mathcal{K} \phi_n = \lambda_n \phi_n\quad\text{and}\quad \langle \phi_n, \phi_m \rangle_{\rkhs} = \delta_{nm},
+\end{equation}
+where $\delta_{nm} = 1$ if $n=m$ and $0$ otherwise. The number of eigenfunctions and associated eigenvalues can be countably infinite (i.e. $\Naturals$) or finite $\{1, \ldots, N\}$. This result is analogues to the fact that semi-definite matrices can be decomposed into a finite set of eigenvectors and non-negative eigenvalues and where the eigenvectors form a basis for the space.
+
+Mercer's theorem describes the kernel $k$ in terms of $\{(\lambda_n, \phi_n)\}$, and as such opens interesting connections to GPs.
+\begin{theorem}[Mercer]
+  Let $\mathcal{X}$ be a compact metric space, $\nu$ a positive measure on $\mathcal{X}$ and $\{(\lambda_n, \phi_n)\}$ the eigensystem as described above, then
+\begin{equation}
+  k(x,x')  = \sum_n \lambda_n \phi_n(x) \phi_n(x'),\quad\text{for}\ x,x\in \mathcal{X}
+\end{equation}
+where the convergence is absolute and uniform.
+\end{theorem}
+It is important to note that $\{(\lambda_n, \phi_n)\}$ will depend on the measure $\nu(x)$ which implicitly will depend on the domain $\mathcal{X}$. Furthermore, while Mercer's theorem is a beautiful and very powerful result, there are only a few cases in which it is possible to compute the eigensystem associated with a kernel. In \cref{chapter:vish} we discuss such as case.
+
+% Feature map:
+% \begin{equation}
+%   k(x, x') = \langle  \rangle_{\ell^2}
+% \end{equation}
+
+RKHS:
+\begin{equation}
+  \rkhs = \left\{ \right\}
+\end{equation}
 
 \begin{theorem}[Karhunen-Lo\`eve]
   \begin{equation}
     f = \sum_n \sqrt{\lambda_n} \varepsilon_n \phi_n\quad\text{with}\quad\varepsilon_n \sim \NormDist{0, 1}
   \end{equation}
-
 \end{theorem}
 
-\begin{enumerate}
-  \item Integral operator
-  \item Mercer Decomposition
-  \item RKHS through Spectral Decomposition
-  \item Karhunen Loeve
+Show that GP samples are not in the RKHS
 
-  \item Bochner's theorem for stationary kernels
-\end{enumerate}
+% \subsubsection{Stationary kernels}
 
+% - kernel operator becomes convolution
 
-For a stationary process $f(t)$, the Wiener-Khintchine theorem states (as a special case of Bochner's theorem, see \citet{rasmussen2006}) that the covariance function $k(r)$, is the inverse Fourier transform of the spectral density $S(\omega)$
-\begin{equation}
-  k(r) = \int_{\Reals^d} S(\omega) e^{i 2 \pi \omega r} \calcd{\omega} \quad\text{and}\quad S(\omega) = \int_{\Reals^d} S(\omega) e^{-i 2 \pi \omega r} \calcd{r}.
-\end{equation}
+% For a stationary process $f(t)$, the Wiener-Khintchine theorem states (as a special case of Bochner's theorem, see \citet{rasmussen2006}) that the covariance function $k(r)$, is the inverse Fourier transform of the spectral density $S(\omega)$
+% \begin{equation}
+%   k(r) = \int_{\Reals^d} S(\omega) e^{i 2 \pi \omega r} \calcd{\omega} \quad\text{and}\quad S(\omega) = \int_{\Reals^d} S(\omega) e^{-i 2 \pi \omega r} \calcd{r}.
+% \end{equation}
