@@ -1,37 +1,103 @@
 \chapter{Linear Time Gaussian Processes on Spheres}
 \label{chapter:vish}
 
-How is this chapter organised.
+Stationary kernels, i.e. translation invariant covariances, are ubiquitous in machine learning when the input space is Euclidean. When working on the hypersphere, their spherical counterpart are dot-product kernels, which are invariant to rotations. They are the main object under study in this chapter. In \cref{sec:rkhs-dotproduct-kernels}, we first show how we can construct the Reproducing Kernel Hilbert Space (RKHS) of dot-product kernel on the hypersphere. \Cref{sec:vish} uses the RKHS to construct an efficient variational interdomain inducing variable for Gaussian processes on the hypersphere. We will then show how to expand the GP onto the complete domain $\Reals^d$ and conclude with a series of experiments, showing the speed and accuracy of the proposed approach.
 
 \section{Mercer Representation of Dot-Product Kernels}
+\label{sec:rkhs-dotproduct-kernels}
 
-The first order Arc Cosine kernel mimics the computation of infinitely wide fully connected layers with ReLU activations. \citet{cho2009kernel} showed that for $\sigma(t) = \max(0, t)$, the covariance between function values of $f(\vx) = \sigma(\vw^\top \vx)$ for $\vw \sim \NormDist{0, d^{-1/2} \Eye_d}$ and $\vw \in \Reals^d$ is given by
+Consider the unit sphere in $\Reals^d$  as the input domain
 \begin{equation}
-\label{eq:arccosine}
-    k(\vx, \vx') = \Exp{\vw}{\sigma(\vw^\top \vx)\, \sigma(\vw^\top \vx')} = \underbrace{\norm{\vx} \norm{\vx'}}_{\text{radial}}\ \underbrace{\frac{1}{\pi}\big( \sqrt{1 - t^2} + t\, (\pi - \arccos t) \big)}_{\text{angular (shape function) } s(t)},
+    \mathcal{X} = \dsphere = \{x \in \Reals^d: \norm{x}_2 = 1\}
 \end{equation}
-where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. The factorisation of the kernel in a radial and angular factor leads to an RKHS consisting of functions of the form $f(\vx) = \norm{\vx}\,g(\frac{\vx}{\norm{\vx}})$, where $g(\cdot)$ is defined on the unit hypersphere $\dsphere = \{\vx \in \Reals^d: \norm{\vx}_2 = 1\}$ but fully determines the function on $\Reals^d$.
+and $\nu$ to be the Lebesgue measure on $\dsphere$, so that
+\begin{equation}
+    \darea = \int_{\dsphere} \calcd{\nu(x)} = \frac{2 \pi ^ {d/2}}{\Gamma(d/2)}.
+\end{equation}
+is the surface area of $\dsphere$. We adopt the usual $L_2$ inner product for functions $f: \dsphere \rightarrow \Reals$ and $g: \dsphere \rightarrow \Reals$ restricted to the sphere 
+\begin{equation}
+     \langle f, g\rangle_{L_{2}(\dsphere)} = \frac{1}{\darea} \int_{\dsphere} f(x)\,g(x) \, \calcd{\nu(x)}.
+\end{equation}
 
-The shape function can be interpreted as a kernel itself, since it is the restriction of $k(\cdot, \cdot)$ to the unit hypersphere. Furthermore its expression only depends on the dot-product between the inputs so it is a zonal kernel (also known as a dot-product kernel \citep{bietti2020deep}). This means that the eigenfunctions of the angular part of $k(\cdot, \cdot)$ are the spherical harmonics $\sh_{n, j}$ (we index them with a level $n$ and an index within each level $j \in \{1, \dots, \dnumharmonicsforlevel\}$) \citep{wendland2005,Dutordoir2020spherical}. Their associated eigenvalues only depend on $n$:
+We define a dot-product kernel, also known as a zonal kernel (we will use both terms interchangably), as a p.d. kernel of the form
 \begin{equation}
-\label{eq:compute-fourier-coefficients}
-    \lambda_{n} = 
-   \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 s(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t},
+    k(x, x') = \kappa(x\transpose x'),
 \end{equation}
-where $C_n^{(\alpha)}(\cdot)$ is the Gegenbauer polynomial\footnote{See \cref{app:sec:harmonics} for a primer on Gegenbauer polynomials and spherical harmonics.} of degree $n$, $\alpha = \frac{d-2}{2}$, $\omega_d$ is a constant that depends on the surface area of the hypersphere. Analytical expressions of $\lambda_n$ are provided in \cref{app:sec:compute-eigenvalues}.
-The above implies that $k$ admits the Mercer representation:
+where $\kappa: [-1, 1] \rightarrow \Reals$ is a continuous function and referred to as the shape function. In other words, dot-product kernels only depend on the distance on the great circle between two inputs, rather than their location. They are the counterpart of stationary kernels $k(x, x') = \kappa(x - x')$, who are functions of the difference only. For example, where stationary kernels are translation invariant, dot-product kernel are rotationally invariant.
+
+We can associate a kernel operator $\mathcal{K}$ to a zonal kernel, as explained in \cref{section:theory:spectral-formulation}, which exhibits the form
 \begin{equation}
-    \label{eq:mercer}
-    k(\vx, \vx') = \norm{\vx}\, \norm{\vx'} \sum_{n=0}^\infty \sum_{j=1}^{\dnumharmonicsforlevel}  \lambda_n \sh_{n, j}\left(\frac{\vx}{\norm{\vx}}\right)\, \sh_{n, j}\left(\frac{\vx'}{\norm{\vx'}}\right),
+    \label{eq:kernel-operator-zonal}
+  \mathcal{K} f = \int_{\dsphere} \kappa(x\transpose\cdot) f(x) \calcd{\nu(x)}.
 \end{equation}
-and that the inner product between any two functions $g,\, h \in \rkhs$ is given by:
+To construct a Mercer representation of a zonal kernel's RKHS we require the eigensystem of the kernel operator $\mathcal{K}$, or, equivalently, the set of eigenfunctions $\{\phi_n\}$ and associated eigenvalues $\{\lambda_n\}$ for which
 \begin{equation}
-\label{eq:RKHSinnerproduct}
-\big\langle g, h \big\rangle_{\rkhs} = 
-    \sum_{n,j}
-            \frac{{g}_{n, j} {h}_{n, j}}{\lambda_{n}}
+    \mathcal{K} \phi_n = \lambda_n \phi_n\qquad\text{and}\qquad \langle \phi_n, \phi_m \rangle_{L_2(\dsphere)} = \delta_{nm}.
 \end{equation}
-where $g_{n, j}$ and $h_{n, j}$ are the Fourier coefficients of $g$ and $h$, i.e. $g(\vx) = \sum_{n,j} g_{n,j} \norm{\vx} \sh_{n,j}(\vx)$.
+
+To obtain the eigensystem of $\mathcal{K}$ we will show that it commutes with the Laplace-Beltrami operator $\LaplaceBeltrami$, henceforth referred to as simply Laplacian or Laplace operator. We want to remind the reader that commuting operators share the same eigenfunctions, but not necessarily the same eigenvalues. Therefore, to find the eigenfunctions of the kernel operator $\mathcal{K}$, it suffice to find the eigenfunctions of the Laplacian. Fortunately, there exists a huge body of literature on the diagonalisation of the Laplace operator on $\dsphere$, and it is well-known that its eigenfunctions are given by the spherical harmonics. In the following paragraph we first proof the commutativity of the operators before coving RKHS and the spherical harmonic basis functions.
+
+% TODO Spherical Harmonics.
+% Basis for Square integrable functions on $\dsphere$
+% Number of basis functions 
+\paragraph{It now rest us to show that the Laplacian and the kernel operator commute.} For this, we first show that for zonal kernels and $x,s \in \dsphere$ the following property holds
+\begin{align}
+    \LaplaceBeltrami_x k(x, s) 
+     &= \nabla_x \cdot \nabla_x \kappa(x\transpose s) && \text{Definition $\LaplaceBeltrami$ and zonal kernels}\\
+     &= \nabla_x \cdot (s \kappa'(x\transpose s))  && \text{Chainrule} \\
+     &= \norm{s}^2 \kappa''(x\transpose s) = \kappa''(x \transpose s) && \text{Because } \norm{s} = 1.
+\end{align}
+Similarly, for $\LaplaceBeltrami_s k(x, s)$ we obtain $k''(x \transpose s)$, and as a result
+\begin{equation}
+    \label{eq:LaplaceBeltrami-x-s}
+\LaplaceBeltrami_x k(x, s) = \LaplaceBeltrami_s k(x, s).
+\end{equation}
+
+We now show that the Laplacian and the kernel operator of zonal kernels commute
+\begin{align}
+    \mathcal{K} \left[\LaplaceBeltrami f\right] &= \int_{\dsphere} k(x, s) \left[\LaplaceBeltrami_x f(x)\right] \calcd{\nu(x)} && \text{Definition $\mathcal{K}$, \cref{eq:kernel-operator-zonal}}\\
+    &= \int_{\dsphere} f(x) \LaplaceBeltrami_x k(x, s)  \calcd{\nu(x)} && \text{Integration by parts}\\
+    &= \int_{\dsphere} f(x) \LaplaceBeltrami_s k(x, s)  \calcd{\nu(x)} = \LaplaceBeltrami \mathcal{K} f && \text{\cref{eq:LaplaceBeltrami-x-s}}.
+\end{align}
+which in turn implies that these two operators share the same eigenfunctions. This result is of particular relevance to us since there is a huge body of literature on diagonalisation of the Laplace-Beltrami operator on $\dsphere$, and that it is well known that its eigenfunctions are given by the spherical harmonics. This reasoning can be summarised by the following theorem:
+\begin{theorem}[Mercer representation]
+Any zonal kernel $k$ on the hypersphere can be decomposed as
+\begin{equation}
+\label{eq:kernel-form}
+    k(x, x') = \sum_{\ell=0}^{\infty} \sum_{k=1}^{\dnumharmonicsforlevel} \widehat{a}_{\ell, k} \sh_{\ell, k}(\vx) \sh_{\ell, k}(\vx'),
+\end{equation}
+where $\vx,\vx' \in \dsphere$ and $\widehat{a}_{\ell, k}$ are positive coefficients, $\sh_{\ell,k}$ denote the elements of the spherical harmonic basis in $\dsphere$, and $N_\ell^d$ corresponds to the number of spherical harmonics for a given level $\ell$.
+\end{theorem}
+Although it is typically stated without a proof, this theorem is already known in some communities (see \citet{wendland2005} for a functional analysis exposition, or \citet{peacock1999cosmological} for its use in cosmology).
+
+
+% The first order Arc Cosine kernel mimics the computation of infinitely wide fully connected layers with ReLU activations. \citet{cho2009kernel} showed that for $\sigma(t) = \max(0, t)$, the covariance between function values of $f(\vx) = \sigma(\vw^\top \vx)$ for $\vw \sim \NormDist{0, d^{-1/2} \Eye_d}$ and $\vw \in \Reals^d$ is given by
+% \begin{equation}
+% \label{eq:arccosine}
+%     k(\vx, \vx') = \Exp{\vw}{\sigma(\vw^\top \vx)\, \sigma(\vw^\top \vx')} = \underbrace{\norm{\vx} \norm{\vx'}}_{\text{radial}}\ \underbrace{\frac{1}{\pi}\big( \sqrt{1 - t^2} + t\, (\pi - \arccos t) \big)}_{\text{angular (shape function) } s(t)},
+% \end{equation}
+% where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. The factorisation of the kernel in a radial and angular factor leads to an RKHS consisting of functions of the form $f(\vx) = \norm{\vx}\,g(\frac{\vx}{\norm{\vx}})$, where $g(\cdot)$ is defined on the unit hypersphere $\dsphere = \{\vx \in \Reals^d: \norm{\vx}_2 = 1\}$ but fully determines the function on $\Reals^d$.
+
+% The shape function can be interpreted as a kernel itself, since it is the restriction of $k(\cdot, \cdot)$ to the unit hypersphere. Furthermore its expression only depends on the dot-product between the inputs so it is a zonal kernel (also known as a dot-product kernel \citep{bietti2020deep}). This means that the eigenfunctions of the angular part of $k(\cdot, \cdot)$ are the spherical harmonics $\sh_{n, j}$ (we index them with a level $n$ and an index within each level $j \in \{1, \dots, \dnumharmonicsforlevel\}$) \citep{wendland2005,Dutordoir2020spherical}. Their associated eigenvalues only depend on $n$:
+% \begin{equation}
+% \label{eq:compute-fourier-coefficients}
+%     \lambda_{n} = 
+%    \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 s(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t},
+% \end{equation}
+% where $C_n^{(\alpha)}(\cdot)$ is the Gegenbauer polynomial\footnote{See \cref{app:sec:harmonics} for a primer on Gegenbauer polynomials and spherical harmonics.} of degree $n$, $\alpha = \frac{d-2}{2}$, $\omega_d$ is a constant that depends on the surface area of the hypersphere. Analytical expressions of $\lambda_n$ are provided in \cref{app:sec:compute-eigenvalues}.
+% The above implies that $k$ admits the Mercer representation:
+% \begin{equation}
+%     \label{eq:mercer}
+%     k(\vx, \vx') = \norm{\vx}\, \norm{\vx'} \sum_{n=0}^\infty \sum_{j=1}^{\dnumharmonicsforlevel}  \lambda_n \sh_{n, j}\left(\frac{\vx}{\norm{\vx}}\right)\, \sh_{n, j}\left(\frac{\vx'}{\norm{\vx'}}\right),
+% \end{equation}
+% and that the inner product between any two functions $g,\, h \in \rkhs$ is given by:
+% \begin{equation}
+% \label{eq:RKHSinnerproduct}
+% \big\langle g, h \big\rangle_{\rkhs} = 
+%     \sum_{n,j}
+%             \frac{{g}_{n, j} {h}_{n, j}}{\lambda_{n}}
+% \end{equation}
+% where $g_{n, j}$ and $h_{n, j}$ are the Fourier coefficients of $g$ and $h$, i.e. $g(\vx) = \sum_{n,j} g_{n,j} \norm{\vx} \sh_{n,j}(\vx)$.
 
 \begin{enumerate}
 \item what is a dot-product kernel
@@ -44,6 +110,7 @@ where $g_{n, j}$ and $h_{n, j}$ are the Fourier coefficients of $g$ and $h$, i.e
 
 
 \section{Variational Spherical Harmonic Gaussian Processes}
+\label{sec:vish}
 
 \subsection{Homogeneous Extension to $\Reals^d$}
 
