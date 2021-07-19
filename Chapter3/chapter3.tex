@@ -1,7 +1,10 @@
-\chapter{Spherical Harmonic Variational Gaussian Processes}
+\chapter{Linear Time Gaussian Processes on Spheres}
 \label{chapter:vish}
 
-\section{ArcCosine kernel and Associated Reproducing Hilber Kernel Space}
+How is this chapter organised.
+
+\section{Mercer Representation of Dot-Product Kernels}
+
 The first order Arc Cosine kernel mimics the computation of infinitely wide fully connected layers with ReLU activations. \citet{cho2009kernel} showed that for $\sigma(t) = \max(0, t)$, the covariance between function values of $f(\vx) = \sigma(\vw^\top \vx)$ for $\vw \sim \NormDist{0, d^{-1/2} \Eye_d}$ and $\vw \in \Reals^d$ is given by
 \begin{equation}
 \label{eq:arccosine}
@@ -29,6 +32,23 @@ and that the inner product between any two functions $g,\, h \in \rkhs$ is given
             \frac{{g}_{n, j} {h}_{n, j}}{\lambda_{n}}
 \end{equation}
 where $g_{n, j}$ and $h_{n, j}$ are the Fourier coefficients of $g$ and $h$, i.e. $g(\vx) = \sum_{n,j} g_{n,j} \norm{\vx} \sh_{n,j}(\vx)$.
+
+\begin{enumerate}
+\item what is a dot-product kernel
+\item example 1: (deep) arc cosine
+\item example 2: stationary kernels
+\item decomposition
+\item proof
+\item refer to spherical harmonics
+\end{enumerate}
+
+
+\section{Variational Spherical Harmonic Gaussian Processes}
+
+\subsection{Homogeneous Extension to $\Reals^d$}
+
+
+\section{Experiments}
 
 
 \section{Spherical Harmonics}
