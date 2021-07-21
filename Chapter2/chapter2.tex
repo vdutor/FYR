@@ -1,10 +1,9 @@
 %!TEX root = ../thesis.tex
 \ifpdf
-    \graphicspath{{Chapter2/Figs/Raster/}{Chapter2/Figs/PDF/}{Chapter2/Figs/}}
+    \graphicspath{{Chapter2/Figs/Vector/}{Chapter2/Figs/PDF/}{Chapter2/Figs/}}
 \else
-    \graphicspath{{Chapter2/Figs/Vector/}{Chapter2/Figs/}}
+    \graphicspath{{Chapter2/Figs/Raster/}{Chapter2/Figs/}}
 \fi
-
 
 
 \chapter{Theoretical Framework}
@@ -124,6 +123,7 @@ We optimise the variational parameters $\{\vm, \MS\}$ by maximising the ELBO \cr
 Crucially, the original KL between the two infinite-dimensional processes $\KL{q(f)}{p(f)}$ is mathematically equivalent to the finite-dimensional KL between the variational posterior and prior over the inducing variables. We refer the interested reader to \citet{matthews16} for a theoretical analysis of the equivalence and to \citet[Section 4.1]{Leibfried2020Tutorial} for a more intuitive explanation. The objective in \cref{eq:elbo-gp}, introduced in \citet{hensman2013,hensman2015scalable} reduces the computational complexity to $\BigO(M^2 N + M^3)$. It also allows for stochastic estimation through minibatching \citep{hensman2013} and for non-Gaussian likelihoods through Gauss-Hermite quadrature of the one-dimensinoal expectation over $q(f(x_i))$ \citep{hensman2015scalable}.
 
 \subsection{Interdomain Inducing Variables}
+\label{section:interdomain-inducing-variables}
 
 Interdomain Gaussian processes use alternative forms of inducing variables such that the resulting sparse GP models consists of a different set of features. %\cref{chapter:vish} and \cref{chapter:dnn-as-point-estimate-for-dgps} heavily rely on this paradigm. 
 Classically, inducing variables are defined as pseudo function evaluations: $u_m = f(z_m)$, but in interdomain GPs the inducing variables are obtained using a linear transformation of the GP: $u_m = \mathcal{L}_m f$. This redefinition of $\vu$ implies that the expressions of $\Kuu$ and $\kux$ change, but the inference scheme of interdomain GPs and the mathematical expressions for the posterior mean and variance are exactly the same as classic sparse GPs. This is thanks to the linearity of the operator and the preservation of (joint) Gaussian behaviour under linear transformations. A common linear operator is the integral operator with an inducing function $g_m$ \citep{lazaro2009inter}:

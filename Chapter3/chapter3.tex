@@ -1,3 +1,10 @@
+\ifpdf
+    \graphicspath{{Chapter3/Figs/Vector/}{Chapter3/Figs/PDF/}{Chapter3/Figs/}}
+\else
+    \graphicspath{{Chapter3/Figs/Raster/}{Chapter3/Figs/}}
+\fi
+
+
 \chapter{Linear Time Gaussian Processes on Spheres}
 \label{chapter:vish}
 
@@ -25,13 +32,7 @@ We define a dot-product kernel, also known as a zonal kernel (we will use both t
 \end{equation}
 where $\kappa: [-1, 1] \rightarrow \Reals$ is a continuous function and referred to as the shape function. In other words, dot-product kernels only depend on the distance on the great circle between two inputs, rather than their location. They are the counterpart of stationary kernels $k(x, x') = \kappa(x - x')$, who are functions of the difference only. For example, where stationary kernels are translation invariant, dot-product kernel are rotationally invariant.
 
-TODO: Arc Cosine and Stationary kernels on the hypersphere
-% The first order Arc Cosine kernel mimics the computation of infinitely wide fully connected layers with ReLU activations. \citet{cho2009kernel} showed that for $\sigma(t) = \max(0, t)$, the covariance between function values of $f(\vx) = \sigma(\vw^\top \vx)$ for $\vw \sim \NormDist{0, d^{-1/2} \Eye_d}$ and $\vw \in \Reals^d$ is given by
-% \begin{equation}
-% \label{eq:arccosine}
-%     k(\vx, \vx') = \Exp{\vw}{\sigma(\vw^\top \vx)\, \sigma(\vw^\top \vx')} = \underbrace{\norm{\vx} \norm{\vx'}}_{\text{radial}}\ \underbrace{\frac{1}{\pi}\big( \sqrt{1 - t^2} + t\, (\pi - \arccos t) \big)}_{\text{angular (shape function) } s(t)},
-% \end{equation}
-% where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. The factorisation of the kernel in a radial and angular factor leads to an RKHS consisting of functions of the form $f(\vx) = \norm{\vx}\,g(\frac{\vx}{\norm{\vx}})$, where $g(\cdot)$ is defined on the unit hypersphere $\dsphere = \{\vx \in \Reals^d: \norm{\vx}_2 = 1\}$ but fully determines the function on $\Reals^d$.
+TODO: example Arc Cosine and Stationary kernels on the hypersphere
 
 
 We can associate a kernel operator $\mathcal{K}$ to a zonal kernel, as explained in \cref{section:theory:spectral-formulation}, which exhibits the form
@@ -93,79 +94,123 @@ Although it is typically stated without a proof, this theorem is already known i
     \sum_{n,j}
             \frac{{g}_{n, j} {h}_{n, j}}{\lambda_{n}}
 \end{equation}
-is the \emph{reproducing} inner product between two functions $g,h \in \rkhs$. The reproducing property of the RKHS implies that for $f \in \rkhs$: $f(x) = \langle f, k(x, \cdot) \rangle_\rkhs$, which will enable the constuction of spherical harmonic inducing features of the next section.
+is the \emph{reproducing} inner product between two functions $g,h \in \rkhs$. The reproducing property of the RKHS implies that for $f \in \rkhs$: $f(x) = \langle f, k(x, \cdot) \rangle_\rkhs$, which will enable the constuction of spherical harmonic inducing features of discussing in the following section.
 
-
-% The shape function can be interpreted as a kernel itself, since it is the restriction of $k(\cdot, \cdot)$ to the unit hypersphere. Furthermore its expression only depends on the dot-product between the inputs so it is a zonal kernel (also known as a dot-product kernel \citep{bietti2020deep}). This means that the eigenfunctions of the angular part of $k(\cdot, \cdot)$ are the spherical harmonics $\sh_{n, j}$ (we index them with a level $n$ and an index within each level $j \in \{1, \dots, \dnumharmonicsforlevel\}$) \citep{wendland2005,Dutordoir2020spherical}. Their associated eigenvalues only depend on $n$:
-% \begin{equation}
-% \label{eq:compute-fourier-coefficients}
-%     \lambda_{n} = 
-%    \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 s(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t},
-% \end{equation}
-% where $C_n^{(\alpha)}(\cdot)$ is the Gegenbauer polynomial\footnote{See \cref{app:sec:harmonics} for a primer on Gegenbauer polynomials and spherical harmonics.} of degree $n$, $\alpha = \frac{d-2}{2}$, $\omega_d$ is a constant that depends on the surface area of the hypersphere. Analytical expressions of $\lambda_n$ are provided in \cref{app:sec:compute-eigenvalues}.
-% The above implies that $k$ admits the Mercer representation:
-% \begin{equation}
-%     \label{eq:mercer}
-%     k(\vx, \vx') = \norm{\vx}\, \norm{\vx'} \sum_{n=0}^\infty \sum_{j=1}^{\dnumharmonicsforlevel}  \lambda_n \sh_{n, j}\left(\frac{\vx}{\norm{\vx}}\right)\, \sh_{n, j}\left(\frac{\vx'}{\norm{\vx'}}\right),
-% \end{equation}
-% and that the inner product between any two functions $g,\, h \in \rkhs$ is given by:
-% \begin{equation}
-% \label{eq:RKHSinnerproduct}
-% \big\langle g, h \big\rangle_{\rkhs} = 
-%     \sum_{n,j}
-%             \frac{{g}_{n, j} {h}_{n, j}}{\lambda_{n}}
-% \end{equation}
-% where $g_{n, j}$ and $h_{n, j}$ are the Fourier coefficients of $g$ and $h$, i.e. $g(\vx) = \sum_{n,j} g_{n,j} \norm{\vx} \sh_{n,j}(\vx)$.
-
+%%%%%%%%%%%%%%%%%%%%%%
 \section{Variational Spherical Harmonic Gaussian Processes}
-
-\subsection{Spherical Harmonics as Inducing Features}
 \label{sec:vish}
 
-We can now build on the results from the previous section to propose powerful and efficient sparse GPs models. We want features $\kux$ that exhibit non-local influence for expressiveness, and inducing variables that induce sparse structure in $\Kuu$ for efficiency. We achieve this by defining the inducing variables $u_m$ to be the inner product between the GP\footnote{Although $f$ does not belong to $\rkhs$ \citep{kanagawa2018gaussian}, such expression is well defined since the regularity of $\sh_{m}$ can be used to extend the domain of definition of the first argument of the inner product to a larger class of functions. See \citet{hensman2017variational} for a detailed discussion.} and spherical harmonics:\footnote{Note that in the context of inducing variables, we switch to a single integer $m$ to index the spherical harmonics and order them first by increasing level $\ell$, and then by increasing $k$ within a level.}
+We can now build on the results from the previous section, combined with interdomain inducing variables (see \cref{section:interdomain-inducing-variables}), to propose a novel sparse variational GP model. Specifically, we are going to use interdomain inducing variables that are defined using the zonal kernel's RKHS inner product. As a result we will obtain expressive features $\kux$ that exhibit non-local influence, and efficient inducing variables that induce diagonal structure in $\Kuu$. We achieve this by defining the inducing variables $u_m$ to be the inner product between the GP and spherical harmonics:\footnote{Note that in the context of inducing variables, we switch to a single integer $m$ to index the spherical harmonics and order them first by increasing level $n$, and then by increasing $j$ within a level.}
 \begin{equation}
-  u_m = \langle f, \sh_m\rangle_{\rkhs}.
+  u_m = \langle f, \sh_m\rangle_{\rkhs}\text{ for }m \in \{1, \ldots, M\}.
 \end{equation}
-
-To leverage these new inducing variables we need to compute two quantities: 1) the covariance between $u_m$ and $f$ for $\kux$, and 2) the covariance between the inducing variables themselves for the $\Kuu$ matrix. See \citet{GPflow2020multioutput} for an in-depth discussion of these concepts.
-
-The covariance of the inducing variables with $f$ are
-\begin{equation*}
-   \left[\kux \right]_m = \ExpSymb[f(\vx)\,u_m] % = \ExpSymb \left[f(x) u_m\right] 
-    = \langle k(\vx, \cdot), \sh_m \rangle_{\rkhs} 
-    = \sh_{m}(\vx),
-\end{equation*}
-where we relied on the linearity of both expectation and inner product and where we used the reproducing property of $\rkhs$.
-
-The covariance between the inducing variables is given by
-\begin{equation*}
+To leverage these new inducing variables we need to compute two quantities: 1) the covariance between $u_m$ and $f$ for $\kux$, and 2) the covariance between the inducing variables themselves for the $\Kuu$ matrix. Firstly, we compute the covariance of the inducing variables and the GP
+\begin{align}
+   \left[\kux \right]_m 
+    &= \ExpSymb[f(\cdot)\,u_m] && \text{Definition covariance} \\
+    &= \ExpSymb[f(\cdot)\,\langle f, \sh_m\rangle_{\rkhs}] && \text{Definition $u_m$} \\
+    &= \langle k(\cdot, \cdot), \sh_m \rangle_{\rkhs}   && {k(\cdot, \cdot) = \ExpSymb[f(\cdot) f]} \\
+    &= \phi_{m}(\cdot) && \text{Reproducing property.}
+\end{align}
+where we relied on the linearity of the expectation and the inner product and the reproducing property of $\rkhs$. Interestingly, using this construction we obtain the RKHS basis functions $\{\phi_m\}$ as the features for the sparse approximation. Secondly, the covariance between the inducing variables is given by
+\begin{equation}
     \left[\Kuu \right]_{m, m'} = \ExpSymb \left[u_m\,u_{m'} \right] 
     % = \ExpSymb \left[ \langle f, Y_{m} \rangle  \langle f, Y_{m'} \rangle  \right] 
     = \langle \sh_{m}, \sh_{m'} \rangle_{\rkhs} 
-    = \frac{\delta_{mm'}}{\widehat{a}_m}\, ,
-\end{equation*}
-where $\delta_{mm'}$ is the Kronecker delta. Crucially, this means that $\Kuu$ is a diagonal matrix with elements $1/(\widehat{a}_m)$.
-
-Substituting $\Kuu$ and $\kux$ into the sparse variational approximation (\cref{eq:qf}), leads to the following form for $q(f)$
-\begin{equation*}
-    \GP\left(\tilde{\bm{\Phi}}^\top(\vx) \vm;\ k(\vx, \vx') + \tilde{\bm{\Phi}}^\top(\vx) (\MS - \Kuu) \tilde{\bm{\Phi}}(\vx') \right),
-\end{equation*}
-with $\tilde{\bm{\Phi}}(\vx) = [\widehat{a}_m \phi_m(\vx)]_{m=1}^M$.
-
-% This sparse approximation has two main differences compared to a SVGP model with standard inducing points. First, the spherical harmonic inducing variables lead to features $k_\vu(\vx)$ with non-local structure. Second, the approximation $q(f)$ does not require any inverses anymore. The computational bottleneck of this model is now simply the matrix multiplication in the variance calculation, which has a $\BigO(N_{\text{batchsize}} M^2)$ cost. Compared to the $\BigO(M^3 + N_{\text{batchsize}} M^2)$ cost of inducing point SVGPs, this gives a significant speedup -- as we show in the experiments.
-
-% Finally, using v and diagonal covariance matrices $\Kuu$. Combined, this enables more accurate and more efficient GP modelling, as we will demonstrate in the next section. We can deal with regression using the Titsias bound \citep{titsias2009} in $\BigO(N M^2)$ and deal with non-conjugate likelihoods for classification using stochastic optimisation \citep{hensman2013} in $\BigO(N_{\text{batchsize}} M^2)$. 
-
-As is usual in sparse GP methods, the number of inducing variables $M$ is constrained by the computational budget available to the user. Given that we ordered the spherical harmonic by increasing $\ell$, choosing the first $M$ elements means we will select first features with low angular frequency. Provided that the kernel spectral density is a decreasing function (this will be true for classic covariances, but not for quasi-periodic ones), this means that the selected features correspond to the ones carrying the most signal according to the prior. In other words, the decomposition of the kernel can be compared to an infinite dimensional principal component analysis, and our choice of the inducing function is optimal since we pick the ones with the largest variance. This is illustrated in \cref{fig:variance_decay_SH}, which shows the analogue of \cref{fig:variance_decay_VFF} for spherical harmonic inducing functions.
+    = {\delta_{mm'} \over \lambda_m},
+\end{equation}
+where $\delta_{mm'}$ is the Kronecker delta. Crucially, this means that $\Kuu$ is a diagonal matrix $\textrm{diag}(\lambda_1, \lambda_2, \ldots, \lambda_M)^{-1}$ containing the inverse eigenvalues on its diagonal. Finally, substituting $\Kuu$ and $\kux$ into the sparse variational approximation (\cref{eq:qf}) leads to
+\begin{equation}
+\begin{aligned}
+    q(f) =
+    \GP\Big(\bm{\phi}^\top(x)\,\vm;\ k(x, x') + &{\bm{\phi}}^\top(x)(\MS - \Kuu){\bm{\phi}}(\vx') \Big),\\ &\text{with}\quad\bm{\phi}(x) = [\lambda_m \phi_m(x)]_{m=1}^M \in \Reals^M.
+\end{aligned}
+\end{equation}
+Through this construction we created a SVGP model with 1) spherical harmonic basis functions, and 2) a diagonal $\Kuu$ matrix, which means that we do not incur the cubic cost of matrix inversion in the evaluation of the model or the variational lower bound. The sperical harmonic basis functions have as advantage that they have global support, so that even a few of them are able to capture the rough shape of the function. This is similar to the Fourier series approximation, in which the first few terms are already able to roughly approximate the function. In the experiments we will discuss this phenomenon in more detail.
 
 \section{Homogeneous Extension to $\Reals^d$}
+
+\begin{figure}[tbh!]
+    \centering
+    \includegraphics[width=.6\textwidth]{mapping}
+    \caption{Illustration of the mapping between a 2D dataset (grey dots) embedded into a 3D space and its projection (orange dots) onto the unit half-circle using a linear mapping.\label{fig:mapping}}
+\end{figure}
+
+So far, the domain of interest has been the hypersphere $\dsphere$ . However, most regression problems in machine learning have inputs defined on $\Reals^d$. We address this problem as follows:
+TODO: explain setup
+
+Although this setup may seem very arbitrary, it is inspired by the important works on the limits of neural networks as Gaussian processes. The first order Arc Cosine kernel \citep{cho2009kernel} is the most well-known example and mimics the computation of infinitely wide fully connected layers with ReLU activations. Let $\sigma(t) = \max(0, t)$, then the covariance between function values of $f(\vx) = \sigma(\vw^\top \vx)$ for $\vw \sim \NormDist{0, d^{-1/2} \Eye_d}$ and $\vw \in \Reals^d$ is given by
+\begin{equation}
+\label{eq:arccosine}
+    k(\vx, \vx') = \Exp{\vw}{\sigma(\vw^\top \vx)\, \sigma(\vw^\top \vx')} = \underbrace{\norm{\vx} \norm{\vx'}}_{\text{radial}}\ \underbrace{\frac{1}{\pi}\big( \sqrt{1 - t^2} + t\, (\pi - \arccos t) \big)}_{\text{angular (shape function) } s(t)},
+\end{equation}
+where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. The factorisation of the kernel in a radial and angular factor leads to an RKHS consisting of functions of the form $f(\vx) = \norm{\vx}\,g(\frac{\vx}{\norm{\vx}})$, where $g(\cdot)$ is defined on the unit hypersphere $\dsphere = \{\vx \in \Reals^d: \norm{\vx}_2 = 1\}$ but fully determines the function on $\Reals^d$.
+
+% especially the \emph{arc-sine} kernel \citep{williams1998computation} and the \emph{arc-cosine} kernels \citep{cho2009kernel}. An arc-cosine kernel corresponds to the infinitely-wide limit of a single-layer ReLU-activated network with Gaussian weights. Let $\vx, \vx' \in \Reals^{d}$, such that $x_d = x'_d = b$, be an augmented input vector whose last entry corresponds to the bias. Then the arc-cosine kernel can be written as
+% \begin{multline*}
+%     k_{ac}(\vx, \vx') = \norm{\vx}\,\norm{\vx'}\,\underbrace{\frac{1}{\pi} \big( \sin \theta + (\pi - \theta) \cos \theta \big)}_{=J(\theta)}, \\
+%     \text{where}\quad\theta = \cos^{-1}\left(\frac{\vx\transpose\vx'}{\norm{\vx}\norm{\vx'}}\right).
+% \end{multline*}
+% The kernel is a function of the norm of the inputs $\norm{\vx}\,\norm{\vx'}$ and a factor $J(\theta)$ that only depends on the geodestic distance $\theta$ (or the great-circle distance) between the projection of $\vx$ and $\vx'$ on the unit hypersphere. 
 
 
 \section{Experiments}
 
+We start the experiments with a theoretical comparison of 
+
 \subsection{Comparison to Variational Fourier Features}
 
-\subsection{Toy Example on Banana}
+\begin{figure}[tbh!]
+  \centering
+\begin{subfigure}{0.36\textwidth}
+  \includegraphics[width=\textwidth]{VFF_decay}
+  \caption{VFF}
+  \label{fig:decay-vff}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.63\textwidth}
+  \includegraphics[width=\textwidth]{VISH_decay}
+  \caption{VISH}
+  \label{fig:decay-vish}
+\end{subfigure}\hfil % <-- added
+\caption{Decay rate}
+\label{fig:decay-vff-vs-vish}
+\end{figure}
 
-\subsection{Airline}
 
+As is usual in sparse GP methods, the number of inducing variables $M$ is constrained by the computational budget available to the user. Given that we ordered the spherical harmonic by increasing $\ell$, choosing the first $M$ elements means we will select first features with low angular frequency. Provided that the kernel spectral density is a decreasing function (this will be true for classic covariances, but not for quasi-periodic ones), this means that the selected features correspond to the ones carrying the most signal according to the prior. In other words, the decomposition of the kernel can be compared to an infinite dimensional principal component analysis, and our choice of the inducing function is optimal since we pick the ones with the largest variance. This is illustrated in \cref{fig:variance_decay_SH}, which shows the analogue of \cref{fig:variance_decay_VFF} for spherical harmonic inducing functions.
+
+\subsection{Toy Experiment: Banana Classification}
+
+The banana dataset is a 2D binary classification problem \citep{hensman2015scalable}. In \cref{fig:banana} we show three different fits of VISH with $M\in \{9,\ 225,\ 784\}$ spherical harmonics, which correspond respectively to maximum levels of $2$, $14$, and $27$ for our inducing functions. Since the variational framework provides a guarantee that more inducing variables must be monotonically better \citep{titsias2009}, we expect that increasing the number of inducing functions will provide improved approximations. This is indeed the case as we show in the rightmost panel: with increasing $M$ the ELBO converges and the fit becomes tighter.
+
+While this is expected behaviour for SVGP methods, it is not guaranteed by VFF. Given the Kronecker-structure used by VFF for this 2D experiment \citet{hensman2017variational} report that using a full rank covariance matrix for the variational distribution was intolerably slow. They also show that enforcing the Kronecker structure on the posterior results in an ELBO that {\em decreased} as frequencies were added, and they finally propose a sum-of-two-Kroneckers structure, but provide no guarantee that this would converge to the exact posterior in the limit of larger $M$. In VISH we do not need to impose any structure on the approximate covariance matrix $\MS$, so we retain the guarantee that adding more basis functions will move us closer to the posterior process. The method remains fast despite optimising over full covariance matrices: fitting the models displayed in \cref{fig:banana} only takes a few seconds on a standard desktop.
+
+\begin{figure}[tbh]
+    \centering
+    \includegraphics[width=\textwidth]{banana}
+    \caption{Classification of the 2D banana dataset with growing number of spherical harmonic basis functions. The right plot shows the convergence of the ELBO with respect to increasing numbers of basis functions.\label{fig:banana}}
+\end{figure}
+
+
+
+\subsection{Large-Scale Regression on Airline Delay}
+ 
+\begin{table}[tb]
+\centering
+\resizebox{\textwidth}{!}{\input{Chapter3/Tables/airline.tex} }
+\caption{Predictive mean squared errors (MSEs), negative log predictive densities (NLPDs) and wall-clock time in seconds with one standard deviation based on 10 random splits on the airline arrival delays experiment. Total dataset size is given by $N$ and in each split we randomly select 2/3 and 1/3 for training and testing.}
+\label{tab:airline}
+\end{table}
+
+
+This experiment illustrates three core capabilities of VISH: 1) it can deal with large datasets and 2) it is computationally and time efficient 3) the model improves performance in terms of NLPD.
+
+We use the 2008 U.S. airline delay dataset to asses these capabilities. The goal of this problem is to predict the amount of delay $y$ given eight characteristics $\vx$ of a flight, such as 
+the age of the aircraft (number of years since deployment), route distance, airtime, etc. We follow the exact same experiment setup as \citet{hensman2017variational}\footnote{\url{https://github.com/jameshensman/VFF}} and evaluate the performance on 4 datasets of size 10,000, 100,000, 1,000,000, and 5,929,413 (complete dataset), created by subsampling the original one. For each dataset we use two thirds of the data for training and one third for testing. Every split is repeated 10 times and we report the mean and one standard deviation of the MSE and NLPD. For every run the outputs are normalized to be a centered unit Gaussian. The inputs are normalized to [0, 1] for VFF and SVGP. For VISH we normalize the inputs so that each column falls within $[-v_d, v_d]$. The hyperparameter $v_d$ corresponds to the prior variance of the weights of an infinite-width fully-connected neural net layer (see \citet{cho2009kernel}). We can optimise for this weight-variance by back-propagation through $k_u(x)$ w.r.t. the ELBO. This is similar to the lengthscale hyperparameters of stationary kernels.
+
+\Cref{tab:airline} shows the outcome of the experiment. The results for VFF and SVGP are from \citet{hensman2017variational}. We observe that VISH improves on the other methods in terms of NLPD and is within error bars in terms of MSE. Given the variability in the data the GP models improve when more data is available during training.
+
+Given the dimensionality of the dataset, a full-VFF model is completely infeasible. As an example, using just four frequencies per dimension would already lead to $M = 4^8 = 65,536$ inducing variables. So VFF has to resort to an additive model with a prior covariance structure given as a sum of Mat\'ern-3/2 kernels for each input dimension, as in \cref{eq:vff-additive}. Each of the functions $f_d$ is approximated using 30 frequencies.
+We report two variants of VISH: one using all spherical harmonics up to degree 3 ($M$=210) and another up to degree 4 ($M$=660). As expected, the more inducing variables, the better the fit.
+
+We also report the wall clock time for the experiments (training and evaluation) for $N=10,000$ and $N=5,929,413$. All these experiments were ran on a single consumer-grade GPU (Nvidia GTX 1070). On the complete dataset of almost 6 million records, VISH took $41\pm0.81$ seconds on average. A-VFF required $75.61\pm0.75$ seconds and the SVGP method needed approximately 15 minutes to fit and predict. This shows that VISH is roughly two orders of magnitude faster than SVGP. A-VFF comes close to VISH but has to impose additive structure to keep its computational advantage.
