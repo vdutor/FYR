@@ -25,6 +25,15 @@ We define a dot-product kernel, also known as a zonal kernel (we will use both t
 \end{equation}
 where $\kappa: [-1, 1] \rightarrow \Reals$ is a continuous function and referred to as the shape function. In other words, dot-product kernels only depend on the distance on the great circle between two inputs, rather than their location. They are the counterpart of stationary kernels $k(x, x') = \kappa(x - x')$, who are functions of the difference only. For example, where stationary kernels are translation invariant, dot-product kernel are rotationally invariant.
 
+TODO: Arc Cosine and Stationary kernels on the hypersphere
+% The first order Arc Cosine kernel mimics the computation of infinitely wide fully connected layers with ReLU activations. \citet{cho2009kernel} showed that for $\sigma(t) = \max(0, t)$, the covariance between function values of $f(\vx) = \sigma(\vw^\top \vx)$ for $\vw \sim \NormDist{0, d^{-1/2} \Eye_d}$ and $\vw \in \Reals^d$ is given by
+% \begin{equation}
+% \label{eq:arccosine}
+%     k(\vx, \vx') = \Exp{\vw}{\sigma(\vw^\top \vx)\, \sigma(\vw^\top \vx')} = \underbrace{\norm{\vx} \norm{\vx'}}_{\text{radial}}\ \underbrace{\frac{1}{\pi}\big( \sqrt{1 - t^2} + t\, (\pi - \arccos t) \big)}_{\text{angular (shape function) } s(t)},
+% \end{equation}
+% where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. The factorisation of the kernel in a radial and angular factor leads to an RKHS consisting of functions of the form $f(\vx) = \norm{\vx}\,g(\frac{\vx}{\norm{\vx}})$, where $g(\cdot)$ is defined on the unit hypersphere $\dsphere = \{\vx \in \Reals^d: \norm{\vx}_2 = 1\}$ but fully determines the function on $\Reals^d$.
+
+
 We can associate a kernel operator $\mathcal{K}$ to a zonal kernel, as explained in \cref{section:theory:spectral-formulation}, which exhibits the form
 \begin{equation}
     \label{eq:kernel-operator-zonal}
@@ -35,48 +44,57 @@ To construct a Mercer representation of a zonal kernel's RKHS we require the eig
     \mathcal{K} \phi_n = \lambda_n \phi_n\qquad\text{and}\qquad \langle \phi_n, \phi_m \rangle_{L_2(\dsphere)} = \delta_{nm}.
 \end{equation}
 
-To obtain the eigensystem of $\mathcal{K}$ we will show that it commutes with the Laplace-Beltrami operator $\LaplaceBeltrami$, henceforth referred to as simply Laplacian or Laplace operator. We want to remind the reader that commuting operators share the same eigenfunctions, but not necessarily the same eigenvalues. Therefore, to find the eigenfunctions of the kernel operator $\mathcal{K}$, it suffice to find the eigenfunctions of the Laplacian. Fortunately, there exists a huge body of literature on the diagonalisation of the Laplace operator on $\dsphere$, and it is well-known that its eigenfunctions are given by the spherical harmonics. In the following paragraph we first proof the commutativity of the operators before coving RKHS and the spherical harmonic basis functions.
+To obtain the eigensystem of $\mathcal{K}$, we will show that $\mathcal{K}$ commutes with the Laplace-Beltrami operator $\LaplaceBeltrami$, henceforth referred to as simply the Laplacian or the Laplace operator. We want to remind the reader that commuting operators share the same eigenfunctions, but not necessarily the same eigenvalues. Therefore, to find the eigenfunctions of the kernel operator $\mathcal{K}$, it suffice to find the eigenfunctions of the Laplacian. Fortunately, the diagonalisation of the Laplace operator on $\dsphere$ is a well-studied problem. In the following paragraph we first proof the commutativity of the operators before covering the definition of the RKHS.
 
-% TODO Spherical Harmonics.
-% Basis for Square integrable functions on $\dsphere$
-% Number of basis functions 
-\paragraph{It now rest us to show that the Laplacian and the kernel operator commute.} For this, we first show that for zonal kernels and $x,s \in \dsphere$ the following property holds
+\paragraph{Commutativity of $\mathcal{K}$ and $\LaplaceBeltrami$.}
+We now proof that the Laplacian and the kernel operator of zonal kernels commute. For this, we first show that for zonal kernels and $x,s \in \dsphere$ the following property holds
 \begin{align}
-    \LaplaceBeltrami_x k(x, s) 
-     &= \nabla_x \cdot \nabla_x \kappa(x\transpose s) && \text{Definition $\LaplaceBeltrami$ and zonal kernels}\\
-     &= \nabla_x \cdot (s \kappa'(x\transpose s))  && \text{Chainrule} \\
-     &= \norm{s}^2 \kappa''(x\transpose s) = \kappa''(x \transpose s) && \text{Because } \norm{s} = 1.
+    \LaplaceBeltrami_x k(x, x') 
+     &= \nabla_x \cdot \nabla_x \kappa(x\transpose x') && \text{Definition $\LaplaceBeltrami$ and zonal kernels}\\
+     &= \nabla_x \cdot (x' \kappa'(x\transpose x'))  && \text{Chainrule} \\
+     &= \norm{x'}^2 \kappa''(x\transpose x') = \kappa''(x \transpose x') && \text{Because } \norm{x'} = 1.
 \end{align}
-Similarly, for $\LaplaceBeltrami_s k(x, s)$ we obtain $k''(x \transpose s)$, and as a result
+Similarly, for $\LaplaceBeltrami_s k(x, x')$ we obtain $k''(x \transpose x')$, and as a result
 \begin{equation}
     \label{eq:LaplaceBeltrami-x-s}
-\LaplaceBeltrami_x k(x, s) = \LaplaceBeltrami_s k(x, s).
+\LaplaceBeltrami_x k(x, x') = \LaplaceBeltrami_{x'} k(x, x').
 \end{equation}
-
-We now show that the Laplacian and the kernel operator of zonal kernels commute
+Relying on integration by parts and the previous result, we obtain
 \begin{align}
-    \mathcal{K} \left[\LaplaceBeltrami f\right] &= \int_{\dsphere} k(x, s) \left[\LaplaceBeltrami_x f(x)\right] \calcd{\nu(x)} && \text{Definition $\mathcal{K}$, \cref{eq:kernel-operator-zonal}}\\
-    &= \int_{\dsphere} f(x) \LaplaceBeltrami_x k(x, s)  \calcd{\nu(x)} && \text{Integration by parts}\\
-    &= \int_{\dsphere} f(x) \LaplaceBeltrami_s k(x, s)  \calcd{\nu(x)} = \LaplaceBeltrami \mathcal{K} f && \text{\cref{eq:LaplaceBeltrami-x-s}}.
+    \mathcal{K} \left[\LaplaceBeltrami f\right] &= \int_{\dsphere} k(x, x') \left[\LaplaceBeltrami_x f(x)\right] \calcd{\nu(x)} && \text{Definition $\mathcal{K}$, \cref{eq:kernel-operator-zonal}}\\
+    &= \int_{\dsphere} f(x) \LaplaceBeltrami_x k(x, x')  \calcd{\nu(x)} && 2\,\times\,\text{Integration by parts}\\
+    &= \int_{\dsphere} f(x) \LaplaceBeltrami_{x'} k(x, x')  \calcd{\nu(x)}  && \text{\cref{eq:LaplaceBeltrami-x-s}} \\
+    &= \LaplaceBeltrami \left[ \mathcal{K} f \right]
 \end{align}
-which in turn implies that these two operators share the same eigenfunctions. This result is of particular relevance to us since there is a huge body of literature on diagonalisation of the Laplace-Beltrami operator on $\dsphere$, and that it is well known that its eigenfunctions are given by the spherical harmonics. This reasoning can be summarised by the following theorem:
-\begin{theorem}[Mercer representation]
-Any zonal kernel $k$ on the hypersphere can be decomposed as
+which shows that the two operators commute and in turn implies that they share the same eigenfunctions. This result is of particular relevance to us since there is a huge body of literature on diagonalisation of the Laplace-Beltrami operator on $\dsphere$, and that it is well known that its eigenfunctions are given by the spherical harmonics. The spherical harmonics $\phi_{n,j}$ form an orthonormal basis for the square-integrable functions on the hypersphere. They are indexed with a level $n$ and an index within each level $j \in \{1, \dots, \dnumharmonicsforlevel\}$. See \cref{appendix:spherical-harmonics} for a comprehensive introduction to spherical harmonics, as well as a practical algorithm to compute them for relatively large $d$. This reasoning can be summarised by the following theorem:
+\begin{theorem}[Mercer decomposition]
+Any zonal kernel $k(x, x') = \kappa(x\transpose x')$ on the hypersphere can be decomposed as
 \begin{equation}
 \label{eq:kernel-form}
-    k(x, x') = \sum_{\ell=0}^{\infty} \sum_{k=1}^{\dnumharmonicsforlevel} \widehat{a}_{\ell, k} \sh_{\ell, k}(\vx) \sh_{\ell, k}(\vx'),
+    k(x, x') = \sum_{n=0}^{\infty} \sum_{j=1}^{\dnumharmonicsforlevel} \lambda_{n} \phi_{n,j}(x) \phi_{n,j}(x'),
 \end{equation}
-where $\vx,\vx' \in \dsphere$ and $\widehat{a}_{\ell, k}$ are positive coefficients, $\sh_{\ell,k}$ denote the elements of the spherical harmonic basis in $\dsphere$, and $N_\ell^d$ corresponds to the number of spherical harmonics for a given level $\ell$.
+where $x,x' \in \dsphere$ and $\lambda_{n}$ are positive coefficients, $\phi_{n,j}$ denote the elements of the spherical harmonic basis in $\dsphere$, and $\dnumharmonicsforlevel$ corresponds to the number of spherical harmonics for a given level $n$. As a result of the Funk-Hecke theorem, the associated eigenvalues only depending on the level $n$
+\begin{equation}
+    \label{eq:compute-eigenvalues}
+        \lambda_{n} = \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 \kappa(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t},
+\end{equation} 
+where $C_n^{(\alpha)}$ is the Gegenbauer polynomial of degree $n$, $\alpha = \frac{d-2}{2}$, $\omega_d$ is a constant that depends on the surface area of the hypersphere. Analytic expressions are given in \cref{appendix:spherical-harmonics}.
 \end{theorem}
-Although it is typically stated without a proof, this theorem is already known in some communities (see \citet{wendland2005} for a functional analysis exposition, or \citet{peacock1999cosmological} for its use in cosmology).
+Although it is typically stated without a proof, this theorem is already known in some communities (see \citet{wendland2005} for a functional analysis exposition, or \citet{peacock1999cosmological} for its use in cosmology). Given the Mercer decomposition, we can equivalently, define the associated RKHS as
+\begin{equation}
+    \label{eq:inner-product-rkhs}
+    \rkhs = \left\{
+    f = 
+    \sum_{n=0}^\infty \sum_{j=1}^{\dnumharmonicsforlevel} {f}_{n,j} \sh_{n, j}:
+    \norm{f}_{\rkhs} < \infty
+    \right\},
+    \quad\text{where}\quad
+    \langle g, h \rangle_{\rkhs} = 
+    \sum_{n,j}
+            \frac{{g}_{n, j} {h}_{n, j}}{\lambda_{n}}
+\end{equation}
+is the \emph{reproducing} inner product between two functions $g,h \in \rkhs$. The reproducing property of the RKHS implies that for $f \in \rkhs$: $f(x) = \langle f, k(x, \cdot) \rangle_\rkhs$, which will enable the constuction of spherical harmonic inducing features of the next section.
 
-
-% The first order Arc Cosine kernel mimics the computation of infinitely wide fully connected layers with ReLU activations. \citet{cho2009kernel} showed that for $\sigma(t) = \max(0, t)$, the covariance between function values of $f(\vx) = \sigma(\vw^\top \vx)$ for $\vw \sim \NormDist{0, d^{-1/2} \Eye_d}$ and $\vw \in \Reals^d$ is given by
-% \begin{equation}
-% \label{eq:arccosine}
-%     k(\vx, \vx') = \Exp{\vw}{\sigma(\vw^\top \vx)\, \sigma(\vw^\top \vx')} = \underbrace{\norm{\vx} \norm{\vx'}}_{\text{radial}}\ \underbrace{\frac{1}{\pi}\big( \sqrt{1 - t^2} + t\, (\pi - \arccos t) \big)}_{\text{angular (shape function) } s(t)},
-% \end{equation}
-% where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. The factorisation of the kernel in a radial and angular factor leads to an RKHS consisting of functions of the form $f(\vx) = \norm{\vx}\,g(\frac{\vx}{\norm{\vx}})$, where $g(\cdot)$ is defined on the unit hypersphere $\dsphere = \{\vx \in \Reals^d: \norm{\vx}_2 = 1\}$ but fully determines the function on $\Reals^d$.
 
 % The shape function can be interpreted as a kernel itself, since it is the restriction of $k(\cdot, \cdot)$ to the unit hypersphere. Furthermore its expression only depends on the dot-product between the inputs so it is a zonal kernel (also known as a dot-product kernel \citep{bietti2020deep}). This means that the eigenfunctions of the angular part of $k(\cdot, \cdot)$ are the spherical harmonics $\sh_{n, j}$ (we index them with a level $n$ and an index within each level $j \in \{1, \dots, \dnumharmonicsforlevel\}$) \citep{wendland2005,Dutordoir2020spherical}. Their associated eigenvalues only depend on $n$:
 % \begin{equation}
@@ -99,173 +117,55 @@ Although it is typically stated without a proof, this theorem is already known i
 % \end{equation}
 % where $g_{n, j}$ and $h_{n, j}$ are the Fourier coefficients of $g$ and $h$, i.e. $g(\vx) = \sum_{n,j} g_{n,j} \norm{\vx} \sh_{n,j}(\vx)$.
 
-\begin{enumerate}
-\item what is a dot-product kernel
-\item example 1: (deep) arc cosine
-\item example 2: stationary kernels
-\item decomposition
-\item proof
-\item refer to spherical harmonics
-\end{enumerate}
-
-
 \section{Variational Spherical Harmonic Gaussian Processes}
+
+\subsection{Spherical Harmonics as Inducing Features}
 \label{sec:vish}
 
-\subsection{Homogeneous Extension to $\Reals^d$}
+We can now build on the results from the previous section to propose powerful and efficient sparse GPs models. We want features $\kux$ that exhibit non-local influence for expressiveness, and inducing variables that induce sparse structure in $\Kuu$ for efficiency. We achieve this by defining the inducing variables $u_m$ to be the inner product between the GP\footnote{Although $f$ does not belong to $\rkhs$ \citep{kanagawa2018gaussian}, such expression is well defined since the regularity of $\sh_{m}$ can be used to extend the domain of definition of the first argument of the inner product to a larger class of functions. See \citet{hensman2017variational} for a detailed discussion.} and spherical harmonics:\footnote{Note that in the context of inducing variables, we switch to a single integer $m$ to index the spherical harmonics and order them first by increasing level $\ell$, and then by increasing $k$ within a level.}
+\begin{equation}
+  u_m = \langle f, \sh_m\rangle_{\rkhs}.
+\end{equation}
+
+To leverage these new inducing variables we need to compute two quantities: 1) the covariance between $u_m$ and $f$ for $\kux$, and 2) the covariance between the inducing variables themselves for the $\Kuu$ matrix. See \citet{GPflow2020multioutput} for an in-depth discussion of these concepts.
+
+The covariance of the inducing variables with $f$ are
+\begin{equation*}
+   \left[\kux \right]_m = \ExpSymb[f(\vx)\,u_m] % = \ExpSymb \left[f(x) u_m\right] 
+    = \langle k(\vx, \cdot), \sh_m \rangle_{\rkhs} 
+    = \sh_{m}(\vx),
+\end{equation*}
+where we relied on the linearity of both expectation and inner product and where we used the reproducing property of $\rkhs$.
+
+The covariance between the inducing variables is given by
+\begin{equation*}
+    \left[\Kuu \right]_{m, m'} = \ExpSymb \left[u_m\,u_{m'} \right] 
+    % = \ExpSymb \left[ \langle f, Y_{m} \rangle  \langle f, Y_{m'} \rangle  \right] 
+    = \langle \sh_{m}, \sh_{m'} \rangle_{\rkhs} 
+    = \frac{\delta_{mm'}}{\widehat{a}_m}\, ,
+\end{equation*}
+where $\delta_{mm'}$ is the Kronecker delta. Crucially, this means that $\Kuu$ is a diagonal matrix with elements $1/(\widehat{a}_m)$.
+
+Substituting $\Kuu$ and $\kux$ into the sparse variational approximation (\cref{eq:qf}), leads to the following form for $q(f)$
+\begin{equation*}
+    \GP\left(\tilde{\bm{\Phi}}^\top(\vx) \vm;\ k(\vx, \vx') + \tilde{\bm{\Phi}}^\top(\vx) (\MS - \Kuu) \tilde{\bm{\Phi}}(\vx') \right),
+\end{equation*}
+with $\tilde{\bm{\Phi}}(\vx) = [\widehat{a}_m \phi_m(\vx)]_{m=1}^M$.
+
+% This sparse approximation has two main differences compared to a SVGP model with standard inducing points. First, the spherical harmonic inducing variables lead to features $k_\vu(\vx)$ with non-local structure. Second, the approximation $q(f)$ does not require any inverses anymore. The computational bottleneck of this model is now simply the matrix multiplication in the variance calculation, which has a $\BigO(N_{\text{batchsize}} M^2)$ cost. Compared to the $\BigO(M^3 + N_{\text{batchsize}} M^2)$ cost of inducing point SVGPs, this gives a significant speedup -- as we show in the experiments.
+
+% Finally, using v and diagonal covariance matrices $\Kuu$. Combined, this enables more accurate and more efficient GP modelling, as we will demonstrate in the next section. We can deal with regression using the Titsias bound \citep{titsias2009} in $\BigO(N M^2)$ and deal with non-conjugate likelihoods for classification using stochastic optimisation \citep{hensman2013} in $\BigO(N_{\text{batchsize}} M^2)$. 
+
+As is usual in sparse GP methods, the number of inducing variables $M$ is constrained by the computational budget available to the user. Given that we ordered the spherical harmonic by increasing $\ell$, choosing the first $M$ elements means we will select first features with low angular frequency. Provided that the kernel spectral density is a decreasing function (this will be true for classic covariances, but not for quasi-periodic ones), this means that the selected features correspond to the ones carrying the most signal according to the prior. In other words, the decomposition of the kernel can be compared to an infinite dimensional principal component analysis, and our choice of the inducing function is optimal since we pick the ones with the largest variance. This is illustrated in \cref{fig:variance_decay_SH}, which shows the analogue of \cref{fig:variance_decay_VFF} for spherical harmonic inducing functions.
+
+\section{Homogeneous Extension to $\Reals^d$}
 
 
 \section{Experiments}
 
+\subsection{Comparison to Variational Fourier Features}
 
-\section{Spherical Harmonics}
-\label{section:spherical-harmonics}
+\subsection{Toy Example on Banana}
 
-Spherical harmonics are a special set of functions defined on the hypersphere and play a central role in harmonic analysis and approximation theory \citep{wendland2005}. They originate from solving Laplace's equation, and form a complete set of orthogonal functions. Any sufficiently regular function defined on the sphere can be written as a sum of these spherical harmonics, similar to the Fourier series with sines and cosines. Spherical harmonics are defined in arbitrary dimensions \citep{frye2014,dai2013}, but lack explicit formulations and practical implementations in dimensions larger than three. %This is mainly due to the complexity of solving Laplace's equation in higher dimensions.
+\subsection{Airline}
 
-In this section, we propose a novel algorithm to construct spherical harmonics in $d$ dimensions. The algorithm is based on the existence of a fundamental system of points on the hypersphere, which we select in a greedy fashion through optimisation. This result in spherical harmonics that are a linear combination of zonal functions and form an orthnormal basis on $\dsphere$. The algorithm lends itself well for implementation in Python and TensorFlow, which we provide at: \url{https://github.com/vdutor/SphericalHarmonics}. The code is accompagnied by a series of tests that show that the properties of spherical harmonics, as detailed below, hold. Before outlining the algorithm, we briefly define and cover the important properties of spherical harmonics in $\Reals^d$. We refer the interested reader to \citet{dai2013,frye2014} for a comprehensive overview.
-% exist bases of spherical harmonics consisting of entirely zonal harmonics
-
-We adopt the usual $L_2$ inner product for functions $f: \dsphere \rightarrow \Reals$ and $g: \dsphere \rightarrow \Reals$ restricted to the sphere 
-\begin{equation}
-     \langle f, g\rangle_{L_{2}(\dsphere)} = \frac{1}{\darea} \int_{\dsphere} f(x)\,g(x) \, \calcd{\omega},
-\end{equation}
-where $\calcd{\omega(x)}$ is the surface area measure such that $\darea$ denotes the surface area of $\dsphere$ 
-\begin{equation}
-\label{eq:surface}
-    \darea = \int_{\dsphere} \calcd{\omega(x)} = \frac{2 \pi ^ {d/2}}{\Gamma(d/2)}.
-\end{equation}
-
-Throughout this section we use the following notation and definitions. For $x = (x_1, \ldots, x_d) \in \Reals^d$ and $\alpha = (\alpha_1, \ldots, \alpha_d) \in \Naturals^d$, a monomial $x^\alpha$ is a product $x^\alpha = x_1^{\alpha_1} \ldots x_d^{\alpha_d}$, which has degree $|\alpha| = \alpha_1 + \ldots \alpha_d$. A real homogeneous polynomial $P(x)$ of degree $n$ is a linear combination of monomials of degree $n$ with real coefficients, that is $P(x) = \sum_{|\alpha| = n} c_{\alpha} x^{\alpha}$, with $c_\alpha \in \Reals$. We denote $\mathcal{P}_n^d$ as the space of real homogeneous polynomials of degree $n$, and can show that, counting the cardinality of the set $\{\alpha \in \Naturals^d: |\alpha| = n\}$, that $\dim(\mathcal{P}_n^d) = \binom{n + d -1}{n}$. A function $f:\Reals^d \rightarrow \Reals$ is said to be \emph{harmonic} if $\Delta f = 0$, where $\Delta = \partial_{x_1}^2 + \ldots + \partial_{x_d}^2$ and $\partial_{x_i}$ the partial derivate w.r.t. the $i$-th variable.
-
-\begin{definition}
-    The spherical harmonics of degree $n$ of $d$ variables, denoted by $\mathcal{H}_{n}^d$, is the linear space of harmonic and homogeneous in degree $n$ polynomials on $\dsphere$, that is 
-    \begin{equation}
-        \mathcal{H}_{n}^d = \{p \in \mathcal{P}_n^d: \Delta p = 0\ \text{and}\ p: \dsphere \rightarrow \Reals \}.
-    \end{equation}
-The dimensionality of $ \mathcal{H}_{n}^d$ is given by
-\begin{equation}
-\label{eq:numharmonics}
-\dim(\mathcal{H}_{n}^d) = \frac{2 n + d - 2}{n} \binom{n + d - 3}{d - 1} := \dnumharmonicsforlevel.
-\end{equation}
-\end{definition}
-
-The space $\mathcal{H}_{n}^d$ has an orthonormal basis consisting of $\dnumharmonicsforlevel$ functions, denoted by $\{\phi_{n,j}\}_{j=1}^{\dnumharmonicsforlevel}$. The basis satisfy the following properties
-\begin{equation}
-    \mathcal{H}_{n}^d  = \textrm{span}\left(\phi_{n,1}, \ldots, \phi_{n, \dnumharmonicsforlevel}\right),\quad\text{and}\quad\left\langle \phi_{n, j}, \phi_{n', j'}\right\rangle_{L_2(\dsphere)} = \delta_{n n'} \delta_{j j'}.
-\end{equation}
-
-From the completeness and orthonormality of the spherical harmonic basis $\{\phi_{n,j}\}_{n=0,j=1}^{\infty,\dnumharmonicsforlevel}$, it can be shown that they also form a basis of square-integrable functions \citep{frye2014}. This means that we can decompose a function $f: \dsphere \rightarrow \Reals$ as
-\begin{equation}
-    f = \sum_{n=0}^{\infty} \sum_{j=1}^{\dnumharmonicsforlevel} \widehat{f}_{n, j} \phi_{n, j},\quad\text{with}\quad\widehat{f}_{n, j} = \langle f, \phi_{n, j} \rangle_{L_2(\dsphere)},
-\end{equation}
-which can be seen as the spherical analogue of the Fourier decomposition of periodic functions onto a basis of sines and cosines.
-
-Subsequently, we will coin the set $\{\phi_{n,j}\}$ as the spherical harmonics. They are indexed by $n$ and $j$, where $n=0,1,2,\ldots$ denotes the degree (or level) and $j=1,\cdots,\dnumharmonicsforlevel$ denotes the orientation of the spherical harmonic. We are interested in finding $\{\phi_{n,j}\}$ in arbitrary dimension. For $d=2$, is solving Laplace's equation ($\Delta p = 0$) directly relatively straightforward. Doing so reveals that $N^{2}_0 = 1$ with $\phi_{0, 1} = 1$ and $N^{2}_n = 2$ for all $n > 0$ with $\phi_{n, 1}(\theta) = \sqrt{2} \cos(n \theta)$ and $\phi_{n, 2}(\theta) = \sqrt{2} \sin(n \theta)$. This shows that on the unit circle $\sphere^1$, the spherical harmonics correspond to the Fourier basis. For $d=3$, we can also directly solve Laplace's diffential equation to find $\dnumharmonicsforlevel = 2n + 1$ and a closed form solution for $\{\phi_{n,j}\}$. However, for $d > 3$, explicit formulations for the spherical harmonics become very rare. To the best of our knowledge, the only explicit formulation we could find is in \citet[Theorem~5.1]{dai2013}, which consists of a product over polynomials. This makes the implementation cumbersome and numerically unstable, and only practically useful up to 10 dimensions \citep{Dutordoir2020spherical}. However, making use of the following two theorems, in \cref{sec:sec:zonal-spherical-harmonics} we can derive another formulation for the basis of spherical harmonics as a sum of polynomials, rather than a product. The connection between spherical harmonics and orthogonal polynomials becomes clear in the next theorem.
-\begin{theorem}[Addition]
-    \label{theorem:addition}
-    Let $\{\phi_{n,j}\}_{j=1}^{\dnumharmonicsforlevel}$ be an orthonormal basis for the spherical harmonics of degree $n$ and $x,x' \in \dsphere$. Then the Gegenbauer polynomial $C_n^{(\alpha)}: [-1, 1] \rightarrow \Reals$ of degree $n$ can be written as
-\begin{equation}
-    \sum_{j=1}^{\dnumharmonicsforlevel} \phi_{n, j}(x) \phi _{n, j}(x') = \frac{n + \alpha}{\alpha}\,
-    C_n^{(\alpha)}(x\transpose x')\quad\text{with}\quad \alpha = \frac{d-2}{2}.
-\end{equation}
-\end{theorem}
-As a result of the relation between the Gegenbauer polynomial and the spherical harmonics, are the Gegenbauer polynomial sometimes referred to as ultraspherical polynomials. For $d=2$, Theorem~1 recovers the addition formula of the cosine function, as indeed $\cos(\theta) \cos(\theta') + \sin(\theta) \sin(\theta') = \cos(\theta - \theta')$ and $C_n^{(0)}(t) = \cos(n \arccos(t))$. The Gegenbauer polynomials with $\alpha=0$ are better known as the Chebyshev polynomials. Another connection between spherical harmonics and Gegenbauer polynomials is given by the Funk-Hecke theorem and applies to zonal functions. A zonal function on $\dsphere$ is a function that is rotationally invariant w.r.t. to a point on the sphere, $\eta \in \dsphere$. This means that the function only depends on the inner product $\eta\transpose x$, or equivalently, on the geodestic distance between $\eta$ and $x$.
-
-\begin{theorem}[Funk-Hecke]
-    % \label{appendix:theorem:funk}
-    Let $f$ be an integrable function such that $\int_{-1}^1 \| f(t)\| (1 - t^2)^{(d-3)/2} \calcd{t}$ is finite and $d \ge 2$. Then for every $\phi_{n,j}$  and $\eta \in \dsphere$
-    \begin{equation}
-        \frac{1}{\darea} \int_{\dsphere} f(\eta\transpose x)\,\phi_{n, j}(x)\, \calcd{\omega(x)} = {\lambda}_{n}\,\phi_{n,j}(\eta),
-    \end{equation}
-    where ${\lambda}_{n}$ is a constant defined by
-    \begin{equation}
-        \lambda_{n}  = 
-        % \frac{\Omega_{d-2}}{\Omega_{d-1}} 
-        \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 f(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t},
-    \end{equation}
-    with $\alpha = \frac{d-2}{2}$ and $\omega_d = \frac{\Omega_{d-2}}{\Omega_{d-1}}$.
-\end{theorem}
-
-\subsection{Zonal Spherical Harmonics}
-\label{sec:zonal-spherical-harmonics}
-
-From the Funk-Hecke and the Addition theorem, it is clear that there is a strong connection between spherical harmonics and Gegenbauer polynomials. The next theorem develops this connection further as it states that a basis for spherical harmonics can be written as zonal Gegenbauer polynomials. % , that is $\phi_{n,j}(x) = \sum_i \beta_{j,i} C_n^{(\alpha)}(\eta_i\transpose x)$. In what comes next we show how to select the weights $\beta_{j,i}$ and zonal directions $\eta_i \in \dsphere$.
-
-\begin{theorem}
-    If $\{\eta_1, \ldots, \eta_{\dnumharmonicsforlevel} \} \in \dsphere$ is a fundamental system of points on the sphere, then $\{C_n^{(\alpha)}(\eta_i \cdot)\}_{i=1}^{\dnumharmonicsforlevel}$ is a basis for $\mathcal{H}_n^d$. A collection of points $\{\eta_1, \ldots, \eta_M \} \in \dsphere$ is called a fundamental system of degree $n$ consisting of $M$ points on the sphere if
-    \begin{equation}
-        \label{eq:fundamental-system}
-        \textrm{det}\ 
-        \begin{bmatrix}
-            C_n^{(\alpha)}(1) & \ldots & C_n^{(\alpha)}(\eta_1\transpose\eta_M) \\
-            \vdots & & \vdots \\
-            C_n^{(\alpha)}(\eta_M\transpose\eta_1) & \ldots & C_n^{(\alpha)}(1)
-        \end{bmatrix} > 0.
-    \end{equation}
-\end{theorem}
-Finding a basis for $\mathcal{H}_n^d$ is thus equivalent to finding a set of $\dnumharmonicsforlevel$ points that satisfy \cref{eq:fundamental-system}. Crucially, \citet[Lemma~3]{dai2013} show that there always exists a fundamental system of degree $n$ and $\dnumharmonicsforlevel$ points.
-
-Following the theoreom, if we wish to construct $\{\phi_{n,j}\}_{n,j}$, an \emph{orthnormal} basis for the spherical harmonics, we firstly need a fundamental system of points. Secondly, while $\{C_n^{(\alpha)}(\eta_i \cdot)\}_{i=1}^{\dnumharmonicsforlevel}$ forms a basis for $\mathcal{H}_n^d$, the basis is not orthonormal. We will thus have to apply a Gram-Schmidt process for orthonormalising the basis. We detail both steps in the next paragraphs.
-
-\paragraph{Construction of a fundamental system of points}
-We propose to build a fundamental system of points in a greedy fashion by iteratively adding a point on the sphere that maximises the determinant as given in \cref{eq:fundamental-system}. Therefore, let $\veta = \{\eta_1, \ldots, \eta_M\}$ contain the M points that are already in the fundamental system and define the following block-matrix of size $(M+1) \times (M+1)$ as
-\begin{equation}
-    \renewcommand\arraystretch{1.3}
-    \MM(\veta, \eta_{*}) =
-    \left[
-        \begin{array}{c|c}
-          C_n^{\alpha}(\veta\veta\transpose) \in \Reals^{M \times M} & C_n^{(\alpha)}(\veta\eta_{*}\transpose) \in \Reals^{M \times 1} \\
-          \hline
-          C_n^{(\alpha)}(\veta\eta_{*}\transpose)\transpose \in \Reals^{1 \times M} & C_n^{(\alpha)}(1) \in \Reals
-        \end{array}
-    \right],
-\end{equation}
-where $C_n^{(\alpha)}(\veta\veta\transpose)$ corresponds to elementwise evaluating the Gegenbauer polynomial $C_n^{(\alpha)}: [-1, 1] \rightarrow \Reals$ for each element of $\veta \veta\transpose \in \Reals^{M \times M}$. A new point $\eta$ is added to the fundamental system if it maximises the determinant
-\begin{equation}
-    \eta = \argmax_{\eta_* \in \dsphere}\ \textrm{det}\left(\MM(\veta, \eta_{*})\right),
-\end{equation}
-in order to satisfy the condition in \cref{eq:fundamental-system}.
-% \begin{equation}
-%     \textrm{det}(\MC_n^{(\alpha)}(\veta, \eta_{*})) = \textrm{det}(C_n^{(\alpha)}(\veta\veta\transpose))\left(C_n^{(\alpha)}(1) - C_n^{(\alpha)}(\eta_{*}\veta\transpose) \left[C_n^{(\alpha)}(\veta\veta\transpose)\right]^{-1} C_n^{(\alpha)}(\veta\eta_{*}\transpose) \right).
-% \end{equation}
-Computing the determinant can be done efficiently using Schur' complement. Furthermore, as $\veta$ and $C_n^{(\alpha)}(1.0)$ are constants the optimisation problem boils down to
-\begin{equation}
-    \label{eq:optimisation-determinant}
-    \eta = \argmin_{\eta_* \in \Reals^d}\ C_n^{(\alpha)}(\frac{\eta_{*}}{\norm{\eta_*}}\veta\transpose) \left[C_n^{(\alpha)}(\veta\veta\transpose)\right]^{-1} C_n^{(\alpha)}(\veta\frac{\eta_{*}\transpose}{\norm{\eta_*}}).
-\end{equation}
-The complete algorithm is given in \cref{alg:fundamental-system}.
-
-\begin{algorithm}[H]
-    \SetAlgoLined
-    \DontPrintSemicolon
-    \KwInput{Degree $n$ and dimension $d$}
-    \KwResult{Fundamental system $\veta = \{\eta_0, \ldots \eta_{\dnumharmonicsforlevel}\}$}
-    $\eta_1 = (0,0,\ldots,1)$ \tcp*{d-dimensional vector pointing north}
-    $\veta = \{\eta_1\}$,
-    $\alpha = \frac{d-2}{2}$,
-    $i = 2$\;
-     \While{$i \le \dnumharmonicsforlevel$}{
-        $\eta = \argmax_{\eta_* \in \Reals^d}\ \textrm{det}(\MM(\veta, \frac{\eta_{*}}{\norm{\eta_*}}))$
-        \tcp*{Using a local optimisation method (e.g., BFGS) and \cref{eq:optimisation-determinant}}
-        Add $\eta$ to $\veta$\;
-        i = i + 1\;
-      }
-     \caption{Construction of fundamental system\label{alg:fundamental-system}}
-\end{algorithm}
-
-\paragraph{Orthonormalisation}
-
-Proof $\langle C_n^{(\alpha)}(\eta_i\transpose \cdot), C_n^{(\alpha)}(\eta_j\transpose \cdot) \rangle_{L_2(\dsphere)} = C_n^{(\alpha)}(\eta_i\transpose\eta_j)$ as a result of the Funk-Hecke theorem.
-
-\begin{theorem}
-   Let $\veta = \{\eta_1, \ldots, \eta_{\dnumharmonicsforlevel}\}$ be a fundamental system of degree $n$ consisting of $\dnumharmonicsforlevel$ points, and $\ML$ the inverse cholesky factor of $C_n^{(\alpha)}(\veta\veta\transpose)$. Then for $j=1,\ldots,\dnumharmonicsforlevel$ and
-    \begin{equation}
-    \phi_{n,j}(x) = \sum_{i=1}^{\dnumharmonicsforlevel} \ML_{j,i}\,C_n^{(\alpha)}(\eta_i\transpose x)
-    \end{equation}
-    is $\{\phi_{n,j}\}$ an orthnormal basis for the spherical harmonics $\mathcal{H}_n^d$.
-\end{theorem}
-% Let $\MM = C_n^{(\alpha)}(\veta\veta\transpose)$ and $\ML \ML\transpose = \MM$, which exists because the set $\veta$ satisfies \cref{eq:fundamental-system}.
-% \begin{equation}
-% \phi_{n,j}(x) = \sum_i [\ML\inv]_{j,i} C_n^{(\alpha)}(\eta_i\transpose x)
-% \end{equation}
