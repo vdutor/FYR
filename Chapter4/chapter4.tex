@@ -1,3 +1,12 @@
+%!TEX root = ../thesis.tex
+\ifpdf
+    \graphicspath{{Chapter4/Figs/Vector/}{Chapter4/Figs/PDF/}{Chapter4/Figs/}}
+\else
+    \graphicspath{{Chapter4/Figs/Raster/}{Chapter4/Figs/}}
+\fi
+
+
+
 \chapter{Deep Neural Networks as Point Estimates for Deep Gaussian Processes}
 \label{chapter:dnn-as-point-estimate-for-dgps}
 
@@ -38,26 +47,26 @@ The RKHS of the Arc Cosine kernel consists solely of functions that are equal to
 %This is not a desired property for many datasets and a common approach
 To circumvent this problem we artificially increase the input space dimension by concatenating a constant to each input vector. In other words, the data space is embedded in a larger space with an offset such that it does not contain the origin anymore. This is analogous to the bias unit in multi-layer perceptron (MLP) layers in neural networks. For convenience we will denote by $(d-1)$ the dimension of the original data space (i.e. the number of input variables), and by $d$ the dimension of the extended space on which the Arc Cosine kernel is defined.
 
-% \begin{figure}[t]
-%     \centering
-%      \begin{subfigure}[b]{0.49\textwidth}
-%          \centering
-%         \includegraphics[clip, trim=0cm 1.8cm 0cm 1.6cm, width=\textwidth]{figures/mapping/relu_mapping.pdf}
-%         %  \caption{$g_m(\vx) = \norm{\vw_m} \norm{\vx} \max\left(0, \frac{\vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}}\right)$}
-%         \caption{ReLU: $\sigma(t) = \max(0, t)$}
-%          \label{fig:projection:relu}
-%      \end{subfigure}
-%      \hfill
-%      \begin{subfigure}[b]{0.49\textwidth}
-%          \centering
-%         \includegraphics[clip, trim=0cm 1.8cm 0cm 1.6cm, width=\textwidth]{figures/mapping/softplus_mapping.pdf}
-%         %  \caption{$g_m(\vx) = \norm{\vw_m}\norm{\vx} \left(\log(1 + \exp(\frac{3 \vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}})) - c\right) $}
-%         \caption{Softplus: $\sigma(t) = \log(1 + \exp(3\,t))$}
-%          \label{fig:projection:softplus}
-%      \end{subfigure}
+\begin{figure}[t]
+    \centering
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+        \includegraphics[clip, trim=0cm 1.8cm 0cm 1.6cm, width=\textwidth]{relu_mapping}
+        %  \caption{$g_m(\vx) = \norm{\vw_m} \norm{\vx} \max\left(0, \frac{\vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}}\right)$}
+        \caption{ReLU: $\sigma(t) = \max(0, t)$}
+         \label{fig:projection:relu}
+     \end{subfigure}
+     \hfill
+     \begin{subfigure}[b]{0.49\textwidth}
+         \centering
+        \includegraphics[clip, trim=0cm 1.8cm 0cm 1.6cm, width=\textwidth]{softplus_mapping}
+        %  \caption{$g_m(\vx) = \norm{\vw_m}\norm{\vx} \left(\log(1 + \exp(\frac{3 \vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}})) - c\right) $}
+        \caption{Softplus: $\sigma(t) = \log(1 + \exp(3\,t))$}
+         \label{fig:projection:softplus}
+     \end{subfigure}
 %    \caption{Activated inducing function ${g}_m(\vx) = \norm{\vx}\,\norm{\vw_m}\, \relu\left( \vw_m^\top \vx \, / \, \norm{\vw_m}\,\norm{\vx}\right)$ where $\sigma(\cdot)$ correspond to the ReLU \textbf{(a)} and Softplus \textbf{(b)}. Although the input domain is $\Reals^2$ we only plot the value of the function on the unit circle $\sphere^1$ (orange), and on the subspace that has an offset of $1$ in the $x_2$ direction (blue). The linear radial component of ${g}_m(\cdot)$ creates a one-to-one mapping between the blue curve and the upper half of the orange one.}%We observe that for these slices the functions correspond to the ReLU and Softplus neural network activation functions, respectively.}
-%    \label{fig:projection}
-% \end{figure}
+   \label{fig:projection}
+\end{figure}
 
 The inducing functions $g_m(\cdot)$ play an important role because they determine the shape of the SVGP's basis functions. Ideally they should be defined such that their restriction to the $(d - 1)$-dimensional original data space matches classic activation functions, such as the ReLU or the Softplus, exactly. However, this results in an angular component for $g_m(\cdot)$ that is not necessarily zonal. Since this property will be important later on, we favour the following alternative definition that enforces zonality:
 \begin{equation}
