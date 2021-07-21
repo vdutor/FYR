@@ -5,7 +5,7 @@
 \fi
 
 
-\chapter{Linear Time Gaussian Processes on Spheres}
+\chapter{Linear Time Gaussian Processes on HyperSpheres}
 \label{chapter:vish}
 
 Stationary kernels, i.e. translation invariant covariances, are ubiquitous in machine learning when the input space is Euclidean. When working on the hypersphere, their spherical counterpart are dot-product kernels, which are invariant to rotations. They are the main object under study in this chapter. In \cref{sec:rkhs-dotproduct-kernels}, we first show how we can construct the Reproducing Kernel Hilbert Space (RKHS) of dot-product kernel on the hypersphere. \Cref{sec:vish} uses the RKHS to construct an efficient variational interdomain inducing variable for Gaussian processes on the hypersphere. We will then show how to expand the GP onto the complete domain $\Reals^d$ and conclude with a series of experiments, showing the speed and accuracy of the proposed approach.
@@ -214,3 +214,11 @@ Given the dimensionality of the dataset, a full-VFF model is completely infeasib
 We report two variants of VISH: one using all spherical harmonics up to degree 3 ($M$=210) and another up to degree 4 ($M$=660). As expected, the more inducing variables, the better the fit.
 
 We also report the wall clock time for the experiments (training and evaluation) for $N=10,000$ and $N=5,929,413$. All these experiments were ran on a single consumer-grade GPU (Nvidia GTX 1070). On the complete dataset of almost 6 million records, VISH took $41\pm0.81$ seconds on average. A-VFF required $75.61\pm0.75$ seconds and the SVGP method needed approximately 15 minutes to fit and predict. This shows that VISH is roughly two orders of magnitude faster than SVGP. A-VFF comes close to VISH but has to impose additive structure to keep its computational advantage.
+
+
+\section{Conclusion}
+
+We showed, 
+
+
+In the next chapter, 
