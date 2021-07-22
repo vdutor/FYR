@@ -124,12 +124,12 @@ as a result of the reproducing property of the RKHS. It becomes clear that this 
 
 In this section we describe the mathematical pitfalls that can be encountered \citep[e.g.,][]{sun2021neural} when defining new inducing variables of the form of \cref{eq:def-inducing-variable}, and how we address them. We discuss two problems: 1) the GP and the inducing function are not part of the RKHS, 2) the inducing functions are not expressive enough to explain the prior. Both problems manifest themselves in an approximation that is overly smooth and over-estimates the predictive variance.
 
-% \begin{figure}[t]
-%     \centering
-%     \includegraphics[width=\linewidth]{figures/truncation_activations_circle.pdf}
-%     \caption{The exact ReLU and Softplus activation function and its approximation for different truncation levels and dimensions. These functions correspond to the orange function in \cref{fig:projection} plotted on a line rather than on the circle.}
-%     \label{fig:activation-functions}
-% \end{figure}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\linewidth]{truncation_activations_circle}
+    \caption{The exact ReLU and Softplus activation function and its approximation for different truncation levels and dimensions. These functions correspond to the orange function in \cref{fig:projection} plotted on a line rather than on the circle.}
+    \label{fig:activation-functions}
+\end{figure}
 
 The Mercer representation of the kernel given in \cref{eq:mercer} implies that we have direct access to the Karhunen–Lo\`eve representation of the GP:
 \begin{equation}
@@ -152,23 +152,21 @@ An alternative to ensure the series convergence for any combination of kernel an
 \paragraph{Unexpressive inducing variables through truncation (\cref{fig:trunc})} The main concern with this truncation approach, however, comes from elsewhere: the larger $\tilde N$ is, the closer $\tilde{g}_m(\cdot)$ is to $g_m(\cdot)$, but the larger $\norm{\tilde{g}_m(\cdot)}_{\rkhs}$ becomes (to the point where it may be arbitrarily large). Similarly to ridge regression where the norm acts as a regulariser, using inducing functions with a large norm in SVGP models comes with a penalty which enforces more smoothness in the approximate posterior and limits its expressiveness.
 \Cref{fig:trunc} shows how the norm of our ReLU inducing functions grow in the RKHS. So by making $\tilde{N}$ larger such that we approximate the ReLU better, we incur a greater penalty in the ELBO for using them. This leads to unexpressive inducing variables, which can be seen by the growing predictive uncertainty. The Softplus, which is part of the RKHS, does not suffer from this.
 
-% 
-
-% \begin{figure}[t]
-% \centering
-% \begin{minipage}{.48\textwidth}
-%   \centering
-%   \includegraphics[width=\linewidth]{figures/truncation_colors.pdf}
-%   \captionof{figure}{\textbf{Top:} Predictive variance an SVGP fit on a synthetic dataset using our ReLU (left) and Softplus (right) inducing variables for $\tilde{N}={\color{C0}10}, {\color{C1}15}$ and ${\color{C3}25}$. \textbf{Bottom:} the norm of the inducing function $\tilde{g}_m(\cdot)$ as a function of $\tilde{N}$.}
-%   \label{fig:trunc}
-% \end{minipage}\hfill
-% \begin{minipage}{.48\textwidth}
-%   \centering
-%   \includegraphics[width=\linewidth]{figures/fits_and_variance_mat52_arccosine.pdf}
-%   \captionof{figure}{\textbf{Top:} Predictive mean and variance for an SVGP model using our Softplus inducing variables for the Mat\'ern-5/2 (left) and Arc Cosine (right) kernel. \textbf{Bottom:} The two terms that constitute the predictive variance.}
-%   \label{fig:matern-vs-arccosine}
-% \end{minipage}
-% \end{figure}
+\begin{figure}[t]
+\centering
+\begin{minipage}{.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{truncation_colors}
+  \captionof{figure}{\textbf{Top:} Predictive variance an SVGP fit on a synthetic dataset using our ReLU (left) and Softplus (right) inducing variables for $\tilde{N}={\color{C0}10}, {\color{C1}15}$ and ${\color{C3}25}$. \textbf{Bottom:} the norm of the inducing function $\tilde{g}_m(\cdot)$ as a function of $\tilde{N}$.}
+  \label{fig:trunc}
+\end{minipage}\hfill
+\begin{minipage}{.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{fits_and_variance_mat52_arccosine}
+  \captionof{figure}{\textbf{Top:} Predictive mean and variance for an SVGP model using our Softplus inducing variables for the Mat\'ern-5/2 (left) and Arc Cosine (right) kernel. \textbf{Bottom:} The two terms that constitute the predictive variance.}
+  \label{fig:matern-vs-arccosine}
+\end{minipage}
+\end{figure}
 
 \paragraph{Unexpressive inducing variables through spectra mismatch (\cref{fig:matern-vs-arccosine})} Any stationary kernel whose inputs $\vx,\vx' \in \dsphere$ are restricted to the unit hypersphere is a zonal kernel (i.e., the kernel only depends on the dot-product). This means that we are not limited to only the Arc Cosine because we can replace the shape function in \cref{eq:arccosine} by any stationary kernel, and our approach would still hold. For example, we could use the Mat\'ern-5/2 shape function with $s_{\text{mat-5/2}}(t) = \left(1+{{{\sqrt {5}} t}}+{{5 t^{2}}/{3}}\right)\exp \left(-{{{\sqrt {5}} t}}\right)$. However, in \cref{fig:matern-vs-arccosine} we compare the fit of an SVGP model using a Mat\'ern-5/2 kernel (left) to a model using an Arc Cosine kernel (right). While both models use our Softplus inducing variables, we clearly observe that the Mat\'ern kernel gives rise to a worse posterior model (lower ELBO and an over-estimation of the variance). In what follows we explain why this is the case.
 
@@ -213,20 +211,21 @@ The DGP and ADGP both use the Arc Cosine kernel. The main difference is that the
 
 In \cref{fig:uci} we see that in general our ADGP model is more accurate than its neural network initialisation (Vanilla model) in terms of RMSE. This is a result of the second stage of training in which we use the ELBO rather than the MSE, which is especially beneficial to prevent overfitting on the smaller datasets. When it comes to NLPD, ADGP shows improvements over its NN initialisation for 5 datasets out of 7 and consistently outperforms classic DGPs.
 
-% \begin{figure}
-%     \centering
-%     \includegraphics[width=\textwidth]{figures/uci_small.pdf}
-%     \caption{UCI: Root Mean Squared Error (RMSE) and Negative Log Predictive Density (NLPD) with 25\% and 75\% quantile error bars based on 5 splits. Dataset size and dimension given in parentheses.}
-%     \label{fig:uci}
-% \end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{uci_small}
+    \caption{UCI: Root Mean Squared Error (RMSE) and Negative Log Predictive Density (NLPD) with 25\% and 75\% quantile error bars based on 5 splits. Dataset size and dimension given in parentheses.}
+    \label{fig:uci}
+\end{figure}
 
 \paragraph{Large scale image classification}
 % \label{sec:experiment:classification}
 In this experiment we measure the performance of our models under dataset shifts \citep{Ovadia2019}. For MNIST and Fashion-MNIST the out-of-distribution (OOD) test sets consist of rotated digits --- from 0\textdegree (i.e. the original test set) to 180\textdegree. For CIFAR-10 we apply four different types of corruption to the test images with increasing intensity levels from 0 to 5. For MNIST and FASHION-MNIST the models consist of two convolutional and max-pooling layers, followed by two dense layers with 128 units and 10 output heads. The dense layers are either fully-connected neural network layers using a Softplus activation function (Vanilla and Dropout), or our Activated GP layers using the Arc Cosine kernel and Softplus inducing variables (ADGP). For the CIFAR-10 models, we use the residual convolutional layers from a ResNet~\citep{he2016deep} to extract useful features before passing them to our dense GP or NN layers. Details of the model architectures are given in \cref{app:sec:experiment}. As previously, the ADGP model is initialised to the solution of the Vanilla model, and training is then continued using the ELBO. In \cref{fig:image-classification} we observe that the models perform very similar in terms of prediction accuracy, but that ADGP better account for uncertainty as evidenced by the Test Log Likelihood metric.% (TLL) we see that the ADGP outperforms the NN approaches by quite a margin.
 
-% \begin{figure}[t]
-%     \centering   
-%     \includegraphics[width=\textwidth]{figures/image_classification.pdf}
-%     \caption{Results on the rotated MNIST, FASHION-MNIST and corrupted CIFAR-10, showing the mean and std. dev. of the accuracy \textbf{(top)}, and test log-likelihood (TLL) \textbf{(bottom)}.}
-%     \label{fig:image-classification}
-% \end{figure}
+\begin{figure}[t]
+    \centering   
+    \includegraphics[width=\textwidth]{image_classification}
+    \caption{Results on the rotated MNIST, FASHION-MNIST and corrupted CIFAR-10, showing the mean and std. dev. of the accuracy \textbf{(top)}, and test log-likelihood (TLL) \textbf{(bottom)}.}
+    \label{fig:image-classification}
+\end{figure}
+

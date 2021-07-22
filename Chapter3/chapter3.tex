@@ -67,7 +67,9 @@ Relying on integration by parts and the previous result, we obtain
     &= \int_{\dsphere} f(x) \LaplaceBeltrami_{x'} k(x, x')  \calcd{\nu(x)}  && \text{\cref{eq:LaplaceBeltrami-x-s}} \\
     &= \LaplaceBeltrami \left[ \mathcal{K} f \right]
 \end{align}
-which shows that the two operators commute and in turn implies that they share the same eigenfunctions. This result is of particular relevance to us since there is a huge body of literature on diagonalisation of the Laplace-Beltrami operator on $\dsphere$, and that it is well known that its eigenfunctions are given by the spherical harmonics. The spherical harmonics $\phi_{n,j}$ form an orthonormal basis for the square-integrable functions on the hypersphere. They are indexed with a level $n$ and an index within each level $j \in \{1, \dots, \dnumharmonicsforlevel\}$. See \cref{appendix:spherical-harmonics} for a comprehensive introduction to spherical harmonics, as well as a practical algorithm to compute them for relatively large $d$. This reasoning can be summarised by the following theorem:
+which shows that the two operators commute and in turn implies that they share the same eigenfunctions. This result is of particular relevance to us since there is a huge body of literature on diagonalisation of the Laplace-Beltrami operator on $\dsphere$, and that it is well known that its eigenfunctions are given by the spherical harmonics. The spherical harmonics $\phi_{n,j}$ form an orthonormal basis for the square-integrable functions on the hypersphere. They are indexed with a level $n$ and an index within each level $j \in \{1, \dots, \dnumharmonicsforlevel\}$. See \cref{appendix:spherical-harmonics} for a comprehensive introduction to spherical harmonics, as well as a practical algorithm to compute them for relatively large $d$. \Cref{fig:harmonics} shows the first 4 levels of spherical harmonics in $\Reals^3$.
+
+The above reasoning about the commutativity of the Laplace-Beltrami and kernel operator and the diagonalisation of the Laplace-Beltrami operator by the spherical harmonics, can be summarised by the following theorem:
 \begin{theorem}[Mercer decomposition]
 Any zonal kernel $k(x, x') = \kappa(x\transpose x')$ on the hypersphere can be decomposed as
 \begin{equation}
@@ -128,13 +130,31 @@ where $\delta_{mm'}$ is the Kronecker delta. Crucially, this means that $\Kuu$ i
 \end{equation}
 Through this construction we created a SVGP model with 1) spherical harmonic basis functions, and 2) a diagonal $\Kuu$ matrix, which means that we do not incur the cubic cost of matrix inversion in the evaluation of the model or the variational lower bound. The sperical harmonic basis functions have as advantage that they have global support, so that even a few of them are able to capture the rough shape of the function. This is similar to the Fourier series approximation, in which the first few terms are already able to roughly approximate the function. In the experiments we will discuss this phenomenon in more detail.
 
+Note that while the inducing variables $\{u_m\}$ are independent under the prior (i.e. $p(\vu) = \NormDist{\bm{0}, \Kuu}$ with $\Kuu$ a diagonal matrix), that does not imply that the posterior over the inducing variables is diagonal as well. As a result, we still parameterise $q(\vu) = \NormDist{\vm, \MS}$, where $\MS$ is a full-rank matrix which captures all the pairwise covariances.
+
 \section{Homogeneous Extension to $\Reals^d$}
 
-\begin{figure}[tbh!]
-    \centering
-    \includegraphics[width=.6\textwidth]{mapping}
-    \caption{Illustration of the mapping between a 2D dataset (grey dots) embedded into a 3D space and its projection (orange dots) onto the unit half-circle using a linear mapping.\label{fig:mapping}}
+\begin{figure}[t]
+\centering
+\begin{minipage}{.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth]{harmonics}
+  \captionof{figure}{Spherical Harmonics on $\sphere^2$}
+  \label{fig:harmonics}
+\end{minipage}\hfill
+\begin{minipage}{.48\textwidth}
+  \centering
+  \includegraphics[width=\linewidth,trim=1.5cm 1.6cm 1.cm 1.55cm,clip=true]{mapping}
+  \captionof{figure}{Example Homogeneous Extension}
+  \label{fig:mapping}
+\end{minipage}
 \end{figure}
+
+% \begin{figure}[tbh!]
+%     \centering
+%     \includegraphics[width=.6\textwidth]{mapping}
+%     \caption{Illustration of the mapping between a 2D dataset (grey dots) embedded into a 3D space and its projection (orange dots) onto the unit half-circle using a linear mapping.\label{fig:mapping}}
+% \end{figure}
 
 So far, the domain of interest has been the hypersphere $\dsphere$ . However, most regression problems in machine learning have inputs defined on $\Reals^d$. We address this problem as follows:
 TODO: explain setup
