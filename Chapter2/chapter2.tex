@@ -45,6 +45,7 @@ We can now specify the GP at this finite set of points and use the rules of cond
 The conditional distribution over the whole function $p(f(\cdot) \given f(\vx) = \vf)$ has the exact same form as in \cref{eq:chapter1:conditional}. This is mathematically slightly confusing because the random variable $f(\vx)$ is included both on the left and right-hand-side of the conditioning, but the equation is technically correct, as discussed in \citet{matthews16,van2020framework,Leibfried2020Tutorial}.
 
 \subsection{The Beauty of Gaussian Process Regression: Exact Bayesian Inference}
+\label{sec:gp-exact-inference}
 
 A defining advantages of GPs is that we can perform exact Bayesian inference in the case of regression. % In this section we briefly discuss the general methodology of Bayesian modelling and how this is performed by GPs.
 % \paragraph{Problem Defintion} 
@@ -194,7 +195,7 @@ The last step follows from the fact that derivative of $k$ w.r.t. $\theta$ is $-
 
 
 
-\section{Kernels and Reproducing Kernel Hilbert Space}
+\section{A Kernel Perspective on Gaussian Processes}
 
 Kernel have a rich history in machine learning and functional analysis, and have enabled the developement of versatile algorithms to analyse and process data. Kernels became widely noticed by the ML community through Support Vector Machines (SVMs), who prior to the deep learning revolution, dominated many machine learning benchmarks. %, where they were used as a replacement of the simple we used a kernel function $k(x,x')$ instead of $x\transpose x'$. This means that rather than using $x\top x'$, one uses a function $k(x, x')$, which corresonponds to an inner-product in some space $\phi(x)\top \phi(x')$. This concept is also referred to as the ``kernel trick'' in the litarture. This made SVMs a compelling model for non-linear modelling problems. 
 % Prior to the deep learning revolution, kernel SVMs sat atop the leaderboards on many machine learning problems. 
@@ -273,6 +274,7 @@ Mercer's theorem describes the kernel $k$ in terms of $\{(\lambda_n, \phi_n)\}$,
 \begin{theorem}[Mercer]
   Let $\mathcal{X}$ be a compact metric space, $\nu$ a positive measure on $\mathcal{X}$ and $\{(\lambda_n, \phi_n)\}$ the eigensystem of a p.d. kernel as described above, then
 \begin{equation}
+  \label{eq:mercer}
   k(x,x')  = \sum_n \lambda_n \phi_n(x) \phi_n(x'),\quad\text{for}\ x,x\in \mathcal{X}
 \end{equation}
 where the convergence is absolute and uniform.
@@ -301,13 +303,16 @@ The reproducing property of the Mercer representation of an RKHS is straightforw
 
 Through the Mercer decomposition of a kernel we can define a Gaussian process, this is known as the Karhunen-Lo\`eve expansion. We can define $f \sim \GP(0, k)$ as
 \begin{equation}
+  \label{eq:karhunen-loeve}
     f = \sum_n \sqrt{\lambda_n} \xi_n \phi_n\quad\text{with}\quad\xi_n \sim \NormDist{0, 1}
 \end{equation}
 as indeed the covariance between two points is given by
-\begin{equation}
-  \Cov(f(x), f(x')) = \sum_{n,m} \sqrt{\lambda_m} \sqrt{\lambda_n} \ExpSymb[\xi_n \xi_m] \phi_n(x) \phi_m(x') = \sum_n \lambda_n \phi_n(x) \phi_n(x') = k(x, x'),
-\end{equation}
-as a consequence of the i.d.d. and unit variance of the random variables $\{\xi_n\}$.
+\begin{align}
+  \Cov(f(x), f(x')) 
+  &= \sum_{n,m} \sqrt{\lambda_m} \sqrt{\lambda_n} \ExpSymb[\xi_n \xi_m] \phi_n(x) \phi_m(x') && \cref{eq:karhunen-loeve}\\
+  &= \sum_n \lambda_n \phi_n(x) \phi_n(x')  &&   \ExpSymb[\xi_n \xi_m] = \delta_{n\,m}\\
+  &= k(x, x') && \cref{eq:mercer}.
+\end{align}
 
 Using the  Karhunen-Lo\`eve expression to compute the RKHS norm of a GP sample $f$ yields $\norm{f}^2_\rkhs = \sum_{n} \xi_{n}^2$, which is a diverging series. This shows that GP samples do not belong to the RKHS of their defining kernel, which may seem surprising. A straightforward solution to this problem is to truncate the Karhunen-Lo\`eve expansion and to only use the first $\tilde{N}$ eigenvalues and functions: $f = \sum_n^{\tilde{N}} \sqrt{\lambda_n} \xi_n \phi_n$, which approximates the kernel and the corresonponding GP.
 

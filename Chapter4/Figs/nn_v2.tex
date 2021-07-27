@@ -1,0 +1,108 @@
+\documentclass[border=0mm]{standalone}
+
+\usepackage{bm}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\newcommand{\vh}{\bm{h}}
+\newcommand{\vw}{\bm{w}}
+\newcommand{\vv}{\bm{v}}
+\newcommand{\trans}{^{\top}}
+\newcommand{\Reals}{\mathbb{R}}
+
+\begin{document}
+\pagestyle{empty}
+
+\def\layersep{1.2cm}
+\def\Xdim{3}
+\def\Zonedim{11}
+\def\Honedim{2}
+\def\Ztwodim{11}
+\def\Htwodim{3}
+\def\Zthreedim{11}
+\def\Ydim{1}
+
+\begin{tikzpicture}[shorten >=1pt,->,draw=black!20, node distance=\layersep]
+    \tikzstyle{every pin edge}=[<-,shorten <=1pt]
+    \tikzstyle{neuron}=[circle,minimum size=10pt,inner sep=0pt, draw=black]
+    \tikzstyle{annot} = [right, font=\large]
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Neurons
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \foreach \name / \x in {1,...,\Xdim}
+    % This is the same as writing \foreach \name / \y in {1/1,2/2,3/3,4/4}
+        \node[neuron] (X-\name) at (\x,0) {};
+
+    % z_1
+    \foreach \name / \x in {1,...,\Zonedim}
+        \path[xshift=-4cm]
+            node[neuron] (Z1-\name) at (\x, -\layersep) {};
+
+    % h_1
+    \foreach \name / \x in {1,...,\Honedim}
+        \path[xshift=.55cm]
+            node[neuron] (H1-\name) at (\x, -2 * \layersep) {};
+
+    % z_2
+    \foreach \name / \x in {1,...,\Ztwodim}
+        \path[xshift=-4cm]
+            node[neuron] (Z2-\name) at (\x, -3 * \layersep) {};
+
+    % h_2
+    \foreach \name / \x in {1,...,\Htwodim}
+        \path node[neuron] (H2-\name) at (\x, -4 * \layersep) {};
+
+    % z_3
+    \foreach \name / \x in {1,...,\Zthreedim}
+        \path[xshift=-4cm]
+            node[neuron] (Z3-\name) at (\x, -5 * \layersep) {};
+
+    % % y
+    \foreach \name / \x in {1,...,\Ydim}
+        \path[xshift=1cm]
+            node[neuron] (Y-\name) at (\x, -6 * \layersep) {};
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Connections
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \foreach \source in {1,...,\Xdim}
+        \foreach \dest in {1,...,\Zonedim}
+            \path (X-\source) edge (Z1-\dest);
+
+    \foreach \source in {1,...,\Zonedim}
+        \foreach \dest in {1,...,\Honedim}
+            \path (Z1-\source) edge (H1-\dest);
+
+    \foreach \source in {1,...,\Honedim}
+        \foreach \dest in {1,...,\Ztwodim}
+            \path (H1-\source) edge (Z2-\dest);
+
+    \foreach \source in {1,...,\Ztwodim}
+        \foreach \dest in {1,...,\Htwodim}
+            \path (Z2-\source) edge (H2-\dest);
+
+    \foreach \source in {1,...,\Htwodim}
+        \foreach \dest in {1,...,\Zthreedim}
+            \path (H2-\source) edge (Z3-\dest);
+
+    \foreach \source in {1,...,\Zthreedim}
+        \foreach \dest in {1,...,\Ydim}
+            \path (Z3-\source) edge (Y-\dest);
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Annotations
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    \node[annot] (x) at (7.3, -0 * \layersep) {$x \in\mathbb{R}^d$};
+    \node[annot] (x) at (7.3, -1 * \layersep) {$\sigma(\vw_1 x) \in \Reals^{M}$};
+    \node[annot] (x) at (7.3, -2 * \layersep) {$h_1 = \vv_1^\top \sigma(\vw_1 x) \in \Reals^{d_{1}}$};
+    \node[annot] (x) at (7.3, -3 * \layersep) {$\sigma(\vw_2 h_1) \in \Reals^M$};
+    \node[annot] (x) at (7.3, -4 * \layersep) {$h_2 = \vv_2^\top \sigma(\vw_2 h_1) \in \Reals^{d_{2}}$};
+    \node[annot] (x) at (7.3, -5 * \layersep) {$\sigma(\vw_3 h_2) \in \Reals^M$};
+    \node[annot] (x) at (7.3, -6 * \layersep) {$y = \vv_3^\top \sigma(\vw_3 h_2) \in \Reals$};
+
+
+\end{tikzpicture}
+
+\end{document}

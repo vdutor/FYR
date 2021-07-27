@@ -125,7 +125,8 @@ where $\delta_{mm'}$ is the Kronecker delta. Crucially, this means that $\Kuu$ i
 \begin{equation}
 \begin{aligned}
     q(f) =
-    \GP\Big(\bm{\phi}^\top(x)\,\vm;\ k(x, x') + &{\bm{\phi}}^\top(x)(\MS - \Kuu){\bm{\phi}}(\vx') \Big),\\ &\text{with}\quad\bm{\phi}(x) = [\lambda_m \phi_m(x)]_{m=1}^M \in \Reals^M.
+    \GP\Big(\tilde{\bm{\phi}}^\top(x)\,\vm;\ k(x, x') + &\tilde{\bm{\phi}}^\top(x)(\MS - \Kuu)\tilde{\bm{\phi}}(\vx') \Big),\\ 
+    &\text{with}\quad\tilde{\bm{\phi}}(x) = [\lambda_m \phi_m(x)]_{m=1}^M \in \Reals^M.
 \end{aligned}
 \end{equation}
 Through this construction we created a SVGP model with 1) spherical harmonic basis functions, and 2) a diagonal $\Kuu$ matrix, which means that we do not incur the cubic cost of matrix inversion in the evaluation of the model or the variational lower bound. The sperical harmonic basis functions have as advantage that they have global support, so that even a few of them are able to capture the rough shape of the function. This is similar to the Fourier series approximation, in which the first few terms are already able to roughly approximate the function. In the experiments we will discuss this phenomenon in more detail.
@@ -171,28 +172,38 @@ where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. Indeed, we observe how 
 which leads to an RKHS consisting of functions defined on $\Reals^d$ of the form $g(x) = \norm{x}\,f(\frac{x}{\norm{x}})$, where $f \in \rkhs$ (from \cref{eq:rkhs-sphere}) is defined on the unit hypersphere but fully determines the function on $\Reals^d$.
 
 
-\section{Related Work}
+\section{Relation to Variational Fourier Features}
+
+The most closely related method to the presented method, which going forward we are going to refer to as Variational Inducing Spherical Harmonics (VISH), is the Variational Fourier Feature (VFF) approach proposed by \citet{hensman2017variational}. VFF is an interdomain method where the inducing variables are given by a Mat\'ern RKHS inner product between the GP and elements of the Fourier basis:
+\begin{equation}
+u_m = \langle f, \psi_m \rangle_\rkhs,
+\end{equation}
+where $\psi_0 = 1$, $\psi_{2m}=\cos(m x)$ and $\psi_{2m+1}=\sin(m x)$ if the input space is $[0, 2 \pi]$. This leads to
+\begin{equation}
+    \Kuu = \left[\langle \psi_i , \psi_{j} \rangle_\rkhs^{} \right]_{i, j = 0}^{M-1}\qquad\text{and}\qquad\kux = \left[ \psi_i(x)\right]_{i = 0}^{M-1}\, .
+\end{equation}
+This results in several advantages. First, the features $\kux$ are exactly the elements of the Fourier basis, which are independent of the kernel parameters and can be precomputed. Second, the matrix $\Kuu$ is the sum of a diagonal matrix plus low rank matrices. This structure can be used to drastically reduce the computational complexity. Finally, the variance of the inducing variables typically decays quickly with increasing frequencies, which means that by selecting the first $M$ elements of the Fourier basis we pick the features that carry the most signal.
+
+The main flaw of VFF comes from the way it generalises to multidimensional input spaces. The approach in~\citet{hensman2017variational} for getting a set of $d$-dimensional inducing functions consists of taking the outer product of $d$ univariate basis and to consider separable kernels so that the elements of $\Kuu$ are given by the product of the inner products in each dimension. For example, in dimension 2, a set of $M^2$ inducing functions is given by $\{(x_1, x_2) \mapsto \psi_i(x_1)\psi_j(x_2)\}_{0 \leq i, j \leq M-1}$, and entries on $\Kuu$ are $\langle \psi_i\psi_j, \psi_k\psi_l \rangle_{\mathcal{H}_{k_1 k_2}^{}}^{} = \langle \psi_i, \psi_k \rangle_{\mathcal{H}_{k_1}^{}}^{} \langle \psi_j, \psi_l \rangle_{\mathcal{H}_{k_2}^{}}^{}$. This construction scales poorly with the dimension: for example choosing a univariate basis as simple as $\{1, \cos, \sin\}$ for an eight-dimensional problem already results in more that 6,500 inducing functions. Additionally, this construction is very inefficient in terms of captured variance, as we illustrate in  \Cref{fig:decay-vff} for a 2D input space. The figure shows that the prior variance associated with the inducing function $\psi_i(x_1)\psi_j(x_2)$ vanishes quickly when both $i$ and $j$ increase. This means that most of the inducing functions on which the variational posterior is built are irrelevant, whereas some important ones such as $\psi_i(x_1)\psi_0(x_2)$ or $\psi_0(x_1)\psi_j(x_2)$ for $i, j \geq \sqrt{M}$ are important but ignored. Although we used a 2D example to illustrate this poor behaviour, it is important to bear in mind that the issue gets exacerbated for higher dimensional input spaces.
+
+On the contrary for VISH, given that we ordered the spherical harmonic by increasing level $n$, choosing the first $M$ elements means we will select first inducing functions with low angular frequency (see \cref{fig:harmonics}). Provided that the kernel spectral density is a decreasing function (this will be true for classic covariances, but not for quasi-periodic ones), this means that the selected inducing variables correspond to the ones carrying the most signal according to the prior. In other words, the decomposition of the kernel can be compared to an infinite dimensional principal component analysis, and our choice of the inducing function is optimal since we pick the ones with the largest variance. This is illustrated in \cref{fig:decay-vish}, which shows the analogue of \cref{fig:decay-vff} for spherical harmonic inducing functions.
+
 
 \begin{figure}[tbh!]
   \centering
 \begin{subfigure}{0.49\textwidth}
-  \includegraphics[width=\textwidth]{VFF}
+  \includegraphics[width=\textwidth]{VFF_v2}
   \caption{VFF}
   \label{fig:decay-vff}
 \end{subfigure}\hfil % <-- added
 \begin{subfigure}{0.49\textwidth}
-  \includegraphics[width=\textwidth]{VISH}
+  \includegraphics[width=\textwidth]{VISH_v2}
   \caption{VISH}
   \label{fig:decay-vish}
 \end{subfigure}\hfil % <-- added
-\caption{Decay rate}
+\caption{Illustration of the variance of the prior and the inducing variables when using VFF or VISH with a two dimensional input space. Each square corresponds to an inducing function $\psi_{i,j}$ (VFF) or $\phi_{n,j}$ (VISH) and the area of each square is proportional to the variance of the associated inducing variable. For a given number of inducing variables as highlighted with the blue line, VFF does not select the inducing variables that contribute the most to the prior. The selection in VISH on the other hand is optimal.}
 \label{fig:decay-vff-vs-vish}
 \end{figure}
-
-\begin{enumerate}
-    \item Variational Fourier Features
-    \item Variational Orthogonal Features
-\end{enumerate}
 
 
 % especially the \emph{arc-sine} kernel \citep{williams1998computation} and the \emph{arc-cosine} kernels \citep{cho2009kernel}. An arc-cosine kernel corresponds to the infinitely-wide limit of a single-layer ReLU-activated network with Gaussian weights. Let $\vx, \vx' \in \Reals^{d}$, such that $x_d = x'_d = b$, be an augmented input vector whose last entry corresponds to the bias. Then the arc-cosine kernel can be written as
@@ -207,29 +218,6 @@ which leads to an RKHS consisting of functions defined on $\Reals^d$ of the form
 
 We evaluate our method Variational Inference with Spherical Harmonics (VISH) on a regression and a classification problem to demonstrate that VISH performs competitively in terms of accuracy and uncertainty quantification, while also being extremely fast (modelling a dataset of 6 million 8D datapoints in less than 2 minutes on a standard desktop).
 
-% TODO:
-% \subsection{Comparison to Variational Fourier Features}
-
-% \begin{figure}[tbh!]
-%   \centering
-% \begin{subfigure}{0.36\textwidth}
-%   \includegraphics[width=\textwidth]{VFF_decay}
-%   \caption{VFF}
-%   \label{fig:decay-vff}
-% \end{subfigure}\hfil % <-- added
-% \begin{subfigure}{0.63\textwidth}
-%   \includegraphics[width=\textwidth]{VISH_decay}
-%   \caption{VISH}
-%   \label{fig:decay-vish}
-% \end{subfigure}\hfil % <-- added
-% \caption{Decay rate}
-% \label{fig:decay-vff-vs-vish}
-% \end{figure}
-
-
-% The main flaw of VFF comes from the way it generalises to multidimensional input spaces. The approach in~\citet{hensman2017variational} for getting a set of $d$-dimensional inducing functions consists of taking the outer product of $d$ univariate basis and to consider separable kernels so that the elements of $\Kuu$ are given by the product of the inner products in each dimension. For example, in dimension 2, a set of $M^2$ inducing functions is given by $\{(x_1, x_2) \mapsto \psi_i(x_1)\psi_j(x_2)\}_{0 \leq i, j \leq M-1}$, and entries on $\Kuu$ are $\langle \psi_i\psi_j, \psi_k\psi_l \rangle_{\mathcal{H}_{k_1 k_2}^{}}^{} = \langle \psi_i, \psi_k \rangle_{\mathcal{H}_{k_1}^{}}^{} \langle \psi_j, \psi_l \rangle_{\mathcal{H}_{k_2}^{}}^{}$. This construction scales poorly with the dimension: for example choosing a univariate basis as simple as $\{1, \cos, \sin\}$ for an eight-dimensional problem already results in more that 6,500 inducing functions. Additionally, this construction is very inefficient in terms of captured variance, as we illustrate in  \Cref{fig:variance_decay_VFF} for a 2D input space. The figure shows that the prior variance associated with the inducing function $\psi_i(x_1)\psi_j(x_2)$ vanishes quickly when both $i$ and $j$ increase. This means that most of the inducing functions on which the variational posterior is built are irrelevant, whereas some important ones such as $\psi_i(x_1)\psi_0(x_2)$ or $\psi_0(x_1)\psi_j(x_2)$ for $i, j \geq \sqrt{M}$ are important but ignored. Although we used a 2D example to illustrate this poor behaviour, it is important to bear in mind that the issue gets exacerbated for higher dimensional input spaces. As detailed in \cref{fig:variance_decay_SH} and discussed later, our proposed approach does not suffer from such behaviour.
-
-% As is usual in sparse GP methods, the number of inducing variables $M$ is constrained by the computational budget available to the user. Given that we ordered the spherical harmonic by increasing $\ell$, choosing the first $M$ elements means we will select first features with low angular frequency. Provided that the kernel spectral density is a decreasing function (this will be true for classic covariances, but not for quasi-periodic ones), this means that the selected features correspond to the ones carrying the most signal according to the prior. In other words, the decomposition of the kernel can be compared to an infinite dimensional principal component analysis, and our choice of the inducing function is optimal since we pick the ones with the largest variance. This is illustrated in \cref{fig:variance_decay_SH}, which shows the analogue of \cref{fig:variance_decay_VFF} for spherical harmonic inducing functions.
 
 \subsection{Toy Experiment: Banana Classification}
 
@@ -268,9 +256,8 @@ We report two variants of VISH: one using all spherical harmonics up to degree 3
 We also report the wall clock time for the experiments (training and evaluation) for $N=10,000$ and $N=5,929,413$. All these experiments were ran on a single consumer-grade GPU (Nvidia GTX 1070). On the complete dataset of almost 6 million records, VISH took $41\pm0.81$ seconds on average. A-VFF required $75.61\pm0.75$ seconds and the SVGP method needed approximately 15 minutes to fit and predict. This shows that VISH is roughly two orders of magnitude faster than SVGP. A-VFF comes close to VISH but has to impose additive structure to keep its computational advantage.
 
 
-\section{Conclusion}
+\section{Concluding Remarks}
 
-We showed, 
+In this chapter we introduced the RKHS associated with dot-product kernels on the hypersphere. Using the Mercer representation of this RKHS we designed an efficient spherical harmonic inducing function for sparse variational Gaussian processes. Our general setup is closely related to VFF, and we inherit several of its advantages such as a considerable speed-up compared to classic sparse GP models as a result of sparsity in the $\Kuu$ matrix, and having fixed features $\kux$ .with a global influence on the approximation. However, by projecting the data onto the hypersphere and using dedicated GP models on this manifold our approach succeeds where other sparse GPs methods fail. First, VISH provides good scaling properties as the dimension of the input space increases.  Second, we showed that under some relatively weak hypothesis we are able to select the optimal features to include in the approximation. This is due to the intricate link between ``stationary'' covariances on the sphere and the Laplace-Beltrami operator. Third, the Mercer representation of the kernel means that the matrices to be inverted at training time are exactly diagonal ---resulting in a very cheap-to-compute sparse approximate GP.
 
-
-In the next chapter, 
+In the next chapter, we are going to employ the same RKHS. However, instead of using the eigenfunctions of the kernel operator as the inducing functions, we are going to rely on the reproducing property to construct inducing functions that closely mimic the activation functions in neural networks.

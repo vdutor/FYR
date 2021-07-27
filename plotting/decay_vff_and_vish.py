@@ -17,11 +17,13 @@ class DecayVFF(Scene):
             self.add(line, label)
         for l1, i in enumerate(_range):
             for l2, j in enumerate(_range):
-                square = Square(.7 * .8 ** l1 * .8 ** l2).set_color(ORANGE).set_opacity(.3).move_to(ORIGIN + i * RIGHT + j * UP)
+                square = Square(.7 * .8 ** l1 * .8 ** l2).set_color(ORANGE).set_opacity(.6).move_to(ORIGIN + i * RIGHT + j * UP)
                 self.add(square)
         
-        s = Square(side_length=4).set_fill(opacity=0).set_color(BLUE).shift(DOWN * .6 + LEFT * .6)
-        self.add(s)
+        s = Square(side_length=4).set_fill(opacity=0).set_color(BLUE_C).shift(DOWN * .6 + LEFT * .6)
+        e = Ellipse().shift(2 * DOWN + 2.5 * RIGHT).set_color(GREY_BROWN).set_opacity(.2)
+        t = Tex("Large variance").next_to(e, direction=.1 * (RIGHT + UP)).set_color(GRAY_BROWN)
+        self.add(s, e, t)
 
 
 class DecayVISH(Scene):
@@ -41,7 +43,7 @@ class DecayVISH(Scene):
         squares = defaultdict(list)
         for nn, n in enumerate(_range):
             for jj, j in enumerate(range(2 * nn + 1)):
-                square = Square(.7 * .75 ** nn).set_color(ORANGE).set_opacity(.3).move_to(ORIGIN + n * DOWN + jj * RIGHT - nn * RIGHT).shift(RIGHT)
+                square = Square(.7 * .75 ** nn).set_color(ORANGE).set_opacity(.6).move_to(ORIGIN + n * DOWN + jj * RIGHT - nn * RIGHT).shift(RIGHT)
                 squares[nn].append(square)
                 self.add(square)
             
@@ -70,9 +72,9 @@ class DecayVISH(Scene):
         dot1 = Dot(ORIGIN + 3.8 * UP).shift(RIGHT)
         dot2 = Dot(ORIGIN - 1.3 * UP + 5 * LEFT).shift(RIGHT)
         dot3 = Dot(ORIGIN - 1.3 * UP + 5 * RIGHT).shift(RIGHT)
-        line1 = Line(dot1.get_center(), dot2.get_center()).set_color(BLUE)
-        line2 = Line(dot2.get_center(), dot3.get_center()).set_color(BLUE)
-        line3 = Line(dot1.get_center(), dot3.get_center()).set_color(BLUE)
+        line1 = Line(dot1.get_center(), dot2.get_center()).set_color(BLUE_C)
+        line2 = Line(dot2.get_center(), dot3.get_center()).set_color(BLUE_C)
+        line3 = Line(dot1.get_center(), dot3.get_center()).set_color(BLUE_C)
 
 
 
