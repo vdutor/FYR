@@ -10,7 +10,7 @@
 \chapter{Deep Neural Networks as Point Estimates for Deep Gaussian Processes}
 \label{chapter:dnn-as-point-estimate-for-dgps}
 
-Neural networks and Gaussian processes are complementary in their strengths and weaknesses. Having a better understanding of their relationship comes with the promise to make each method benefit from the strengths of the other. In this chapter, we establish an equivalence between the forward passes of neural networks and the posterior of deep sparse Gaussian process models. The theory we develop builds upon the RKHS presented in \cref{chapter:vish} and is based on interpreting activation functions as interdomain inducing features through a rigorous analysis of the interplay between activation functions and kernels. This results in models that can either be seen as neural networks with improved uncertainty prediction or deep Gaussian processes with increased prediction accuracy. In \cref{section:dnn-for-dgps:related-work} we first give a brief overview of the rich literature on Bayesian treatments of NNs and how this gives rise to (deep) GPs. In \cref{section:dgps} we then formally introduce Deep Gaussian processes (DGPs) and highlight the close similarly between NNs and the posterior of sparse DGPs. In \cref{sec:dnn-for-dgps:model} XXX TODO.  Our claims are supported by experimental results on the UCI repository benchmarks and a series of image classification tasks in \cref{section:dnn-for-dgps:experiments}.
+Neural networks (NNs) and Gaussian processes (GPs) are complementary in their strengths and weaknesses. Having a better understanding of their relationship comes with the promise to make each method benefit from the strengths of the other. In this chapter, we establish an equivalence between the forward passes of neural networks and the posterior of deep sparse Gaussian process models. The theory we develop builds upon the RKHS presented in \cref{chapter:vish} and is based on interpreting activation functions as interdomain inducing features through a rigorous analysis of the interplay between activation functions and kernels. This results in models that can either be seen as neural networks with improved uncertainty prediction or deep Gaussian processes with increased prediction accuracy. In \cref{section:dnn-for-dgps:related-work} we first give a brief overview of the rich literature on Bayesian treatments of NNs and how this gives rise to (deep) GPs. In \cref{section:dgps} we then formally introduce Deep Gaussian processes (DGPs) and highlight the close similarly between NNs and the posterior of sparse DGPs. In \cref{sec:dnn-for-dgps:model} we present our \emph{activated} inducing variables for which the resulting GP basis functions match traditional neural network activation, which gives rise to the equivalence between DGPs and NNs.  Our claims are supported by experimental results on the UCI repository benchmarks and a series of image classification tasks in \cref{section:dnn-for-dgps:experiments}.
 
 \section{Related Work}
 \label{section:dnn-for-dgps:related-work}
@@ -121,7 +121,7 @@ In the next section we design the interdomain inducing variable for which the co
 \section{Gaussian Process Layers with Activated Inducing Variables}
 \label{sec:dnn-for-dgps:model}
 
-Building on the exposition of zonal kernel RKHSs (\cref{sec:rkhs-dotproduct-kernels}) and interdomain inducing variables (\cref{section:interdomain-inducing-variables}) we can summarise our approach succinctly: we consider DGP models with GP layers that have an Arc Cosine kernel and Variational Fourier Feature style inducing variables $u_m = \langle f, {g}_m \rangle_\rkhs$ \citep{hensman2017variational}. We then choose inducing functions $g_m$ that have the same shape as neural network activation functions (\cref{sec:inducing-function}). This yields basis functions for the SVGP model that correspond to activation functions (\cref{sec:relu-inducing-variables}), and thus to a model whose mean function can be interpreted as a classic feed forward neural network. \cref{sec:zonal-kernels-and-rkhs} covers the mathematical intricacies associated with the construction described above.
+Building on the exposition of zonal kernel RKHSs (\cref{sec:rkhs-dotproduct-kernels}) and interdomain inducing variables (\cref{section:interdomain-inducing-variables}) we can summarise our approach succinctly: we consider DGP models with GP layers that have an Arc Cosine kernel and Variational Fourier Feature style inducing variables $u_m = \langle f, {g}_m \rangle_\rkhs$ \citep{hensman2017variational}. We then choose inducing functions $g_m$ that have the same shape as neural network activation functions (\cref{sec:inducing-function}). Thanks to the reproducing property of the RKHS this yields basis functions $\kulx$ for the GP layers that correspond to activation functions (\cref{sec:relu-inducing-variables}), and thus to a DGP whose forward pass can be interpreted as a classic feed forward neural network. \Cref{sec:zonal-kernels-and-rkhs} covers the mathematical intricacies associated with the construction described above.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Activated Inducing Functions}
@@ -148,22 +148,22 @@ To circumvent this problem we artificially increase the input space dimension by
         \caption{Softplus: $\sigma(t) = \log(1 + \exp(3\,t))$}
          \label{fig:projection:softplus}
      \end{subfigure}
-%    \caption{Activated inducing function ${g}_m(\vx) = \norm{\vx}\,\norm{\vw_m}\, \relu\left( \vw_m^\top \vx \, / \, \norm{\vw_m}\,\norm{\vx}\right)$ where $\sigma(\cdot)$ correspond to the ReLU \textbf{(a)} and Softplus \textbf{(b)}. Although the input domain is $\Reals^2$ we only plot the value of the function on the unit circle $\sphere^1$ (orange), and on the subspace that has an offset of $1$ in the $x_2$ direction (blue). The linear radial component of ${g}_m(\cdot)$ creates a one-to-one mapping between the blue curve and the upper half of the orange one.}%We observe that for these slices the functions correspond to the ReLU and Softplus neural network activation functions, respectively.}
+   \caption{Activated inducing function ${g}_m(x) = \norm{x}\,\norm{w_m}\, \sigma\left( w_m^\top x \, / \, \norm{w_m}\,\norm{x}\right)$ where $\sigma$ correspond to the ReLU \textbf{(a)} and Softplus \textbf{(b)}. Although the input domain is $\Reals^2$ we only plot the value of the function on the unit circle $\sphere^1$ (orange), and on the subspace that has an offset of $1$ in the $x_2$ direction (blue). The linear radial component of ${g}_m$ creates a one-to-one mapping between the blue curve and the upper half of the orange one.}%We observe that for these slices the functions correspond to the ReLU and Softplus neural network activation functions, respectively.}
    \label{fig:projection}
 \end{figure}
 
-The inducing functions $g_m(\cdot)$ play an important role because they determine the shape of the SVGP's basis functions. Ideally they should be defined such that their restriction to the $(d - 1)$-dimensional original data space matches classic activation functions, such as the ReLU or the Softplus, exactly. However, this results in an angular component for $g_m(\cdot)$ that is not necessarily zonal. Since this property will be important later on, we favour the following alternative definition that enforces zonality:
+The inducing functions $g_m$ play an important role because they determine the shape of the SVGP's basis functions. Ideally they should be defined such that their restriction to the $(d - 1)$-dimensional original data space matches classic activation functions, such as the ReLU or the Softplus, exactly. However, this results in an angular component for $g_m$ that is not necessarily zonal. Since this property will be important later on, we favour the following alternative definition that enforces zonality:
 \begin{equation}
 \label{eq:def-inducing-function}
-    g_m: \Reals^d \rightarrow \Reals,\qquad \vx \mapsto \norm{\vx}\,\norm{\vw_m}\, \sigma\left(\frac{\vw_m^\top \vx}{\norm{\vw_m}\,\norm{\vx}}\right), 
+    g_m: \Reals^d \rightarrow \Reals,\qquad x \mapsto \norm{x}\,\norm{w_m}\, \sigma\left(\frac{w_m^\top x}{\norm{w_m}\,\norm{x}}\right), 
 \end{equation}
-with $\vw_m \in \Reals^d$ a parameter, and $\sigma: [-1, 1] \rightarrow \Reals$ the function that determines the value of $g_m(\cdot)$ on the unit hypersphere. In \cref{fig:projection}, we show that choosing $\sigma(\cdot)$ to be a ReLU ($\sigma(t) = \max(0, t)$) or a Softplus ($\sigma(t) = \log(1 + \exp(3\,t))$) activation function leads to inducing functions that closely resemble the classic ReLU and Softplus on the data space. In the specific case of the ReLU it can actually be shown that the match is exact. In both cases, The parameter $\vw_m \in \Reals^d$ determines the orientation and slope of the activation function---they play the same role as the pre-activation weights in a NN.
+with $w_m \in \Reals^d$ a parameter, and $\sigma: [-1, 1] \rightarrow \Reals$ the function that determines the value of $g_m$ on the unit hypersphere. In \cref{fig:projection}, we show that choosing $\sigma$ to be a ReLU ($\sigma(t) = \max(0, t)$) or a Softplus ($\sigma(t) = \log(1 + \exp(3\,t))$) activation function leads to inducing functions that closely resemble the classic ReLU and Softplus on the data space. In the specific case of the ReLU it can actually be shown that the match is exact. In both cases, the parameter $w_m \in \Reals^d$ determines the orientation and slope of the activation function---they play the same role as the pre-activation weights in a NN.
 
-The zonality that we enforced in \cref{eq:def-inducing-function} is particularly convenient when it comes to representing $g_m(\cdot)$ in the basis of the eigenfunctions of $\rkhs$, which is required for computing inner products. It indeed allows us to make use of the Funk-Hecke theorem (see \cref{app:sec:harmonics}) and to eventually obtain
+The zonality that we enforced in \cref{eq:def-inducing-function} is particularly convenient when it comes to representing $g_m$ in the basis of the eigenfunctions of $\rkhs$, which is required for computing inner products. It indeed allows us to make use of the Funk-Hecke theorem (see \cref{app:sec:harmonics}) and to obtain
 \begin{equation}
 \begin{aligned}
 \label{eq:fourier-decomposition-activation-functions-new}
-    g_m(\vx) = \norm{\vx}\, \norm{\vw_m} \sum_{n=0}^\infty &\sum_{j=1}^{\dnumharmonicsforlevel}  \sigma_n \sh_{n, j}\left(\frac{\vw_m}{\norm{\vw_m}}\right)\, \sh_{n, j}\left(\frac{\vx}{\norm{\vx}}\right), \\
+    g_m(x) = \norm{x}\, \norm{w_m} \sum_{n=0}^\infty &\sum_{j=1}^{\dnumharmonicsforlevel}  \sigma_n \phi_{n, j}\left(\frac{w_m}{\norm{w_m}}\right)\, \phi_{n, j}\left(\frac{x}{\norm{x}}\right), \\
    & \text{where \quad} \sigma_{n} = 
    \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 \sigma(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t}.
 \end{aligned}
@@ -181,22 +181,22 @@ Analytical expressions for $\sigma_n$ when $\sigma(t)=\max(0, t)$ are given in \
 We define our \emph{activated} interdomain inducing variables as
 \begin{equation}
 \label{eq:def-inducing-variable}
-    u_m = \big\langle f(\cdot), {g}_m(\cdot) \big\rangle_\rkhs.
+    u_m = \big\langle f, {g}_m \big\rangle_\rkhs.
 \end{equation}
-Since the GP samples do not belong to the RKHS there are mathematical subtleties associated with such a definition, which are detailed in \cref{sec:zonal-kernels-and-rkhs}. Assuming for now that they are indeed well defined, using these interdomain inducing variables as part of the SVGP framework requires access to two quantities: (i) their pairwise covariance, and (ii) the covariance between the GP and the inducing variables. The pairwise covariance, which is needed to populate $\MC$, is given by
+Since the GP samples do not belong to the RKHS there are mathematical subtleties associated with such a definition, which are detailed in \cref{sec:zonal-kernels-and-rkhs}. Assuming for now that they are indeed well defined, using these interdomain inducing variables as part of the SVGP framework requires access to two quantities: (i) their pairwise covariance, and (ii) the covariance between the GP and the inducing variables. The pairwise covariance, which is needed to populate $\Kuu$, is given by
 \begin{equation}
 \label{eq:kuu}
 \Cov(u_{m}, u_{m'})
-= \langle {g}_m(\cdot), {g}_{m'}(\cdot) \rangle_\rkhs
+= \langle {g}_m, {g}_{m'} \rangle_\rkhs
 = \sum_{\substack{n=0 \\ \lambda_n \neq 0}}^{\infty}
-    \frac{\sigma^2}{\lambda_n}\,\frac{n + \alpha}{\alpha}\,C_n^{(\alpha)}\left(\frac{\vw_m^\top \vw_{m'}}{\norm{\vw_m}\,\norm{\vw_{m'}}}\right).  
+    \frac{\sigma_n^2}{\lambda_n}\,\frac{n + \alpha}{\alpha}\,C_n^{(\alpha)}\left(\frac{w_m^\top w_{m'}}{\norm{w_m}\,\norm{w_{m'}}}\right).  
 \end{equation}
-The above is obtained using the RKHS inner product from \cref{eq:RKHSinnerproduct}, the Fourier coefficients from \cref{eq:fourier-decomposition-activation-functions-new} and the addition theorem for spherical harmonics from \cref{app:sec:harmonics}. Secondly, the covariance between the GP and $u_m$, which determines $[c_u(\cdot)]_m$, is given by:
+The above is obtained using the RKHS inner product from \cref{eq:RKHSinnerproduct}, the Fourier coefficients from \cref{eq:fourier-decomposition-activation-functions-new} and the addition theorem for spherical harmonics from \cref{app:sec:harmonics}. Secondly, the covariance between the GP and $u_m$, which determines $[k_u(x)]_m$, is given by:
 \begin{equation}
 \label{eq:kuf}
-  \Cov(u_m, f(\vx)) = 
+  \Cov(u_m, f(x)) = 
     % \Cov(u_m, f(\cdot)) = % \Exp{f}{f(\vx) \langle f(\cdot), g_m(\cdot) \rangle_\rkhs} = 
-    \langle k(\vx, \cdot), {g}_m(\cdot) \rangle_\rkhs = {g}_m(\vx) 
+    \langle k(x, \cdot), {g}_m \rangle_\rkhs = {g}_m(x) 
     % = \norm{\vw_m} \norm{\vx} \sum_{n=0}^{\tilde{N}} \sigma_n \frac{n + \alpha}{\alpha}\,C_n^{(\alpha)}(\frac{\vw_m^\top \vx}{\norm{\vw_m} \norm{\vx}}).
 \end{equation}
 as a result of the reproducing property of the RKHS. It becomes clear that this procedure gives rise to basis functions that are equal to our inducing functions. By construction, these inducing functions match neural network activation functions in the data plane, as shown in \cref{fig:projection}. Using these inducing variables thus leads to an approximate posterior GP (\cref{eq:qf}) which has a mean that is equivalent to a fully-connected layer with a non-linear activation function (e.g.~ReLU, Softplus, Swish). 
