@@ -55,7 +55,7 @@ Subsequently, we will coin the set $\{\phi_{n,j}\}$ as the spherical harmonics. 
 As a result of the relation between the Gegenbauer polynomial and the spherical harmonics, are the Gegenbauer polynomial sometimes referred to as ultraspherical polynomials. For $d=2$, Theorem~1 recovers the addition formula of the cosine function, as indeed $\cos(\theta) \cos(\theta') + \sin(\theta) \sin(\theta') = \cos(\theta - \theta')$ and $C_n^{(0)}(t) = \cos(n \arccos(t))$. The Gegenbauer polynomials with $\alpha=0$ are better known as the Chebyshev polynomials. Another connection between spherical harmonics and Gegenbauer polynomials is given by the Funk-Hecke theorem and applies to zonal functions. A zonal function on $\dsphere$ is a function that is rotationally invariant w.r.t. to a point on the sphere, $\eta \in \dsphere$. This means that the function only depends on the inner product $\eta\transpose x$, or equivalently, on the geodestic distance between $\eta$ and $x$.
 
 \begin{theorem}[Funk-Hecke]
-    % \label{appendix:theorem:funk}
+    \label{appendix:theorem:funk}
     Let $f$ be an integrable function such that $\int_{-1}^1 \| f(t)\| (1 - t^2)^{(d-3)/2} \calcd{t}$ is finite and $d \ge 2$. Then for every $\phi_{n,j}$  and $\eta \in \dsphere$
     \begin{equation}
         \frac{1}{\darea} \int_{\dsphere} f(\eta\transpose x)\,\phi_{n, j}(x)\, \calcd{\omega(x)} = {\lambda}_{n}\,\phi_{n,j}(\eta),
