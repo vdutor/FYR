@@ -5,7 +5,7 @@
 \fi
 
 
-\chapter{Linear Time Gaussian Processes on HyperSpheres}
+\chapter{Linear Time Gaussian Processes on Hyperspheres}
 \label{chapter:vish}
 
 Stationary kernels, i.e. translation invariant covariances, are ubiquitous in machine learning when the input space is Euclidean. When working on the hypersphere, their spherical counterpart are dot-product kernels, which are invariant to rotations. They are the main object under study in this chapter. In \cref{sec:rkhs-dotproduct-kernels}, we first show how we can construct the Reproducing Kernel Hilbert Space (RKHS) of dot-product kernel on the hypersphere. \Cref{sec:vish} uses the RKHS to construct an efficient variational interdomain inducing variable for Gaussian processes on the hypersphere. We will then show how to expand the GP onto the complete domain $\Reals^d$ and conclude with a series of experiments, showing the speed and accuracy of the proposed approach.
@@ -71,6 +71,7 @@ which shows that the two operators commute and in turn implies that they share t
 
 The above reasoning about the commutativity of the Laplace-Beltrami and kernel operator and the diagonalisation of the Laplace-Beltrami operator by the spherical harmonics, can be summarised by the following theorem:
 \begin{theorem}[Mercer decomposition]
+    \label{theorem:mercer-zonal}
 Any zonal kernel $k(x, x') = \kappa(x\transpose x')$ on the hypersphere can be decomposed as
 \begin{equation}
 \label{eq:kernel-form}
@@ -160,6 +161,8 @@ So far, the domain of interest has been the hypersphere $\dsphere$ . However, mo
 \end{enumerate}
 This procedure is explained in \cref{fig:mapping}, which gives an illustration of the mapping between a 2D dataset (grey dots) embedded into a 3D space and its projection (orange dots) onto the unit half-circle using a linear mapping.
 
+\subsection{First-order Arc Cosine kernel}
+\label{sec:arccosine}
 Although this setup may seem very arbitrary, it is inspired by the important works on the limits of neural networks as Gaussian processes. The first order Arc Cosine kernel \citep{cho2009kernel} is one of the most well-known examples, and mimics the computation of infinitely wide fully connected layers with ReLU activations. Let $\sigma(t) = \max(0, t)$, then the covariance between function values of $f(x) = \sigma(w\transpose x)$ for $w \sim \NormDist{0, d^{-1/2} \Eye_d}$ and $w \in \Reals^d$ is given by
 \begin{equation}
 \label{eq:arccosine}
@@ -169,8 +172,11 @@ where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. Indeed, we observe how 
 \begin{equation}
     k(x, x') = \norm{x} \norm{x'} \kappa\left( \frac{x^\top x'}{\norm{x}\norm{x'}} \right), % \quad \text{and} \quad f(x) = \norm{x} f\left({x \over \norm{x}}\right).
 \end{equation}
-which leads to an RKHS consisting of functions defined on $\Reals^d$ of the form $g(x) = \norm{x}\,f(\frac{x}{\norm{x}})$, where $f \in \rkhs$ (from \cref{eq:rkhs-sphere}) is defined on the unit hypersphere but fully determines the function on $\Reals^d$.
-
+which leads to an RKHS consisting of functions defined on $\Reals^d$ of the form $g(x) = \norm{x}\,f(\frac{x}{\norm{x}})$, where $f \in \rkhs$ (from \cref{eq:rkhs-sphere}) is defined on the unit hypersphere but fully determines the function on $\Reals^d$. Straightforwardly, we can extend the Mercer decomposition the kernel to
+\begin{equation}
+    k(x, x') = \sum_{n=0}^{\infty} \sum_{j=1}^{\dnumharmonicsforlevel} \lambda_{n} \norm{x} \phi_{n,j}(x) \norm{x'} \phi_{n,j}(x'),
+\end{equation}
+where the eigenvalues $\lambda_n$ remain unchanged and are given given in \cref{theorem:mercer-zonal}.
 
 \section{Relation to Variational Fourier Features}
 

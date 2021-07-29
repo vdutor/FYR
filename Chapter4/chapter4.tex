@@ -77,7 +77,7 @@ Inference in DGPs is challenging as the composition is no longer a GP, leading t
 %
 %  Subsequently, we will be dealing with multi-output GPs then for each output $p$ we have $\vb_p = \Cuu^{-1} \vmu_p$ with $\vmu_p$ and $\MSigma_p$ the mean and covariance of the inducing outputs, $u_{m, p} = f_p(\vz_m)$ and $q(\vu_p) = \NormDist{\vmu_p, \MSigma_p}$. We collect $\{\vb_p \in \Reals^M \}_{p=1}^P$ as the columns of the matrix $\MB \in \Reals^{M \times P}$.
 %
- The variational parameters $\vm_\ell \in \Reals^M$ and $\MS_\ell \in \Reals^{M \times M}$ are selected by reducing the Kullback-Leibler (KL) divergence from the variational distribution to the true posterior. This is equivalent to maximising the Evidence Lower BOund (ELBO). Taking the evaluations of the GP as $\vh_{:, \ell} = f_\ell(\vh_{:, \ell-1})$, the ELBO becomes \citep{salimbeni2017doubly}:
+The variational parameters $\vm_\ell \in \Reals^M$ and $\MS_\ell \in \Reals^{M \times M}$ are selected by reducing the Kullback-Leibler (KL) divergence from the variational distribution to the true posterior. This is equivalent to maximising the Evidence Lower BOund (ELBO). Taking the evaluations of the GP as $\vh_{:, \ell} = f_\ell(\vh_{:, \ell-1})$, the ELBO becomes \citep{salimbeni2017doubly}:
 \begin{equation}
 \label{eq:dgp-elbo}
 \log p(\vy) \ge \sum\nolimits_i \Exp{q(h_{i, L})}{\log p(y_i \given h_{i, L})} - \sum\nolimits_{\ell} \KL{q(\vu_\ell)}{p(\vu_\ell)}.
@@ -103,7 +103,7 @@ Inference in DGPs is challenging as the composition is no longer a GP, leading t
 \end{figure}
 
 \subsection{Connection to Deep Neural Networks}
-The approximate posterior GP $q(f_\ell)$'s variance does take the infinite degrees of freedom from the prior into account; making predictions with an infinite amount of basis functions. The mean, on the contrary, has a finite numbers of parameters and can straightforwardly be re-written as a linear model with $M$ basis functions of the form $\kul(x) = \Cov(\vu_\ell, f_\ell(x))$:
+Investigating \cref{eq:qf-dgp}, it is worth noting that the posterior $q(f_\ell)$'s variance takes into account the infinite degrees of freedom from the prior; making predictions with an infinite amount of basis functions. The mean, on the contrary, has a finite numbers of parameters and can straightforwardly be re-written as a linear model with $M$ basis functions of the form $\kul(x) = \Cov(\vu_\ell, f_\ell(x))$:
 \begin{equation}
     \label{eq:mean-qf}
     \Exp{f_\ell}{q(f_\ell(x))} = \bm{b}_\ell^\top \kul(x) \quad \text{where} \quad \bm{b}_\ell = \Kulul^{-1} \vm_\ell \in \Reals^M
@@ -113,7 +113,7 @@ The mean of a layer in DGP is therefore ``not that different'' from a fully-conn
     \label{eq:fcn}
     \text{NN-FCL}_\ell(x) = \bm{v}_\ell\transpose \sigma(\bm{w}_\ell\,x),
 \end{equation}
-where $\sigma$ is the non-linear activations function (e.g., relu), $\bm{w}_\ell \in \Reals^{M \times d}$ and $\bm{v}_\ell \in \Reals^{M \times d_\ell}$ are the pre-activation and output weights, respectively. Looking at the resemblance between \cref{eq:mean-qf} and \cref{eq:fcn}, if we can formulate an approximation that makes the covariance $\kul(x)$ the same as a typical neural net activation function $\sigma(\bm{w}_\ell\,x)$, we will have a formal mathematical equivalence between the mean of GP layer in a DGP and a fully-connected neural network layer, that is $\ExpSymb[q(f_\ell(x))] = \text{NN-FCL}_\ell(x)$. By stacking many of these layers we obtain an equivalence between the forward pass in a DGP and a DNN, as visualised in \cref{fig:visual}.
+where $\sigma$ is the non-linear activations function (e.g., ReLU), $\bm{w}_\ell \in \Reals^{M \times d}$ and $\bm{v}_\ell \in \Reals^{M \times d_\ell}$ are the pre-activation and output weights, respectively. Looking at the resemblance between \cref{eq:mean-qf} and \cref{eq:fcn}, if we are able to formulate an inducing variable that makes the covariance $\kul(x)$ the same as a neural net activation function $\sigma(\bm{w}_\ell\,x)$, we will have a formal mathematical equivalence between the mean of GP layer in a DGP and a fully-connected neural network layer, that is $\ExpSymb[q(f_\ell(x))] = \text{NN-FCL}_\ell(x)$. By stacking many of these layers we obtain an equivalence between the forward pass in a DGP and a DNN, as visualised in \cref{fig:visual}.
 
 In the next section we design the interdomain inducing variable for which the covariance will match the neural network activation function. This is the main contributions of this chapter. 
 
@@ -127,6 +127,7 @@ Building on the exposition of zonal kernel RKHSs (\cref{sec:rkhs-dotproduct-kern
 \subsection{Activated Inducing Functions}
 \label{sec:inducing-function}
 
+We consider the RKHS of the first-order Arc Cosine kernel as discussed in \cref{sec:rkhs-dotproduct-kernels}, which has a form
 The RKHS of the Arc Cosine kernel consists solely of functions that are equal to zero at the origin, i.e. $\forall f \in \rkhs: f(\bm{0}) = 0$. 
 %This is not a desired property for many datasets and a common approach
 To circumvent this problem we artificially increase the input space dimension by concatenating a constant to each input vector. In other words, the data space is embedded in a larger space with an offset such that it does not contain the origin anymore. This is analogous to the bias unit in multi-layer perceptron (MLP) layers in neural networks. For convenience we will denote by $(d-1)$ the dimension of the original data space (i.e. the number of input variables), and by $d$ the dimension of the extended space on which the Arc Cosine kernel is defined.
