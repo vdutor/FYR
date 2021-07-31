@@ -13,7 +13,7 @@ The eigenvalues of a zonal function are given by the one-dimensional integral:
 \end{equation}
 where $C_n^{(\alpha)}(\cdot)$ is the Gegenbauer polynomial of degree $n$ with $\alpha = \frac{d-2}{2}$ and $\omega_{d} = \Omega_{d-2} / \Omega_{d-1}$ denotes the surface area of $\dsphere$ (see \cref{app:sec:harmonics} for analytical expressions of these quantities). The shape function $s(t)$ determines whether this integral can be computed in closed-form. In the next sections we derive analytical expressions for the eigenvalues of the Arc Cosine kernel and ReLU activation function in the case the $d$ is odd. For $d$ even, other kernels (e.g., Mat\'ern) or activation functions (e.g., Softplus, Swish, etc.) we rely on numerical integration (e.g., Gaussian quadrature) to obtain these coefficients. We will show that both approaches lead to highly similar results.
 
-\subsection{Arc Cosine kernel}
+\section{Arc Cosine kernel}
 \label{sec:appendix:compute-eigenvalues-arccosine}
 
 The shape function of the first-order Arc Cosine kernel \citep{cho2009kernel} is given by:
@@ -121,7 +121,7 @@ Combining the above intermediate results gives the solution to \cref{appendix:th
 \end{table}
 
 
-\subsection{ReLU activation function}
+\section{ReLU activation function}
 
 Thanks to the simple form of the ReLU's activation shape function $\sigma(t) = \max(0, t)$, its Fourier coefficients can also be computed analytically. The integral to be solved is given by
 \begin{equation}
