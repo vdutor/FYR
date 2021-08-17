@@ -1,3 +1,5 @@
+\graphicspath{{Chapter5/Figs/}}
+
 \chapter{Future Research: Non-Parametric Decision Making in Non-Euclidian Spaces}
 \label{chapter:future-research}
 
@@ -10,7 +12,7 @@ The second regime, in which data is noisy, requires a completely different model
 
 However, to fully valorise Bayesian models one needs to consider them as part of a larger `decision-making' system. In these systems probabilistic models can be used to determine optimal actions to take in order to achieve a certain outcome. % For example, finding the input value that minimises an unknown `black-box' function. % Since good decisions depend on the confidence of our knowledge, faithfully representing uncertainty is a crucial aspect of the models.
 
-In the next chapter of my PhD, I want to develop such decision-making systems that use probabilistic models to drive their decisions. In particular, I want to focus on probabilistic models that take into account the geometry of the problem at hand. This will enable encorportating more accurately physical properties and constraints phyical properties of the system . In the next section we briefly discuss a MDP, a formal mathematical framework to decision making, and how we can define probabilistic models in non-Euclidian spaces. on  . We finish with suggesting concrete research topics and a real-world application.
+In the next chapter of my PhD, I want to evolve from purely `curve-fitting' applications to focusing more on decision-making systems that \emph{use} probabilistic models to drive their decisions. In particular, I want to focus on probabilistic models that take into account the geometry of the problem at hand. This will allow encorporating more accurately physical properties and constraints of the system under study. In the next section we briefly discuss Markov Decision Processes (MDPs), a formal mathematical framework to decision making. We pay attention to the model based approach. InSection we can define probabilistic models in non-Euclidian spaces. on  . We finish with suggesting concrete research topics and a real-world application.
 
 % . I would like to focus on both the modelling side and the decision-making aspect using the model's outputs. In the next two sections we discuss the type of decision system we consider and how we can define Gaussian processes on these spaces. 
 
@@ -23,57 +25,78 @@ A discrete-time Markov decision Process (MDP) is a stochastic control process. I
     \item Reward density $p(r \given a, s)$: the immediate reward obtained after executing an action $a$ in a given state $s$,
     \item Transition density $p(s' \given a, s)$: transitioning from state $s$ to state $s'$, due to action $a$.
 \end{enumerate}
-It should be noted that this is a very broad definition, yet there are still many variations to it. For instance, one can consider deterministic reward and transition functions, continuous-time and partially observed MDPs. Many of these settings have been widely studied in the literature. 
+It should be noted that this is a very broad definition, yet there are still many variations to it. For instance, one can consider deterministic reward and transition functions, continuous-time and partially observed MDPs.
 
-The objective of an MDP is to find a `good' (probabilistic) policy function $\pi:\mathcal{S} \rightarrow \mathcal{X}$. This is a mapping that specifies which action a decision maker should take in a given state $s$. The goal is to find a sequence of actions that maximses the cumulative reward a decision maker obtains by obeying the policy $\pi$
+The objective of an MDP is to find a `good' (probabilistic) policy function $\pi:\mathcal{S} \rightarrow \mathcal{X}$. This is a mapping that specifies which action a decision maker should take in a given state $s$. The goal is to find a sequence of actions, starting from an initial state $s_0$, that maximses the cumulative reward a decision maker obtains by obeying the policy $\pi$. This is given by the value function
 \begin{equation}
-    V^{(\pi)}(s_0) = \ExpSymb \sum_t r_t
+    V^{(\pi)}(s_0) = \Exp{}{\sum_t r_t}
 \end{equation}
-where XX
+where the expectation is over $r_t \sim p(r_t \given s_t, a_t)$, $s_{t+1} \sim p(s_{t+1} \given s_t, a_t)$ and $a_t \sim \pi(s_t)$.
 
-Optimal control vs. Reinformcement learning
-
-There are many different ways to construct XXX
-
-Model-based 
-
-\paragraph{Bayesian optimisation}
-
-Bayesian optimization [CITE] is a class of sequential search algorithms for finding a global minimizer
+The quality of a policy $\pi$ is given by the \emph{regret}, which measures the value function $V^{(\pi)}$ relative to the optimal value function $V^{*}$ obtained by the best possible policy $\pi^*$
 \begin{equation}
-    x_* = \argmin_{x \in \mathcal{X}} f(x)
+    R^{(\pi)}(s_0) = V^*(s_0) - V^{(\pi)}(s_0). 
 \end{equation}
-of an unknown objective function $f$ defined over a domain of interest $X$. The function $f$ is not observed directly: instead, at each step the algorithm must select a query point $x \in X$ at which to evaluate $f$. This problem can be framed as a MDP 
 
-\paragraph{Contextual multi-armed bandits}
+\subsection{A Model-based Approach}
+There are many different ways to deduct a good---or even an optimal---policy for a given MDP, but the exact algorithm will heavily depend on the precise formulation of the problem. Here, we consider the case that the transition and reward function are unknown, and also very expensive to evaluate. In this setting, any efficient algorithm will need to consider whether to take explorative actions that might lead to better rewards, or take advantage of actions that are known to be good but will not improve the current solution. This dilema is known as the exploitation-exploration trade-off. The fact that the functions are expensive to evaluate makes it worthwile to spend resources (e.g., time and compute) on deciding where to evaluate them next.
 
-\section{Gaussian processes as surrogate models in non-Euclidian manifolds}
+A strategy to address this MDP formulation is using a \emph{model-based} approach. Broadly speaking, this approach consists of a model that learns the unknown transitions and/or rewards from observed data in a supervised learning way. Subsequently, a policy is derived using the learned model rather than using the true reward and transition functions. % The exploitation-exploration trade-off highlights the importance of the model to faitfully represent the uncertainty present in the data.
 
-% \begin{enumerate}
-%     \item Low dimensions
-%     \item Prior knowledge
-%     \item Limited, noisy and very expensive data
-%     \item Non-Euclidian spaces: graphs, meshes, and closed manifolds (e.g. circle).
-% \end{enumerate}
+\paragraph{Example}
+We consider Bayesian optimisation (BO) [CITE] as an illustration of these concepts. BO is a sequential search algorithm for finding a global minimiser of an unknown objective function $f$ defined over a domain of interest $\mathcal{X}$
+\begin{equation}
+    x_* = \argmin_{x \in \mathcal{X}} f(x).
+\end{equation}
+The function $f$ is not observed directly. Instead, at each step the algorithm selects a query point $x \in \mathcal{X}$ at which to evaluate $f$ and obtains $y(x)$: a function evaluation corrupted by noise $y(x) \sim p(y(x) \given f(x))$. 
 
-Stationary kernels are ubiquitous in Gaussian processes when the input space is Euclidean. Their popularity is due to their general useability and the ease of understanding which prior information they encode. Recently, the extensions of stationary kernels to 
+BO can be framed as a MDP if one considers the cardinality of $\mathcal{S}$ to be $1$, and the actions space to cover the function's input domain $\mathcal{A} = \mathcal{X}$. As there is only a single state the transition functions trivially reduces to the identity function. The reward associated to an action $x$\footnote{To adhere to the common notation in BO we use $x$, rather than $a$, to represent the action (in our case the next query point).} is given by the negative function observation. This construction leads to an unknown and probabilistic reward  function due to the unknown objective function and the noisy observations. Collecting the sequence of actions (i.e. query points) $\{x_t\}$, the performance of an algoritm selecting the query points can be measured using a tailered notion of reget
+\begin{equation}
+    R = \sum_t f(x_t) - f(x_*).
+\end{equation}
 
+A model-based approach to this problem employs a surrogate model $g$ which learns the unknown objective function $f$ using past observations. The surrogate model is used to decide on the next query point, through what is known as an \emph{acquisition rule} [CITE]. The exploitation-exploration trade-off highlights the importance of the surrogate model's faithful represention of uncerainty about the objective. It is a key ingredient to an effective algorithm and low regret. Most model-based approaches employ Gaussian processes (GPs) as their surrogate model: $g \sim \GP$. 
 
-manifolds 
-Descrete cases: undirected graph and meshes
+To follow a model-based approach in Bayesian optimisation, as well as in other kinds of MDPs, it is required to define a GP on the domain of interest. For convenience, this domain is typically chosen to be the Euclidian space. However, many problems possess important non–Euclidean geometric structure, whcih makes. Consider for example the joint postures of a robot, which are defined on the torus $\mathcal{T}^d = \mathcal{S}^1 \times \mathcal{S}^1 \ldots \times \mathcal{S}^1$. t more effective and convenient to directly specify the problem on the non-Euclidean domain, like the torus or the sphere, but also a graph, a rotation group, or the space of positive-definite matrices. However, to accomodate for this, one must be able to specify a GP prior, or equivalently define a kernel, on this space of interest.
 
-Define Matern kernels:
+\section{Gaussian Processes as Surrogate Models in non-Euclidian manifolds}
+
+\begin{figure}[tbh!]
+  \centering
+\begin{subfigure}{0.3\textwidth}
+  \includegraphics[clip, trim=4cm 1.8cm 1cm 3cm,width=\textwidth]{sphere}
+  \caption{Sphere}
+  \label{fig:sphere}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.3\textwidth}
+  \includegraphics[width=\textwidth]{graph}
+  \caption{Graph}
+  \label{fig:graph}
+\end{subfigure}\hfil % <-- added
+\begin{subfigure}{0.3\textwidth}
+  \includegraphics[width=\textwidth]{teddy}
+  \caption{Mesh}
+  \label{fig:mesh}
+\end{subfigure}
+\caption{XXX}
+\label{fig:xxxx}
+\end{figure}
+
+Stationary kernels are ubiquitous in Gaussian processes when the input space is Euclidean. Their popularity is due to their general useability and the ease of understanding which prior information they encode. Recent work of [CITE] has extended the definition of stationary kernels to Riemannian manifolds. This makes it possible to define a symmetric and positive-definite kernel, which fuels a GP that is able to take into account the geometry of the space. For example, in a graph two nodes can be in eachothers proximity (i.e. their distance in the Euclidian space is small and a classic stationary kernel would strongly correlate them) yet they can be separated by many edges and thus have little effect on each other.
+
+The construction in XX irely on the spectral theory of the Laplace-Beltrami operator to define the kernel through its eigenfunctions and eigenvalues. 
 \begin{equation}
     k(x, x) = \sum_i S(\sqrt{\lambda_i}) \phi_i(x) \phi_i(x')
 \end{equation}
+where $S$ is the power spectrum of the kernel and . In we have seen a special case of this construction for zonal kernel defined on the hypersphere. In phi are given by the spherical harmonics. This is similar to s similar to our work in \cref{chapter:vish} as they 
 
-We want to place a \emph{surrogate model} between the expensive function $f$ and the algorithm. We model $\tilde{f}$ by a Gaussian process
-\begin{equation}
-    \tilde{f} \sim \GP
-\end{equation}
+The elegance of eq X . But also extends to descrete domains . Sphere where we have anlytical expressions for and Graph Laplacian 
+Descrete cases: undirected graph and meshes
 
-\subsection{Research Questions}
-
+\subsection{Open Research Questions}
+\begin{itemize}
+    \item 
+\end{itemize}
 
 \section{Applications}
 
@@ -84,11 +107,11 @@ We want to place a \emph{surrogate model} between the expensive function $f$ and
 
 % Basically settings where DNNs are never going to be competitive with GPs - low-dim, very data-efficient, high-cost - not even if someone figures out how to do DNN uncertainty right, due to GP regret guarantees (under reasonable assumptions) matching the best possible regret achievable by any model/decision system.
 
-\paragraph{Related areas}
-\begin{enumerate}
-    \item Probabilistic numerics [Tubingen Manifesto, Osborne and Henning]. They are less interested in closing the loop and making decisions atop of the models. They usually plot the error bars on the estimator as their final result.
-    \item Bayesian optimisation methods. Special case.
-\end{enumerate}
+% \paragraph{Related areas}
+% \begin{enumerate}
+%     \item Probabilistic numerics [Tubingen Manifesto, Osborne and Henning]. They are less interested in closing the loop and making decisions atop of the models. They usually plot the error bars on the estimator as their final result.
+%     \item Bayesian optimisation methods. Special case.
+% \end{enumerate}
 
 
 
