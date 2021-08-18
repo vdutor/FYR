@@ -1,6 +1,6 @@
 \graphicspath{{Chapter5/Figs/}}
 
-\chapter{Future Research: Non-Parametric Decision Making in Non-Euclidian Spaces}
+\chapter{Future Research Agenda}
 \label{chapter:future-research}
 
 \section{Introduction}
@@ -55,9 +55,9 @@ BO can be framed as a MDP if one considers the cardinality of $\mathcal{S}$ to b
     R = \sum_t f(x_t) - f(x_*).
 \end{equation}
 
-A model-based approach to this problem employs a surrogate model $g$ which learns the unknown objective function $f$ using past observations. The surrogate model is used to decide on the next query point, through what is known as an \emph{acquisition rule} [CITE]. The exploitation-exploration trade-off highlights the importance of the surrogate model's faithful represention of uncerainty about the objective. It is a key ingredient to an effective algorithm and low regret. Most model-based approaches employ Gaussian processes (GPs) as their surrogate model: $g \sim \GP$. 
+A model-based approach to this problem employs a surrogate model $g$ which learns the unknown objective function $f$ using past observations. The surrogate model is used to decide on the next query point, through what is known as an \emph{acquisition rule} [CITE]. The exploitation-exploration trade-off highlights the importance of the surrogate model's faithful represention of uncerainty about the objective. It is a key ingredient to an effective algorithm and is necessary to obtain a low regret [CITE]. Most model-based approaches employ Gaussian processes (GPs) as their surrogate model: $g \sim \GP$ [CITE]. 
 
-To follow a model-based approach in Bayesian optimisation, as well as in other kinds of MDPs, it is required to define a GP on the domain of interest. For convenience, this domain is typically chosen to be the Euclidian space. However, many problems possess important non–Euclidean geometric structure, whcih makes. Consider for example the joint postures of a robot, which are defined on the torus $\mathcal{T}^d = \mathcal{S}^1 \times \mathcal{S}^1 \ldots \times \mathcal{S}^1$. t more effective and convenient to directly specify the problem on the non-Euclidean domain, like the torus or the sphere, but also a graph, a rotation group, or the space of positive-definite matrices. To accomodate for this, one must be able to specify a GP prior, or equivalently define a kernel, on this space of interest.
+To follow a model-based approach in Bayesian optimisation, as well as in other kinds of MDPs, it is required to define a GP on the domain of interest. For convenience, this domain is typically chosen to be the Euclidian space. However, many problems possess important non–Euclidean geometric structure, which makes it much more effective and convenient to directly specify the problem on the non-Euclidean domain, like the torus or the sphere, but also a graph, a rotation group, or the space of positive-definite matrices. Consider for example optimising the joint postures of a robot, which are defined on the torus $\mathcal{T}^d = \mathcal{S}^1 \times \mathcal{S}^1 \ldots \times \mathcal{S}^1$. To accomodate for this, one must be able to specify a GP prior, or equivalently define a kernel, on this space of interest.
 
 \section{Gaussian Processes as Surrogate Models in non-Euclidian manifolds}
 
@@ -80,38 +80,45 @@ To follow a model-based approach in Bayesian optimisation, as well as in other k
   \caption{Mesh}
   \label{fig:mesh}
 \end{subfigure}
-\caption{XXX}
+\caption{Mat\'ern GP samples on non-Euclidian spaces}
 \label{fig:xxxx}
 \end{figure}
 
-Stationary kernels are ubiquitous in Gaussian processes when the input space is Euclidean. Their popularity is due to their general useability and the ease of understanding which prior information they encode. Recent work of [CITE] has extended the definition of stationary kernels to Riemannian manifolds. This makes it possible to define a symmetric and positive-definite kernel, which characterises a GP that is able to take into account the geometry of the space. % For example, in a graph two nodes can be in eachothers proximity (i.e. their distance in the Euclidian space is small and a classic stationary kernel would strongly correlate them) yet they can be separated by many edges and thus have little effect on each other.
+Stationary kernels are ubiquitous in Gaussian processes when the input space is Euclidean. Their popularity is due to their general useability and the ease of understanding which prior information they encode. Recent work of \citet{Borovitskiy2020} has extended the definition of stationary kernels to Riemannian manifolds. This enables the definition of symmetric and positive-definite kernels, which characterise GPs, that take into account the geometry of the space. In the case of a graph, for example, two nodes can be close to each other in the Euclidean space yet far apart in the term of number of edges them separates them. A classical statioary kernel is not able to capture this information, whereas a geometric aware kernel can.
 
-The construction in [CITE] relies on the spectral theory of the Laplace-Beltrami operator and defines the kernel through its Mercer decomposition (cref XXX)
+The construction in \citet{Borovitskiy2020} relies on the spectral theory of the Laplace-Beltrami operator and defines the kernel through its Mercer decomposition (\cref{eq:mercer})
 \begin{equation}
-    k(x, x) = \sum_i S(\sqrt{\lambda_i}) \phi_i(x) \phi_i(x')
+    \label{eq:borovitskiy}
+    k(x, x) = \sum_i S(\sqrt{\lambda_i})\,\phi_i(x)\,\phi_i(x')
 \end{equation}
-where $S$ is the power spectrum of the kernel and $\{\lambda_i, \phi_i\}$ are the eigenvalues and eigenfunctions of the Laplace-Beltrami operator . In \cref{chapter:vish} we discusses special case of this construction for zonal kernel defined on the hypersphere where the eigenfunctions are given by the spherical harmonics.
+where $S$ is the power spectrum of the kernel and $\{\lambda_i, \phi_i\}$ are the eigenvalues and eigenfunctions of the Laplace-Beltrami operator. \cref{chapter:vish} discusses a special case of this construction for zonal kernels defined on the hypersphere where the eigenfunctions are given by the spherical harmonics.
 
-The elegance of eq X . But also extends to descrete domains . Sphere where we have anlytical expressions for and Graph Laplacian 
-Descrete cases: undirected graph and meshes
+The elegance of \cref{eq:borovitskiy} is that it defines the kernel through the eigenfunctions of the Laplace-Beltrami operator. These eigenfunctions are known analytically for certain well-studied manifolds, such as the sphere and the torus. However, in practice, working with more complex manifolds involves descretizing the manifold of which the mesh and undirected weighted graph are special cases. This simple framework allows us to unify these spaces and allows us to develop apply to all of them.
 
-\subsection{Plans and Research Questions}
-\begin{itemize}
-    \item 
-\end{itemize}
+Given the brief background on model-based approaches to MDP and Gaussian processes defined on non-Euclidian spaces we now suggest the following projects 
 
-\section{Applications}
+\section{Research Agenda}
+The overarching theme of my proposed research agenda is: ``How can we make Gaussian processes an effective tool for decision-making tasks on non-Euclidean spaces?''. The goal would be that these tools are more widely used outside our `small' GP community by scientist and engineers who deal with these problems regularily. One could envision these tools to be particularly useful in domains such as mechanical engineering where finite element meshes, environmental modelling which is often done on the sphere, and bio-medical applications on organ-shaped manifolds. To achieve this goal we need at least the following components:
 
-\begin{enumerate}
-    \item Bayesian search: airplane crash -> gravitational waves
-\end{enumerate}
-
+\subsection{Adopotion: Geometric Kernel Package}
 
 \begin{figure}
     \centering
-    \includegraphics[width=.9\textwidth]{geomgp}
-    \caption{Hello}
+    \includegraphics[width=.7\textwidth]{geomgp}
+    \caption{Overview of Geometric Kernel package}
+    \label{fig:geomgp}
 \end{figure}
+
+Open-source, high-quality software is a key katalysator for good research: it allows one to quickly prototype ideas on top of strong foundations, but---more importantly---it makes it possible to package mature research work to make it available to the wider community. The first objective is to develop a Python package which provides implementations of geometric kernels on analytic manifolds and. The package will also be opinionated on the best way to handle these objects for downstream tasks. However, to not hinder adoption by the wider community the package will be backend agnostic, which will allow for downstream use TensorFlow package (e.g., GPflow) and PyTorch packages (e.g., GPytorch). \Cref{fig:geomgp} gives an overview of the package. Development has started: \url{https://github.com/GPflow/GeometricKernels}.
+
+\subsection{Efficiency: Variational Fourier Features for Manifold Gaussian processes}
+
+The cubic computational complexity of GPs in Euclidian spaces limits their use in many real-world applications. As explained in \cref{chapter:theoretical-framework}, a widely adopted solution for this problem is to employ a smaller set of inducing points which summarise the GP at certain input locations. The same cubic computational complexity is present in GP's non-Euclidian counterpart, but it unfortunately not straightforward to extend the inducing point methods to these domains. It is, for example, not clear how to define an inducing variable on a graph or on a mesh, and how one would optimise their location as is the case with traditional inducing point inputs. This Interdomain and Variational Fourier Features inducing point method seem a promising alternative. Indeed, using the integral formulation we can define inducing variables which are optimally placed given the geometry, and do not need to be optimised.
+
+\subsection{Application: Sequential decision-making on non-Euclidian spaces}
+
+To convince a wider audience to use ones methods, it is important to show their practical usefulness. An interesting 
+Bayesian search: airplane crash -> gravitational waves
 
 
 % Basically settings where DNNs are never going to be competitive with GPs - low-dim, very data-efficient, high-cost - not even if someone figures out how to do DNN uncertainty right, due to GP regret guarantees (under reasonable assumptions) matching the best possible regret achievable by any model/decision system.
