@@ -732,13 +732,13 @@ year = {2019},
 
 @InProceedings{bui2019dgpep, 
     title = {{Deep Gaussian Processes for Regression using Approximate Expectation Propagation}}, 
-    author = {Bui, Thang and Hern{\'a}ndez-Lobato, Daniel and Hern{\'a}ndez-Lobato, Jos{\'e} Miguel and Li, Yingzhen and Turner, Richard E.},     
+    author = {Bui, Thang D. and Hern{\'a}ndez-Lobato, Daniel and Hern{\'a}ndez-Lobato, Jos{\'e} Miguel and Li, Yingzhen and Turner, Richard E.},     
     booktitle = {Proceedings of the 33rd International Conference on Machine Learning (ICML)},
     date      = {2016},
 }
 
 @inproceedings{Khan2019,
- author = {Khan, Mohammad Emtiyaz and Immer, Alexander and Abedi, Ehsan and Korzepa, Maciej},
+ author = {Khan, Emtiyaz and Immer, Alexander and Abedi, Ehsan and Korzepa, Maciej},
  booktitle = {Advances in Neural Information Processing Systems 32 (NeurIPS)},
  title = {Approximate Inference Turns Deep Networks into Gaussian Processes},
  volume = {32},
@@ -793,11 +793,6 @@ year = {2019},
   volume = {48}, 
   }
 
-% --------------------------------------
-% New references should go below here:
-% --------------------------------------
-
-
 @article{mercer1909,
   title={Functions of positive and negative type, and their connection the theory of integral equations},
   author={Mercer, James},
@@ -809,24 +804,27 @@ year = {2019},
   publisher={The Royal Society London}
 }
 
-@misc{ober2020global,
-Author = {Sebastian W. Ober and Laurence Aitchison},
-Title = {Global inducing point variational posteriors for Bayesian neural networks and deep Gaussian processes},
-Year = {2020},
-Eprint = {arXiv:2005.08140},
+@article{ober2020global,
+  author = {Sebastian W. Ober and Laurence Aitchison},
+  title = {Global inducing point variational posteriors for Bayesian neural networks and deep Gaussian processes},
+  url          = {https://arxiv.org/abs/2005.08140},
+  date         = {2020},
+  eprint       = {2005.08140},
+  eprinttype   = {arXiv},
+  journaltitle = {arXiv preprint arXiv:2005.08140},
 }
 
-@misc{immer2021marglik,
-Author = {Alexander Immer and Matthias Bauer and Vincent Fortuin and Gunnar Rätsch and Mohammad Emtiyaz Khan},
-Title = {Scalable Marginal Likelihood Estimation for Model Selection in Deep Learning},
-Year = {2021},
-Eprint = {arXiv:2104.04975},
+@inproceedings{immer2021marglik,
+  author = {Immer, Alexander and Bauer, Matthias and Fortuin, Vincent and R{\"a}tsch, Gunnar and Khan, Emtiyaz},
+  title = {Scalable Marginal Likelihood Estimation for Model Selection in Deep Learning},
+  booktitle = {Proceedings of the 38rd International Conference on Machine Learning (ICML)},
+  date = {2021},
 }
 
 @inproceedings{duvenaud2013structure,
   title={Structure discovery in nonparametric regression through compositional kernel search},
   author={Duvenaud, David and Lloyd, James and Grosse, Roger and Tenenbaum, Joshua and Zoubin, Ghahramani},
-  booktitle={International Conference on Machine Learning},
+  booktitle = {Proceedings of the 30rd International Conference on Machine Learning (ICML)},
   pages={1166--1174},
   year={2013},
   organization={PMLR}
@@ -835,32 +833,47 @@ Eprint = {arXiv:2104.04975},
 @inproceedings{wilson2013gaussian,
   title={Gaussian process kernels for pattern discovery and extrapolation},
   author={Wilson, Andrew and Adams, Ryan},
-  booktitle={International conference on machine learning},
-  pages={1067--1075},
+  booktitle = {Proceedings of the 30rd International Conference on Machine Learning (ICML)},
   year={2013},
+  pages={1067--1075},
   organization={PMLR}
 }
 
 @incollection{ginsbourger2013kernels,
   title={Kernels and designs for modelling invariant functions: From group invariance to additivity},
   author={Ginsbourger, David and Durrande, Nicolas and Roustant, Olivier},
-  booktitle={mODa 10--Advances in Model-Oriented Design and Analysis},
+  booktitle={Advances in Model-Oriented Design and Analysis},
   pages={107--115},
   year={2013},
   publisher={Springer}
 }
-@article{havasi2018inference,
+
+@inproceedings{havasi2018inference,
   title={Inference in deep gaussian processes using stochastic gradient hamiltonian monte carlo},
   author={Havasi, Marton and Hern{\'a}ndez-Lobato, Jos{\'e} Miguel and Murillo-Fuentes, Juan Jos{\'e}},
-  journal={arXiv preprint arXiv:1806.05490},
+  booktitle = {Advances in Neural Information Processing Systems 31 (NeurIPS)},
   year={2018}
 }
+
+@article{ober2020global,
+  author = {Sebastian W. Ober and Laurence Aitchison},
+  title = {Global inducing point variational posteriors for Bayesian neural networks and deep Gaussian processes},
+  url          = {https://arxiv.org/abs/2005.08140},
+  date         = {2020},
+  eprint       = {2005.08140},
+  eprinttype   = {arXiv},
+  journaltitle = {arXiv preprint arXiv:2005.08140},
+}
+
 
 @article{burt2020variational,
   title={Variational orthogonal features},
   author={Burt, David R and Rasmussen, Carl Edward and van der Wilk, Mark},
-  journal={arXiv preprint arXiv:2006.13170},
-  year={2020}
+  url          = {https://arxiv.org/abs/2006.13170},
+  date         = {2020},
+  eprint       = {2006.13170},
+  eprinttype   = {arXiv},
+  journaltitle = {arXiv preprint arXiv:2006.13170},
 }
 
 @article{GPflow2017,
@@ -878,18 +891,14 @@ Eprint = {arXiv:2104.04975},
 @article{dutordoir2021deep,
   author       = {Dutordoir, Vincent and Hensman, James and van der Wilk, Mark and Ek, Carl Henrik and Ghahramani, Zoubin and Durrande, Nicolas},
   date         = {2021},
-  journaltitle = {submission to NeurIPS},
+  booktitle = {Submission to NeurIPS},
   title        = {{Deep Neural Networks as Point Estimate for Deep Gaussian Processes}},
 }
 
 @inproceedings{dutordoir2018cde,
- author = {Dutordoir, Vincent and Salimbeni, Hugh and Hensman, James and Deisenroth, Marc},
- booktitle = {Advances in Neural Information Processing Systems},
- editor = {S. Bengio and H. Wallach and H. Larochelle and K. Grauman and N. Cesa-Bianchi and R. Garnett},
- pages = {},
- publisher = {Curran Associates, Inc.},
+ author = {Dutordoir, Vincent and Salimbeni, Hugh and Hensman, James and Deisenroth, Marc P.},
  title = {Gaussian Process Conditional Density Estimation},
- url = {https://proceedings.neurips.cc/paper/2018/file/6a61d423d02a1c56250dc23ae7ff12f3-Paper.pdf},
+ booktitle = {Advances in Neural Information Processing Systems 31 (NeurIPS)},
  volume = {31},
  year = {2018}
 }
@@ -898,20 +907,19 @@ Eprint = {arXiv:2104.04975},
   title={Sparse {G}aussian process approximations and applications},
   author={van der Wilk, Mark},
   year={2019},
-  school={University of Cambridge}
+  school={University of Cambridge, U.K.}
 }
 
 @inproceedings{minka2001expectation,
   title={Expectation propagation for approximate {B}ayesian inference},
   author={Minka, Thomas P.},
-  booktitle={Proceedings of the Seventeenth conference on Uncertainty in Artificial Intelligence (UAI 2001)},
+  booktitle = {Proceedings of the 17th Conference on Uncertainty in Artificial Intelligence (UAI)},
   pages={362--369},
   year={2001},
-  organization={Morgan Kaufmann Publishers Inc.}
 }
 
 @article{bui2017unifying,
-  author  = {Thang D. Bui and Josiah Yan and Richard E. Turner},
+  author  = {Bui, Thang D. and Yan, Josiah and Turner, Richard E.},
   title   = {A Unifying Framework for {G}aussian Process Pseudo-Point Approximations using Power Expectation Propagation},
   journal = {Journal of Machine Learning Research},
   year    = {2017},
@@ -935,30 +943,23 @@ Eprint = {arXiv:2104.04975},
 
 @incollection{bauer2016understanding,
 title = {Understanding Probabilistic Sparse {G}aussian Process Approximations},
-author = {Bauer, Matthias and van der Wilk, Mark and Rasmussen, Carl Edward},
+author = {Bauer, Matthias and van der Wilk, Mark and Rasmussen, Carl E.},
 booktitle = {Advances in Neural Information Processing Systems 29 (NeurIPS)},
-editor = {D. D. Lee and M. Sugiyama and U. V. Luxburg and I. Guyon and R. Garnett},
-pages = {1533--1541},
 year = {2016},
-publisher = {Curran Associates, Inc.},
-url = {http://papers.nips.cc/paper/6477-understanding-probabilistic-sparse-gaussian-process-approximations.pdf}
 }
 
 @incollection{Domke2018IWVI,
 title = {Importance Weighting and Variational Inference},
-author = {Domke, Justin and Sheldon, Daniel R},
-booktitle = {Advances in Neural Information Processing Systems 31},
-editor = {S. Bengio and H. Wallach and H. Larochelle and K. Grauman and N. Cesa-Bianchi and R. Garnett},
+author = {Domke, Justin and Sheldon, Daniel R.},
+booktitle = {Advances in Neural Information Processing Systems 31 (NeurIPS)},
 pages = {4470--4479},
 year = {2018},
-publisher = {Curran Associates, Inc.},
-url = {http://papers.nips.cc/paper/7699-importance-weighting-and-variational-inference.pdf}
 }
 
 @inproceedings{perronnin2010large,
   title={Large-scale image retrieval with compressed fisher vectors},
   author={Perronnin, Florent and Liu, Yan and S{\'a}nchez, Jorge and Poirier, Herv{\'e}},
-  booktitle={2010 IEEE computer society conference on computer vision and pattern recognition},
+  booktitle={IEEE computer society conference on computer vision and pattern recognition},
   pages={3384--3391},
   year={2010},
   organization={IEEE}
@@ -983,23 +984,21 @@ url = {http://papers.nips.cc/paper/7699-importance-weighting-and-variational-inf
   volume    = {3},
 }
 
-@article{borovitskiy2020mat,
-  title={Mat$\backslash$'ern Gaussian processes on Riemannian manifolds},
-  author={Borovitskiy, Viacheslav and Terenin, Alexander and Mostowsky, Peter and Deisenroth, Marc Peter},
-  journal={arXiv preprint arXiv:2006.10160},
-  year={2020}
-}
-
 @inproceedings{borovitskiy2020mat,
-  author={Borovitskiy, Viacheslav and Terenin, Alexander and Mostowsky, Peter and Deisenroth, Marc Peter},
-  title={Mat$\backslash$'ern Gaussian processes on Riemannian manifolds},
+  author={Borovitskiy, Viacheslav and Terenin, Alexander and Mostowsky, Peter and Deisenroth, Marc P.},
+  title={Mat{\'}ern Gaussian processes on Riemannian manifolds},
   booktitle = {Advances in Neural Information Processing Systems 33 (NeurIPS)},
   date      = {2020},
 }
 
-@article{wenzel2020good,
+@inproceedings{wenzel2020good,
   title={How good is the bayes posterior in deep neural networks really?},
   author={Wenzel, Florian and Roth, Kevin and Veeling, Bastiaan S and {\'S}wi{\k{a}}tkowski, Jakub and Tran, Linh and Mandt, Stephan and Snoek, Jasper and Salimans, Tim and Jenatton, Rodolphe and Nowozin, Sebastian},
-  journal={arXiv preprint arXiv:2002.02405},
+  booktitle = {Proceedings of the 37th International Conference on Machine Learning (ICML)},
   year={2020}
 }
+
+
+% --------------------------------------
+% New references should go below here:
+% --------------------------------------
