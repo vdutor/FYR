@@ -30,10 +30,7 @@ We define a dot-product kernel, also known as a zonal kernel (we will use both t
 \begin{equation}
     k(x, x') = \kappa(x\transpose x'),
 \end{equation}
-where $\kappa: [-1, 1] \rightarrow \Reals$ is a continuous function and referred to as the \emph{shape function}. In other words, dot-product kernels only depend on the distance on the great circle between two inputs, rather than their location. They are the counterpart of stationary kernels $k(x, x') = \kappa(x - x')$, who are functions of the difference only. For example, where stationary kernels are translation invariant, dot-product kernel are rotationally invariant.
-
-% TODO: example Arc Cosine and Stationary kernels on the hypersphere
-
+where $\kappa: [-1, 1] \rightarrow \Reals$ is a continuous function and referred to as the \emph{shape function}. In other words, dot-product kernels only depend on the distance on the great circle between two inputs, rather than their location. They are the counterpart of stationary kernels $k(x, x') = \kappa(x - x')$, who are functions of the difference only. For instance, where stationary kernels are translation invariant, dot-product kernel are rotationally invariant.
 
 We can associate a kernel operator $\mathcal{K}$ to a zonal kernel, as explained in \cref{section:theory:spectral-formulation}, which exhibits the form
 \begin{equation}
@@ -179,6 +176,7 @@ which leads to an RKHS consisting of functions defined on $\Reals^d$ of the form
 where the eigenvalues $\lambda_n$ and reproducing inner-product remain unchanged and are given by \cref{eq:compute-eigenvalues} and \cref{eq:rkhs-sphere}, respectively.
 
 \section{Relation to Variational Fourier Features}
+\label{sec:vff-vs-vish}
 
 The most closely related method to the presented method, which going forward we are going to refer to as Variational Inducing Spherical Harmonics (VISH), is the Variational Fourier Feature (VFF) approach proposed by \citet{hensman2017variational}. VFF is an interdomain method where the inducing variables are given by a Mat\'ern RKHS inner product between the GP and elements of the Fourier basis:
 \begin{equation}

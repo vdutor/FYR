@@ -75,10 +75,9 @@ Similarly, the marginal likelihood (model evidence) is also available in closed-
   \label{eq:log-marginal-likelihood}
   p(\vy) = \NormDist{\vy \given \vzero, \Kff + \sigma^2 \Eye}.
 \end{equation}
-The availablility of the posterior and the marginal likelihood in analytic form makes GPs a unique tool for inferring unknown functions from data. 
-% TODO: The marginal Occam's razor [Rasmussen and Ghahramani, 2001]
+The availablility of the posterior and the marginal likelihood in analytic form makes GPs a unique tool for inferring unknown functions from data. In particular, the marginal likelihood allows for model comparison and complies with Occam's razor \citep[Chapter 28]{mackay2003information}.
 
-Despite the convenience of the analytic expressions, computing this exact posterior requires inverting the $N \times N$ matrix $\Kff$, which has a $\BigO(N^3)$ computational complexity and a $\BigO(N^2)$ memory footprint. Interestingly, the computational intractability in GPR models originates from the prior and \emph{not} the complexity of marginalisation as is often the case for other Bayesian methods [TODO: CITE]. Indeed, these methods resort to MCMC to avoid computing intractable normalising constant, which is a problem that GPR does not encounter.  Another shortcoming of GPR models is that there is no known analytical expression for the posterior distribution when the likelihood (\cref{eq:likelihood}) is not Gaussian, as encountered in classification for instance. In the next paragraph we discuss solutions to both problems.
+Despite the convenience of the analytic expressions, computing this exact posterior requires inverting the $N \times N$ matrix $\Kff$, which has a $\BigO(N^3)$ computational complexity and a $\BigO(N^2)$ memory footprint. Interestingly, the computational intractability in GPR models originates from the prior and \emph{not} the complexity of marginalisation as is often the case for other Bayesian methods \citep[e.g.,][]{blei2003latent}. Indeed, these methods resort to MCMC or EM approaches to avoid computing intractable normalising constants, which is a problem that GPR does not encounter.  Another shortcoming of GPR models is that there is no known analytical expression for the posterior distribution when the likelihood (\cref{eq:likelihood}) is not Gaussian, as encountered in classification for instance. In the next paragraph we discuss solutions to both problems.
 
 \section{Approximate Inference with Sparse Gaussian Processes}
 
