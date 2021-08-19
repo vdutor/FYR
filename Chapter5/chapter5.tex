@@ -53,6 +53,7 @@ The function $f$ is not observed directly. Instead, at each step the algorithm s
 
 BO can be framed as a MDP if one considers the cardinality of $\mathcal{S}$ to be $1$, and the actions space to cover the function's input domain $\mathcal{A} = \mathcal{X}$. As there is only a single state the transition functions trivially reduces to the identity function. The reward associated to an action $x$\footnote{To adhere to the common notation in BO we use $x$, rather than $a$, to represent the action (in our case the next query point).} is given by the negative function observation. This construction leads to an unknown and probabilistic reward  function due to the unknown objective function and the noisy observations. Collecting the sequence of actions (i.e. query points) $\{x_t\}$, the performance of an algoritm selecting the query points can be measured using a tailered notion of reget
 \begin{equation}
+  \label{eq:regret-bo}
     R = \sum_t f(x_t) - f(x_*).
 \end{equation}
 
@@ -62,7 +63,7 @@ popular examples include Expected Improvement \citep{jones1998efficient}, Knowle
 To follow a model-based approach in Bayesian optimisation, as well as in other kinds of MDPs, we define a GP on the domain of interest. For convenience, this domain is typically chosen to be the Euclidian space. However, many problems possess important non–Euclidean geometric structure, which makes it much more effective and convenient to directly specify the problem on the non-Euclidean domain, like the torus or the sphere, but also a graph, a rotation group, or the space of positive-definite matrices. Consider for example optimising the joint postures of a robot, which are defined on the torus $\mathcal{T}^d = \mathcal{S}^1 \times \mathcal{S}^1 \ldots \times \mathcal{S}^1$. To accomodate for this, one must be able to specify a GP prior, or equivalently define a kernel, on this space of interest.
 
 \section{Gaussian Processes as Surrogate Models in non-Euclidian manifolds}
-\label{sec:gop-noneuclidian}
+\label{sec:gp-noneuclidian}
 
 \begin{figure}[tbh!]
   \centering
@@ -120,15 +121,10 @@ The cubic computational complexity of GPs in Euclidian spaces limits their use i
 
 \subsection{Application: Sequential decision-making on non-Euclidian spaces}
 
-To convince a wider audience to use these methods, it is important to show their practical usefulness on a real-world use-case.
+To convince a wider audience to use these methods, it is important to show their practical usefulness on a real-world use-case. While the exact application is at the time of writing not set in stone, we consider the use-case of `planning searches for lost aircrafts and other objects' \citep{stone2014search} to be well-suited problem to test our methods on. In it simplest formulation, planning a search mission can be seen as a Bayesian optimisation problem, where the optimisation surface is mainly flat (i.e. absence of the aircraft), apart from a single global minimum at the location of the lost object. However, the problem quickly becomes more challenging---and realistic---when we consider observations to be noisy. This is indeed important because it is likely that the missing aircraft will have sunk, and not observing it does not necissarily mean its absence. Additionally, it will also be necessary to take into account water and wind currents, which will give a time-varying aspect to the problem. Finally, one will have to consider the cost associated to moving the search operation, which will imply a different regret compared to the traditional one used in BO (given in \cref{eq:regret-bo}). Given the geometry of our globe this is a problem that is most naturally represented on the sphere. TODO: This representation will also come in handy when visualising results and encoding prior information and existing models, which highlights the importance of our work on decision-making on non-Euclidian spaces.
 
 
-Take into account the case of moving the search operation. Calculate expecations of costs associated to search missions. % This use-case could be a stepping-stone into more scientific applications such as , which are similar in vein to 
-
-To illustrate this it woul
-Bayesian search: airplane crash -> gravitational waves
-ba
-
+% An interesting extension to this problem 
 
 % Basically settings where DNNs are never going to be competitive with GPs - low-dim, very data-efficient, high-cost - not even if someone figures out how to do DNN uncertainty right, due to GP regret guarantees (under reasonable assumptions) matching the best possible regret achievable by any model/decision system.
 
