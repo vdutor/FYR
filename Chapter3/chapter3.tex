@@ -26,7 +26,7 @@ is the surface area of $\dsphere$. We adopt the usual $L_2$ inner product for fu
      \langle f, g\rangle_{L_{2}(\dsphere)} = \frac{1}{\darea} \int_{\dsphere} f(x)\,g(x) \, \calcd{\nu(x)}.
 \end{equation}
 
-We define a dot-product kernel, also known as a zonal kernel (we will use both terms interchangably), as a p.d. kernel of the form
+We define a dot-product kernel, also known as a zonal kernel (we will use both terms interchangeably), as a p.d. kernel of the form
 \begin{equation}
     k(x, x') = \kappa(x\transpose x'),
 \end{equation}
@@ -94,7 +94,7 @@ Although it is typically stated without a proof, this theorem is already known i
     \sum_{n,j}
             \frac{{g}_{n, j} {h}_{n, j}}{\lambda_{n}}
 \end{equation}
-is the \emph{reproducing} inner product between two functions $g,h \in \rkhs$. The reproducing property of the RKHS implies that for $f \in \rkhs$: $f(x) = \langle f, k(x, \cdot) \rangle_\rkhs$, which will enable the constuction of spherical harmonic inducing features of discussing in the following section.
+is the \emph{reproducing} inner product between two functions $g,h \in \rkhs$. The reproducing property of the RKHS implies that for $f \in \rkhs$: $f(x) = \langle f, k(x, \cdot) \rangle_\rkhs$, which will enable the construction of spherical harmonic inducing features of discussing in the following section.
 
 %%%%%%%%%%%%%%%%%%%%%%
 \section{Variational Spherical Harmonic Gaussian Processes}
@@ -165,7 +165,7 @@ Although this setup may seem very arbitrary, it is inspired by the important wor
 \label{eq:arccosine}
     k(x, x') = \Exp{w}{\sigma(w\transpose x)\, \sigma(w\transpose x')} = \underbrace{\norm{x} \norm{x'}}_{\text{radial}}\ \underbrace{\frac{1}{\pi}\big( \sqrt{1 - t^2} + t\, (\pi - \arccos t) \big)}_{\text{angular (shape function) } \kappa(t)},
 \end{equation}
-where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. Indeed, we observe how the first order Arc Cosine kernel factorises in a radial and an angular component. The radial component simply linearly extrapolates the values on the hypersphere, while the angular component encodes the covariance on the hypersphere and is only a function of the geodestic distance. This factorisation exactly matches our setup. We can generalise the zonal kernels of the previous section and their corresponding RKHS to the complete domain $\Reals^d$ using the following definition
+where $t = \frac{\vx^\top \vx'}{\norm{\vx}\norm{\vx'}}$. Indeed, we observe how the first order Arc Cosine kernel factorises in a radial and an angular component. The radial component simply linearly extrapolates the values on the hypersphere, while the angular component encodes the covariance on the hypersphere and is only a function of the geodesic distance. This factorisation exactly matches our setup. We can generalise the zonal kernels of the previous section and their corresponding RKHS to the complete domain $\Reals^d$ using the following definition
 \begin{equation}
     k(x, x') = \norm{x} \norm{x'} \kappa\left( \frac{x^\top x'}{\norm{x}\norm{x'}} \right), % \quad \text{and} \quad f(x) = \norm{x} f\left({x \over \norm{x}}\right).
 \end{equation}
