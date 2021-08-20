@@ -11,7 +11,7 @@ The eigenvalues of a zonal function are given by the one-dimensional integral:
     \lambda_{n} = 
    \frac{\omega_{d}}{C_n^{(\alpha)}(1)} \int_{-1}^1 s(t)\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\frac{d-3}{2}} \calcd{t},
 \end{equation}
-where $C_n^{(\alpha)}(\cdot)$ is the Gegenbauer polynomial of degree $n$ with $\alpha = \frac{d-2}{2}$ and $\omega_{d} = \Omega_{d-2} / \Omega_{d-1}$ denotes the surface area of $\dsphere$ (see \cref{app:sec:harmonics} for analytical expressions of these quantities). The shape function $s(t)$ determines whether this integral can be computed in closed-form. In the next sections we derive analytical expressions for the eigenvalues of the Arc Cosine kernel and ReLU activation function in the case the $d$ is odd. For $d$ even, other kernels (e.g., Mat\'ern) or activation functions (e.g., Softplus, Swish, etc.) we rely on numerical integration (e.g., Gaussian quadrature) to obtain these coefficients. We will show that both approaches lead to highly similar results.
+where $C_n^{(\alpha)}(\cdot)$ is the Gegenbauer polynomial of degree $n$ with $\alpha = \frac{d-2}{2}$ and $\omega_{d} = \Omega_{d-2} / \Omega_{d-1}$ denotes the surface area of $\dsphere$ (see \cref{appendix:spherical-harmonics} for analytical expressions of these quantities). The shape function $s(t)$ determines whether this integral can be computed in closed-form. In the next sections we derive analytical expressions for the eigenvalues of the Arc Cosine kernel and ReLU activation function in the case the $d$ is odd. For $d$ even, other kernels (e.g., Mat\'ern) or activation functions (e.g., Softplus, Swish, etc.) we rely on numerical integration (e.g., Gaussian quadrature) to obtain these coefficients. We will show that both approaches lead to highly similar results.
 
 \section{Arc Cosine kernel}
 \label{sec:appendix:compute-eigenvalues-arccosine}
@@ -29,7 +29,7 @@ Using a change of variables we rewrite \cref{appendix:theorem:funk2}
 \end{equation}
 % with $c_{d, n} = \frac{\omega_{d-2}}{C_n^{(\alpha)}(1)}$.
 
-Substituting $C_n^{(\alpha)}(\cos x)$ by its polynomial expansion (\cref{appendix:eq:gegenbauer}), it becomes evident that we need a general solution of the integral for $n,\,m \in \Naturals$
+Substituting $C_n^{(\alpha)}(\cos x)$ by its polynomial expansion, it becomes evident that we need a general solution of the integral for $n,\,m \in \Naturals$
 \begin{equation}
 \int_0^\pi \left[ \sin(x) + (\pi - x) \cos(x) \right] \cos^n(x) \sin^m(x) \calcd{x}.
 \end{equation}
@@ -129,7 +129,7 @@ Thanks to the simple form of the ReLU's activation shape function $\sigma(t) = \
    \frac{\omega_{d}}{C_n^{(\alpha)}(1)} 
    \int_{0}^1 t\,C_n^{(\alpha)}(t)\,(1 - t^2)^{\alpha - 1/2} \calcd{t}.
 \end{equation}
-Using Rodrigues' formula for $C_n^{(\alpha)}(t)$ in \cref{appendix:eq:gegenbauer-rodrigues} and the identities in \cref{appendix:eq:gegenbauer-normalisation}, we can conveniently cancel the factor $(1 - t^2)^{\alpha - 1/2}$. Yielding
+Using Rodrigues' formula for $C_n^{(\alpha)}(t)$, we can conveniently cancel the factor $(1 - t^2)^{\alpha - 1/2}$
 \begin{equation}
     \sigma_{n} = 
     \omega_{d}
