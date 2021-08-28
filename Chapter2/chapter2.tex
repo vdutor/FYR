@@ -80,6 +80,7 @@ The availablility of the posterior and the marginal likelihood in analytic form 
 Despite the convenience of the analytic expressions, computing this exact posterior requires inverting the $N \times N$ matrix $\Kff$, which has a $\BigO(N^3)$ computational complexity and a $\BigO(N^2)$ memory footprint. Interestingly, the computational intractability in GPR models originates from the prior and \emph{not} the complexity of marginalisation as is often the case for other Bayesian methods \citep[e.g.,][]{blei2003latent}. Indeed, these methods resort to MCMC or EM approaches to avoid computing intractable normalising constants, which is a problem that GPR does not encounter.  Another shortcoming of GPR models is that there is no known analytical expression for the posterior distribution when the likelihood (\cref{eq:likelihood}) is not Gaussian, as encountered in classification for instance. In the next paragraph we discuss solutions to both problems.
 
 \section{Approximate Inference with Sparse Gaussian Processes}
+\label{sec:svgp}
 
 Sparse Gaussian processes combined with Variational Inference (VI) provide an elegant way to address these two shortcomings \citep{titsias2009, hensman2013, hensman2015scalable}. VI consists of introducing a distribution $q(f)$ specified by a set of parameters, and finding the values of these parameters such that $q(f)$ gives the best possible approximation of the exact posterior $p(f \given \vy )$. It is worth noting that there exists other approaches in the literature that address the same issues. In particular, Expectation Propagation (EP) \citep{minka2001expectation,bui2017unifying} formulates, similar to VI, an approximation to the posterior but uses a different objective to optimise the approximation. Tangentially, other sparse GP methods (e.g., FITC) \citep{Snelson05,quinonero2005unifying} approximate the model rather than the posterior. A downside of this is that the posteriors lose their non-parametric nature, which can be detrimental for the uncertainty estimates \citep{bauer2016understanding}. In what follows we will focus on Sparse Gaussian processes with variational inference because of its general applicability and overall robust performance.
 
@@ -276,7 +277,7 @@ Mercer's theorem describes the kernel $k$ in terms of $\{(\lambda_n, \phi_n)\}$,
 \end{equation}
 where the convergence is absolute and uniform.
 \end{theorem}
-It is important to note that $\{(\lambda_n, \phi_n)\}$ will depend on the measure $\nu(x)$, which implicitly also depends on the domain $\mathcal{X}$. Furthermore, while Mercer's theorem is a very powerful result, there are only a few cases in which it is possible to compute the eigensystem associated with a kernel. In \cref{chapter:vish} we discuss such as case.
+It is important to note that $\{(\lambda_n, \phi_n)\}$ will depend on the measure $\nu(x)$, which implicitly also depends on the domain $\mathcal{X}$. Furthermore, while Mercer's theorem is a very powerful result, there are only a few cases in which it is possible to compute the eigensystem associated with a kernel. In \cref{chapter:vish} we discuss such as case for rotationally invariant kernels defined on the hypersphere.
 
 We can use the eigen-decomposition of the kernel operator to represent the RKHS of a kernel
 \begin{theorem}[Mercer Representation of an RKHS]
@@ -298,7 +299,7 @@ The reproducing property of the Mercer representation of an RKHS is straightforw
   \langle f, k(x, \cdot) \rangle_\rkhs = \sum_n \frac{a_n \lambda_n \phi_n(x)}{\lambda_n} = \sum_n a_n \phi_n(x) = f(x).
 \end{equation}
 
-Through the Mercer decomposition of a kernel we can define a Gaussian process, this is known as the Karhunen-Lo\`eve expansion. We can define $f \sim \GP(0, k)$ as
+Through the Mercer decomposition of a kernel we can define a Gaussian proces---known as the Karhunen-Lo\`eve expansion. We can define $f \sim \GP(0, k)$ as
 \begin{equation}
   \label{eq:karhunen-loeve}
     f = \sum_n \sqrt{\lambda_n} \xi_n \phi_n\quad\text{with}\quad\xi_n \sim \NormDist{0, 1}
@@ -308,10 +309,14 @@ as indeed the covariance between two points is given by
   \Cov(f(x), f(x')) 
   &= \sum_{n,m} \sqrt{\lambda_m} \sqrt{\lambda_n} \ExpSymb[\xi_n \xi_m] \phi_n(x) \phi_m(x') && \cref{eq:karhunen-loeve}\\
   &= \sum_n \lambda_n \phi_n(x) \phi_n(x')  &&   \ExpSymb[\xi_n \xi_m] = \delta_{n\,m}\\
-  &= k(x, x') && \cref{eq:mercer}.
+  &= k(x, x') && \cref{eq:mercer},
 \end{align}
+which matches the kernel of the GP.
 
-Using the  Karhunen-Lo\`eve expression to compute the RKHS norm of a GP sample $f$ yields $\norm{f}^2_\rkhs = \sum_{n} \xi_{n}^2$, which is a diverging series. This shows that GP samples do not belong to the RKHS of their defining kernel, which may seem surprising. A straightforward solution to this problem is to truncate the Karhunen-Lo\`eve expansion and to only use the first $\tilde{N}$ eigenvalues and functions: $f = \sum_n^{\tilde{N}} \sqrt{\lambda_n} \xi_n \phi_n$, which approximates the kernel and the corresonponding GP.
+Interestingly, using the  Karhunen-Lo\`eve expression to compute the RKHS norm of a GP sample $f$ yields $\norm{f}^2_\rkhs = \sum_{n} \xi_{n}^2$, which is a diverging series. This shows that GP samples do not belong to the RKHS of their defining kernel, which may seem surprising. A straightforward solution to this problem is to truncate the Karhunen-Lo\`eve expansion and to only use the first $\tilde{N}$ eigenvalues and functions: $f = \sum_n^{\tilde{N}} \sqrt{\lambda_n} \xi_n \phi_n$, which approximates the kernel and the corresponding GP.
+
+\section{Conclusion}
+\Cref{eq:karhunen-loeve} gives an alternative definition of a GP in terms of its basisfunctions $\{\phi_n\}$ and weights $\{\sqrt{\lambda_n} \xi_n\}$. This functions-space views allows, among other, the definition of an interdomain inducing variable (cfr. \cref{section:interdomain-inducing-variables}) that leads to linear-time sparse GP approximations. Unfortunately, for many kernels there is no explicit formulation of their decomposition, which renders these methods purely theoretic. In \cref{chapter:vish}, however, we study a concrete class of kernels (i.e. rotationally invariant kernels) defined on a specific space (i.e. hyperspheres) for which the eigendecomposition can be obtained.
 
 
 % TODO:

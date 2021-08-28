@@ -5,7 +5,7 @@
 
 Spherical harmonics are a special set of functions defined on the hypersphere and play a central role in harmonic analysis and approximation theory \citep{wendland2005}. They originate from solving Laplace's equation, and form a complete set of orthogonal functions. Any sufficiently regular function defined on the sphere can be written as a sum of these spherical harmonics, similar to the Fourier series with sines and cosines. Spherical harmonics are defined in arbitrary dimensions \citep{frye2014,dai2013}, but lack explicit formulations and practical implementations in dimensions larger than three. %This is mainly due to the complexity of solving Laplace's equation in higher dimensions.
 
-In this section, we propose a novel algorithm to construct spherical harmonics in $d$ dimensions. The algorithm is based on the existence of a fundamental system of points on the hypersphere, which we select in a greedy fashion through optimisation. This result in spherical harmonics that are a linear combination of zonal functions and form an orthnormal basis on $\dsphere$. The algorithm lends itself well for implementation in Python and TensorFlow, which we provide at: \url{https://github.com/vdutor/SphericalHarmonics}. The code is accompagnied by a series of tests that show that the properties of spherical harmonics, as detailed below, hold. Before outlining the algorithm, we briefly define and cover the important properties of spherical harmonics in $\Reals^d$. We refer the interested reader to \citet{dai2013,frye2014} for a comprehensive overview.
+In this section, we propose a novel algorithm to construct spherical harmonics in $d$ dimensions. The algorithm is based on the existence of a fundamental system of points on the hypersphere, which we select in a greedy fashion through optimisation. This result in spherical harmonics that are a linear combination of zonal functions and form an ortho-normal basis on $\dsphere$. The algorithm lends itself well for implementation in Python and TensorFlow, which we provide at: \url{https://github.com/vdutor/SphericalHarmonics}. The code is accompanied by a series of tests that show that the properties of spherical harmonics, as detailed below, hold. Before outlining the algorithm, we briefly define and cover the important properties of spherical harmonics in $\Reals^d$. We refer the interested reader to \citet{dai2013,frye2014} for a comprehensive overview.
 % exist bases of spherical harmonics consisting of entirely zonal harmonics
 
 We adopt the usual $L_2$ inner product for functions $f: \dsphere \rightarrow \Reals$ and $g: \dsphere \rightarrow \Reals$ restricted to the sphere 
@@ -88,10 +88,10 @@ From the Funk-Hecke and the Addition theorem, it is clear that there is a strong
 \end{theorem}
 Finding a basis for $\mathcal{H}_n^d$ is thus equivalent to finding a set of $\dnumharmonicsforlevel$ points that satisfy \cref{eq:fundamental-system}. Crucially, \citet[Lemma~3]{dai2013} show that there always exists a fundamental system of degree $n$ and $\dnumharmonicsforlevel$ points.
 
-Following the theoreom, if we wish to construct $\{\phi_{n,j}\}_{n,j}$, an \emph{orthnormal} basis for the spherical harmonics, we firstly need a fundamental system of points. Secondly, while $\{C_n^{(\alpha)}(\eta_i \cdot)\}_{i=1}^{\dnumharmonicsforlevel}$ forms a basis for $\mathcal{H}_n^d$, the basis is not orthonormal. We will thus have to apply a Gram-Schmidt process for orthonormalising the basis. We detail both steps in the next paragraphs.
+Following the theorem, if we wish to construct $\{\phi_{n,j}\}_{n,j}$, an \emph{ortho-normal} basis for the spherical harmonics, we firstly need a fundamental system of points. Secondly, while $\{C_n^{(\alpha)}(\eta_i \cdot)\}_{i=1}^{\dnumharmonicsforlevel}$ forms a basis for $\mathcal{H}_n^d$, the basis is not orthonormal. We will thus have to apply a Gram-Schmidt process for ortho-normalising the basis. We detail both steps in the next paragraphs.
 
 \paragraph{Construction of a fundamental system of points}
-We propose to build a fundamental system of points in a greedy fashion by iteratively adding a point on the sphere that maximises the determinant as given in \cref{eq:fundamental-system}. Therefore, let $\veta = \{\eta_1, \ldots, \eta_M\}$ contain the M points that are already in the fundamental system and define the following block-matrix of size $(M+1) \times (M+1)$ as
+We propose to build a fundamental system of points in a greedy fashion by repeatedly adding a point on the sphere that maximises the determinant as given in \cref{eq:fundamental-system}. Therefore, let $\veta = \{\eta_1, \ldots, \eta_M\}$ contain the M points that are already in the fundamental system and define the following block-matrix of size $(M+1) \times (M+1)$ as
 \begin{equation}
     \renewcommand\arraystretch{1.3}
     \MM(\veta, \eta_{*}) =
@@ -103,7 +103,7 @@ We propose to build a fundamental system of points in a greedy fashion by iterat
         \end{array}
     \right],
 \end{equation}
-where $C_n^{(\alpha)}(\veta\veta\transpose)$ corresponds to elementwise evaluating the Gegenbauer polynomial $C_n^{(\alpha)}: [-1, 1] \rightarrow \Reals$ for each element of $\veta \veta\transpose \in \Reals^{M \times M}$. A new point $\eta$ is added to the fundamental system if it maximises the determinant
+where $C_n^{(\alpha)}(\veta\veta\transpose)$ corresponds to element wise evaluating the Gegenbauer polynomial $C_n^{(\alpha)}: [-1, 1] \rightarrow \Reals$ for each element of $\veta \veta\transpose \in \Reals^{M \times M}$. A new point $\eta$ is added to the fundamental system if it maximises the determinant
 \begin{equation}
     \eta = \argmax_{\eta_* \in \dsphere}\ \textrm{det}\left(\MM(\veta, \eta_{*})\right),
 \end{equation}
@@ -136,17 +136,18 @@ The complete algorithm is given in \cref{alg:fundamental-system}.
      \caption{Construction of fundamental system\label{alg:fundamental-system}}
 \end{algorithm}
 
-\paragraph{Orthonormalisation}
-
-Proof $\langle C_n^{(\alpha)}(\eta_i\transpose \cdot), C_n^{(\alpha)}(\eta_j\transpose \cdot) \rangle_{L_2(\dsphere)} = C_n^{(\alpha)}(\eta_i\transpose\eta_j)$ as a result of the Funk-Hecke theorem.
+\paragraph{Ortho-normalisation}
 
 \begin{theorem}
-   Let $\veta = \{\eta_1, \ldots, \eta_{\dnumharmonicsforlevel}\}$ be a fundamental system of degree $n$ consisting of $\dnumharmonicsforlevel$ points, and $\ML$ the inverse cholesky factor of $C_n^{(\alpha)}(\veta\veta\transpose)$. Then for $j=1,\ldots,\dnumharmonicsforlevel$ and
+   Let $\veta = \{\eta_1, \ldots, \eta_{\dnumharmonicsforlevel}\}$ be a fundamental system of degree $n$ consisting of $\dnumharmonicsforlevel$ points, and $\ML$ the inverse Cholesky factor of $C_n^{(\alpha)}(\veta\veta\transpose)$. Then for $j=1,\ldots,\dnumharmonicsforlevel$ and
     \begin{equation}
     \phi_{n,j}(x) = \sum_{i=1}^{\dnumharmonicsforlevel} \ML_{j,i}\,C_n^{(\alpha)}(\eta_i\transpose x)
     \end{equation}
-    is $\{\phi_{n,j}\}$ an orthnormal basis for the spherical harmonics $\mathcal{H}_n^d$.
+    is $\{\phi_{n,j}\}$ an ortho-normal basis for the spherical harmonics $\mathcal{H}_n^d$.
 \end{theorem}
+
+The proof follows from $\langle C_n^{(\alpha)}(\eta_i\transpose \cdot), C_n^{(\alpha)}(\eta_j\transpose \cdot) \rangle_{L_2(\dsphere)} = C_n^{(\alpha)}(\eta_i\transpose\eta_j)$ as a result of the Funk-Hecke theorem.
+
 % Let $\MM = C_n^{(\alpha)}(\veta\veta\transpose)$ and $\ML \ML\transpose = \MM$, which exists because the set $\veta$ satisfies \cref{eq:fundamental-system}.
 % \begin{equation}
 % \phi_{n,j}(x) = \sum_i [\ML\inv]_{j,i} C_n^{(\alpha)}(\eta_i\transpose x)
