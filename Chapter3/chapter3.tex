@@ -193,7 +193,7 @@ The main flaw of VFF comes from the way it extends to multidimensional input spa
 On the contrary for VISH, given that we ordered the spherical harmonic by increasing level $n$, choosing the first $M$ elements means we will select first inducing functions with low angular frequency (see \cref{fig:harmonics}). Provided that the kernel spectral density is a decreasing function (this will be true for classic covariances, but not for quasi-periodic ones), this means that the selected inducing variables correspond to the ones carrying the most signal according to the prior. In other words, the decomposition of the kernel can be compared to an `infinite dimensional principal component analysis', and our choice of the inducing function is optimal since we pick the ones with the largest variance. This is illustrated in \cref{fig:decay-vish}, which shows the analogue of \cref{fig:decay-vff} for spherical harmonic inducing functions.
 
 
-\begin{figure}[tbh!]
+\begin{figure}[t!]
   \centering
 \begin{subfigure}{0.49\textwidth}
   \includegraphics[width=\textwidth]{VFF_v2}
